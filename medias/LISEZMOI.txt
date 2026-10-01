@@ -1,0 +1,10 @@
+Dépose ici tes photos et ta musique, puis indique-les dans config.js :
+
+  photos  →  { image: "medias/photo-1.jpg", legende: "Ce jour-là…", cadrage: "50% 20%" },
+             (cadrage, facultatif : où se trouve le visage, en % de la largeur
+             puis de la hauteur ; il reste au centre des médaillons et du zoom)
+  musique →  fichier: "medias/notre-chanson.mp3",
+
+Conseils :
+- photos en .jpg, .png ou .webp, réduites à environ 1200 pixels de large ;
+- musique en .mp3 (ou .m4a) ; un lien YouTube ne fonctionne pas.
