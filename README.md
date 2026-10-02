@@ -158,6 +158,10 @@ La lecture à voix haute tient dans deux fichiers du dossier `medias/` :
   du livre où elle s’écrit et l’instant où la voix la dit (`debut`, `fin`, en
   secondes).
 
+Ici, la voix a le timbre d’un message vocal fourni pour le site : la
+lecture a été convertie vers cette voix sans changer son rythme, donc la
+frise reste exacte.
+
 Pendant la lecture, la musique baisse puis remonte à la fin. Le bouton en
 haut à droite coupe la voix et la musique ensemble.
 
