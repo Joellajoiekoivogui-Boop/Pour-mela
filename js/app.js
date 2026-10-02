@@ -548,7 +548,6 @@
       apparition: function (x, y) {
         if (!encore(j)) return;
         E.petitEclat(x, y, 1.25);
-        M.effet('photo');
         vibrer(12);
       }
     });
@@ -740,7 +739,7 @@
         var r = svg.getBoundingClientRect(), e = r.width / VB.l, pt = ref.getPointAtLength(s);
         E.plume(r.left + (pt.x - VB.x) * e, r.top + (pt.y - VB.y) * e);
         while (prochaine < perles.length && perles[prochaine].seuil <= s) {
-          allumerPerle(perles[prochaine], prochaine);
+          allumerPerle(perles[prochaine]);
           prochaine++;
         }
         if (t < 1) window.requestAnimationFrame(etape);
@@ -750,11 +749,10 @@
     });
   }
 
-  function allumerPerle(perle, i) {
+  function allumerPerle(perle) {
     perle.classList.add('visible');
     var c = centre(perle);
     E.etincelles(c.x, c.y, 16);
-    M.effet('perle', i);
   }
 
   // Le prénom tient au creux du cœur, entre les photos.
@@ -982,10 +980,11 @@
     el.visionneuseImg.hidden = !!photo.video;
     el.visionneuseVideo.hidden = !photo.video;
     if (photo.video) {
-      // Avec le son : la musique se fait toute petite pendant la vidéo.
+      // Sans le son au départ ; si on le remet, la musique se fait toute petite.
       if (photo.image) el.visionneuseVideo.poster = photo.image;
       else el.visionneuseVideo.removeAttribute('poster');
       el.visionneuseVideo.src = O.choisirVideo(photo.video);
+      el.visionneuseVideo.muted = true;   // la musique continue ; le son de la vidéo se remet avec ses boutons
       var lecture = el.visionneuseVideo.play();
       if (lecture && lecture.catch) lecture.catch(function () {});
     } else {

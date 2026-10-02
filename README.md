@@ -120,7 +120,8 @@ photos: {
 - **Vidéos** : une ligne `{ video: "medias/clip.mp4", image: "medias/clip.jpg", legende: "…" }`
   (`image` = image d’aperçu, pour les médaillons et la galerie). Dans le film,
   la vidéo passe sans le son, la musique continue ; sous la lettre, un
-  toucher l’ouvre avec le son (la musique se fait alors toute petite).
+  toucher l’ouvre, toujours sans le son : on peut le remettre avec les
+  boutons de la vidéo (la musique se fait alors toute petite).
   Plusieurs formats possibles : `video: ["medias/clip.mp4", "medias/clip.webm"]`,
   le navigateur prend le premier qu’il sait lire. Garde des vidéos courtes
   (15 à 20 s, quelques Mo) pour qu’elles se chargent vite.

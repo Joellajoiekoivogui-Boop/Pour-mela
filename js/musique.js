@@ -312,16 +312,6 @@
     prenom: function (t) { arpegeRapide(['A5', 'D6', 'F#6'], t, 0.09, 0.07, 2.4); },
     final: function (t) { arpegeRapide(['F#5', 'A5', 'D6', 'F#6'], t, 0.07, 0.07, 2.4); },
     pop: function (t) { cloche(frequence('A6'), t, 0.05, 0.9); },
-    // Une photo apparaît dans son cœur : souffle et carillon montant.
-    photo: function (t) {
-      souffle(t, 0.9, 700, 4200, 0.04);
-      arpegeRapide(['D6', 'F#6', 'A6', 'D7'], t + 0.06, 0.07, 0.05, 2.2);
-    },
-    // Les perles du collier : une note de plus à chaque photo.
-    perle: function (t, i) {
-      var notes = ['D6', 'E6', 'F#6', 'A6', 'B6', 'D7', 'E7', 'F#7', 'A7', 'B7'];
-      cloche(frequence(notes[(i || 0) % notes.length]), t, 0.06, 1.5);
-    },
     lettre: function (t) {
       souffle(t, 0.45, 2500, 6000, 0.05);
       souffle(t + 0.18, 0.4, 3000, 1800, 0.04);

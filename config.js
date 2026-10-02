@@ -71,8 +71,8 @@ window.DECLARATION = {
         en général le visage : "50% 20%" = au milieu, en haut de la photo.
         Pour une vidéo : video = le fichier (.mp4, ou plusieurs formats
         entre crochets), image = une image d'aperçu tirée de la vidéo.
-        Dans le film, la vidéo passe sans le son ; sous la lettre, on peut
-        la regarder avec le son.
+        La vidéo passe sans le son (la musique continue) ; sous la lettre,
+        on peut remettre son son avec les boutons de la vidéo.
         Laisse la liste vide pour ne pas afficher de photos.                   */
   photos: {
     titre: "Regarde comme tu es belle…",
