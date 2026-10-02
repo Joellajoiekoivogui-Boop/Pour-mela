@@ -31,13 +31,18 @@ gratuitement en une minute.
    fin, la dernière photo se referme en cœur, bat une dernière fois et
    éclate : une plume de lumière trace alors un grand cœur dont les photos
    deviennent les perles, et son prénom s’écrit au milieu.
-7. **« Découvrir mon message 💌 »** fait arriver une enveloppe scellée d’un
-   cachet en cœur. On la touche : le sceau saute, le rabat s’ouvre, la lettre
-   sort et se déplie. Le texte se révèle au rythme de la lecture, la
-   signature s’écrit à la main, un cœur se dessine, puis une pluie de cœurs
-   tombe.
-8. **Les photos** s’affichent aussi en polaroïds sous la lettre,
-   agrandissables d’un toucher. *« Revivre ce moment »* relance l’histoire.
+7. **« Découvrir mon message 💌 »** fait arriver un livre relié, son prénom
+   en lettres d’or. On le touche : la couverture s’ouvre et **une voix lit la
+   lettre**, la boîte à musique continue doucement derrière. Les mots
+   apparaissent au rythme de la voix, et chaque page lue s’envole pour
+   laisser place à la suivante. À la dernière page, la signature s’écrit à
+   la main, un cœur se dessine, puis une pluie de cœurs tombe.
+   *« Revoir ses photos »* rouvre les photos en grand, *« Revivre ce
+   moment »* relance l’histoire.
+8. **Sans la voix** (voir [La voix qui lit la lettre](#la-voix-qui-lit-la-lettre)),
+   c’est une enveloppe scellée d’un cachet en cœur : le sceau saute, la
+   lettre se déplie et se révèle au rythme de la lecture ; les photos
+   s’affichent alors en polaroïds sous la lettre.
 
 ## Personnaliser
 
@@ -143,6 +148,30 @@ simplement ignorée.
 - Les navigateurs interdisent le son avant un geste : la musique démarre donc
   au clic sur le cœur. Le bouton en haut à droite la coupe ou la relance.
 
+### La voix qui lit la lettre
+
+La lecture à voix haute tient dans deux fichiers du dossier `medias/` :
+
+- `lettre-voix.mp3` : la voix (environ 2 min 50 s, 1,2 Mo, téléchargée
+  seulement quand le livre arrive) ;
+- `lecture.js` : la frise de lecture. Pour chaque phrase, elle donne la page
+  du livre où elle s’écrit et l’instant où la voix la dit (`debut`, `fin`, en
+  secondes).
+
+Pendant la lecture, la musique baisse puis remonte à la fin. Le bouton en
+haut à droite coupe la voix et la musique ensemble.
+
+La voix est liée au texte. Si la lettre de `config.js` (titre, paragraphes,
+formule, signature) ne correspond plus mot pour mot à celle de `lecture.js`,
+ou si un lien de l’atelier change la lettre, le site revient tout seul à
+l’enveloppe classique plutôt que de lire un autre texte.
+
+**Mettre ta propre voix** : enregistre-toi en lisant la lettre (mêmes
+phrases, dans l’ordre), remplace `lettre-voix.mp3`, puis corrige dans
+`lecture.js` les instants `debut` et `fin` de chaque phrase (un logiciel
+comme Audacity les affiche). Pour retirer la voix, supprime simplement
+`lecture.js`.
+
 ## Mettre en ligne (gratuit)
 
 Ce dépôt se suffit à lui-même.
@@ -195,11 +224,12 @@ tester les liens de l’atelier, sers le dossier : `npx serve .` ou
   js/effets.js         ciel, cœurs, explosion, confettis, plume (canvas)
   js/musique.js        boîte à musique (Web Audio) ou ta chanson, petits sons
   js/film.js           le film des photos : médaillons en cœur, zoom, lumières (canvas)
+  js/livre.js          le livre : pages, mots au rythme de la voix, pages qui s’envolent
   js/app.js            le scénario, scène par scène
   js/editeur.js        l’atelier
   tests/               tests de la configuration (node --test tests/*.test.js)
   fonts/               Cormorant Garamond et Great Vibes (licence SIL OFL)
-  medias/              tes photos et ta musique
+  medias/              tes photos, ta musique, la voix (lettre-voix.mp3, lecture.js)
   apercu.jpg           image affichée quand le lien est partagé
   icone.png            icône sur l’écran d’accueil du téléphone
   vercel.json          réglages Vercel (construction, cache, non-indexation)

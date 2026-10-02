@@ -39,6 +39,8 @@
   <script src="js/effets.js" defer></script>
   <script src="js/musique.js" defer></script>
   <script src="js/film.js" defer></script>
+  <script src="js/livre.js" defer></script>
+  <script src="medias/lecture.js" defer></script>
   <script src="js/app.js" defer></script>
 </head>
 <body>
@@ -132,7 +134,36 @@
       </div>
     </section>
 
-    <!-- 6. L'enveloppe -->
+    <!-- 6. Le livre : la lettre lue à voix haute (si medias/lecture.js existe) -->
+    <section class="scene scene-livre" id="scene-livre">
+      <div class="livre-arrivee">
+        <div class="livre" id="livre" tabindex="-1">
+          <div class="livre-pages" id="livre-pages"></div>
+          <button class="livre-couverture" id="livre-couverture" type="button" aria-label="Ouvrir le livre">
+            <span class="couv-face" aria-hidden="true">
+              <span class="couv-cadre"></span>
+              <span class="couv-titre" id="couv-titre"></span>
+              <span class="couv-coeur"><svg viewBox="0 0 100 92" focusable="false"><use xlink:href="#chemin-coeur" href="#chemin-coeur"/></svg></span>
+              <span class="couv-prenom" id="couv-prenom"></span>
+            </span>
+            <span class="couv-dos" aria-hidden="true"></span>
+          </button>
+        </div>
+      </div>
+      <p class="livre-indice" id="livre-indice"></p>
+      <div class="livre-fin" id="livre-fin">
+        <button class="bouton-doux" id="livre-photos" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
+          Revoir ses photos
+        </button>
+        <button class="bouton-doux" id="livre-rejouer" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg>
+          Revivre ce moment
+        </button>
+      </div>
+    </section>
+
+    <!-- 6. L'enveloppe (sans livre) -->
     <section class="scene scene-enveloppe" id="scene-enveloppe">
       <div class="env-cadre">
         <button class="enveloppe" id="enveloppe" type="button" aria-label="Ouvrir la lettre">

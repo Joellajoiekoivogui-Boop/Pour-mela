@@ -1,13 +1,13 @@
 /*
  * Le scénario : accueil → explosion de cœurs → « JE T'AIME » → le prénom
- * écrit à la main → les petits messages → le film des photos → l'enveloppe
- * → la lettre.
+ * écrit à la main → les petits messages → le film des photos → le livre
+ * (la lettre lue à voix haute) ou, sans voix, l'enveloppe → la lettre.
  */
 (function () {
   'use strict';
 
   var Amour = window.Amour;
-  var O = Amour.outils, E = Amour.effets, M = Amour.musique, F = Amour.film;
+  var O = Amour.outils, E = Amour.effets, M = Amour.musique, F = Amour.film, B = Amour.livre;
   var html = document.documentElement;
 
   var charge = O.chargerConfig();
@@ -62,6 +62,14 @@
     cstNomLigne: $('cst-nom-ligne'),
     cstNom: $('cst-nom'),
     boutonFilm: $('bouton-lettre-film'),
+    sceneLivre: $('scene-livre'),
+    livre: $('livre'),
+    livreCouverture: $('livre-couverture'),
+    livreIndice: $('livre-indice'),
+    livrePhotos: $('livre-photos'),
+    livreRejouer: $('livre-rejouer'),
+    couvTitre: $('couv-titre'),
+    couvPrenom: $('couv-prenom'),
     sceneEnveloppe: $('scene-enveloppe'),
     enveloppe: $('enveloppe'),
     envTexte: $('env-texte'),
@@ -779,9 +787,67 @@
     M.effet('pop');
     el.boutonLettre.setAttribute('tabindex', '-1');
     el.boutonFilm.setAttribute('tabindex', '-1');
+    if (livreOk) {
+      // Le livre arrive, fermé ; il s'ouvre d'un toucher.
+      etat = 'livre-ferme';
+      el.sceneLivre.classList.remove('lecture', 'lu');
+      montrer('scene-livre');
+      B.approcher();
+      setTimeout(function () { try { el.livreCouverture.focus({ preventScroll: true }); } catch (e) { /* rien */ } }, 900);
+      return;
+    }
     el.sceneEnveloppe.classList.remove('ouverte', 'disparait');
     montrer('scene-enveloppe');
     setTimeout(function () { try { el.enveloppe.focus({ preventScroll: true }); } catch (e) { /* rien */ } }, 900);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Le livre : la lettre lue à voix haute, la musique derrière          */
+  /* ------------------------------------------------------------------ */
+
+  var livreOk = false;
+
+  // La voix ne lit que la lettre pour laquelle elle a été enregistrée : si
+  // la lettre a changé (config.js, lien de l'atelier), on garde l'enveloppe.
+  function voixAJour(lecture) {
+    var l = config.lettre, lu = { titre: '', paras: [], formule: '', signature: '' };
+    function net(t) { return String(t || '').replace(/\s+/g, ' ').trim(); }
+    (lecture.frise || []).forEach(function (s) {
+      if (s.genre === 'phrase') lu.paras[s.para] = (lu.paras[s.para] ? lu.paras[s.para] + ' ' : '') + s.texte;
+      else lu[s.genre] = s.texte;
+    });
+    var attendu = [l.titre || (config.prenom ? config.prenom + ',' : '')]
+      .concat(l.paragraphes, [l.formule, l.signature]);
+    var trouve = [lu.titre].concat(lu.paras, [lu.formule, lu.signature]);
+    if (attendu.length !== trouve.length) return false;
+    for (var i = 0; i < attendu.length; i++) if (net(attendu[i]) !== net(trouve[i])) return false;
+    return true;
+  }
+
+  function surLivre() {
+    if (etat !== 'livre-ferme') return;
+    etat = 'livre';
+    var j = jeton;
+    el.sceneLivre.classList.add('lecture');
+    M.reveiller();
+    M.effet('lettre');
+    vibrer(15);
+    var c = centre(el.livre);
+    E.etincelles(c.x, c.y, 24);
+    annoncer(config.lettre.paragraphes.join(' '));
+    // ouvrir() lance la voix : à faire pendant le toucher (iPhone).
+    B.ouvrir().then(function () {
+      if (!encore(j)) return;
+      etat = 'livre-fin';
+      el.sceneLivre.classList.add('lu');
+    });
+    // La couverture va disparaître : le focus passe au livre.
+    try { el.livre.focus({ preventScroll: true }); } catch (e) { /* rien */ }
+  }
+
+  function revoirPhotos() {
+    construirePhotos();
+    if (photos.length) ouvrirVisionneuse(0);
   }
 
   function surEnveloppe() {
@@ -1031,6 +1097,8 @@
     E.vider();
     E.plume(null);
     if (filmOk) F.arreter();
+    if (livreOk) B.arreter();
+    el.sceneLivre.classList.remove('lecture', 'lu');
     fermerVisionneuse();
     el.lettre.classList.remove('ouverte');
     setTimeout(function () { if (etat !== 'lettre') el.lettre.hidden = true; }, 900);
@@ -1074,7 +1142,7 @@
   function surToucher(x, y, cible) {
     M.reveiller();
     if (estInteractif(cible)) return;
-    if (etat === 'lettre' || etat === 'ouverture' || etat === 'chargement') return;
+    if (etat === 'lettre' || etat === 'ouverture' || etat === 'chargement' || etat === 'livre') return;
     E.petitEclat(x, y, 0.8);
     if (toucherEnAttente) toucherEnAttente(true);
   }
@@ -1129,6 +1197,9 @@
   el.boutonFilm.addEventListener('click', surBoutonLettre);
   el.enveloppe.addEventListener('click', surEnveloppe);
   el.boutonRejouer.addEventListener('click', rejouer);
+  el.livreCouverture.addEventListener('click', surLivre);
+  el.livreRejouer.addEventListener('click', rejouer);
+  el.livrePhotos.addEventListener('click', revoirPhotos);
   $('visionneuse-fermer').addEventListener('click', fermerVisionneuse);
   $('visionneuse-prec').addEventListener('click', function () { afficherPhoto(photoActive - 1); });
   $('visionneuse-suiv').addEventListener('click', function () { afficherPhoto(photoActive + 1); });
@@ -1202,6 +1273,10 @@
 
   el.indice.textContent = tactile ? 'Touche l’écran pour continuer' : 'Clique pour continuer';
   el.envIndice.textContent = tactile ? 'Touche l’enveloppe pour l’ouvrir' : 'Clique sur l’enveloppe pour l’ouvrir';
+  el.livreIndice.textContent = tactile ? 'Touche le livre pour l’ouvrir' : 'Clique sur le livre pour l’ouvrir';
+  remplirTexte(el.couvTitre, config.lettre.surEnveloppe);
+  el.couvPrenom.textContent = config.prenom;
+  el.livrePhotos.hidden = !config.photos.liste.length;
   remplirTexte(el.boutonLettre, config.boutonLettre);
   remplirTexte(el.boutonFilm, config.boutonLettre);
   remplirTexte(el.envTexte, config.lettre.surEnveloppe);
@@ -1222,6 +1297,15 @@
     leger: html.classList.contains('leger'),
     reduit: reduit,
     effets: E
+  }));
+
+  // Le livre lu à voix haute, si la voix et sa frise sont là (medias/lecture.js).
+  livreOk = !!(B && window.LECTURE && voixAJour(window.LECTURE) && B.preparer({
+    donnees: window.LECTURE,
+    effets: E,
+    musique: M,
+    remplirTexte: remplirTexte,
+    reduit: reduit
   }));
 
   if (charge.erreur) signalerErreurConfig();

@@ -938,7 +938,307 @@ button {
 
 .film-fin .bouton-lettre { margin-top: 6vh; }
 
-/* ---------- 6. L'enveloppe ------------------------------------------------- */
+/* ---------- 6. Le livre : la lettre lue à voix haute -------------------- */
+
+.livre-arrivee { opacity: 0; }
+.scene-livre.est-active .livre-arrivee { animation: livreArrivee 1.3s var(--ressort) .1s both; }
+
+@keyframes livreArrivee {
+  0% { opacity: 0; transform: translate3d(0, 34vh, 0) rotate(-12deg) scale(.55); }
+  100% { opacity: 1; transform: none; }
+}
+
+.livre {
+  position: relative;
+  width: 84vw;
+  max-width: 460px;
+  outline: none;
+  -webkit-perspective: 1800px;
+  perspective: 1800px;
+  transform: scale(.82);
+  transition: transform 1.4s var(--doux) .2s;
+}
+
+@supports (width: min(1px, 2px)) {
+  .livre { width: min(84vw, 460px, 55vh); }
+}
+
+.livre::before { content: ''; display: block; padding-top: 142%; }   /* proportions d'une page */
+.livre.ouvert { transform: none; }
+
+.livre-pages {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 3px 8px 8px 3px;
+  /* épaisseur du livre : les pages du dessous */
+  box-shadow: 3px 3px 0 -1px #f4e9e1, 6px 6px 0 -2px #e9dbd2, 9px 9px 0 -3px #dccbc1, 0 22px 60px rgba(0, 0, 0, .5);
+}
+
+.page {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  border-radius: 3px 8px 8px 3px;
+  background-color: #fffaf3;
+  background-image:
+    linear-gradient(90deg, rgba(var(--profonde-rgb), .18) 0, rgba(var(--profonde-rgb), 0) 8%),
+    radial-gradient(120% 70% at 50% 0%, rgba(255, 255, 255, .95), rgba(255, 255, 255, 0) 60%),
+    linear-gradient(180deg, rgba(var(--claire-rgb), .07), rgba(var(--claire-rgb), .18));
+  box-shadow: inset 0 0 50px rgba(var(--profonde-rgb), .07);
+  color: #43172c;
+  transform-origin: 0 50%;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.page-contenu {
+  position: absolute;
+  top: 7%; left: 11%; right: 8%; bottom: 9%;
+  overflow: hidden;
+  font-size: 17px;
+  text-align: left;
+}
+
+.page-titre {
+  margin: 0 0 .25em;
+  font-family: var(--script);
+  font-weight: 400;
+  font-size: 2.2em;
+  line-height: 1.15;
+  color: var(--profonde);
+}
+
+.page-para {
+  margin: 0 0 .65em;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.page-formule {
+  margin: 1.1em 0 0;
+  text-align: right;
+  font-style: italic;
+  font-weight: 500;
+}
+
+.page-signature {
+  margin: 0;
+  text-align: right;
+  font-family: var(--script);
+  font-size: 2.3em;
+  line-height: 1.2;
+  color: var(--profonde);
+}
+
+.page-signature .signature-encre { opacity: 0; }
+
+.page-signature.visible .signature-encre {
+  opacity: 1;
+  -webkit-mask-image: linear-gradient(90deg, #000 46.3%, rgba(0, 0, 0, 0) 53.7%);
+  mask-image: linear-gradient(90deg, #000 46.3%, rgba(0, 0, 0, 0) 53.7%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  animation: encre 1.6s ease-in-out both;
+}
+
+.page-coeur {
+  display: block;
+  width: 3.4em;
+  height: 2.8em;
+  margin: .1em 0 0 auto;
+  overflow: visible;
+  fill: none;
+  stroke: var(--principale);
+  stroke-width: 3.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0;
+}
+
+.page-coeur.visible { opacity: 1; }
+.page-coeur .trace { transition: stroke-dashoffset 1.8s ease-in-out; }
+
+.page-numero {
+  position: absolute;
+  left: 0; right: 0;
+  bottom: 3%;
+  font-size: .75rem;
+  font-style: italic;
+  text-align: center;
+  color: rgba(67, 23, 44, .5);
+}
+
+/* Les mots s'écrivent au rythme de la voix */
+.mot-livre {
+  opacity: 0;
+  filter: blur(3px);
+  transition: opacity .5s ease, filter .5s ease;
+}
+
+.mot-livre.dit { opacity: 1; filter: none; }
+.mot-livre .coeur-inline { width: .9em; height: .82em; vertical-align: -.1em; }
+
+/* La page lue se soulève et s'envole */
+.page.envolee {
+  animation: envol 1.45s cubic-bezier(.42, .05, .3, 1) forwards;
+  pointer-events: none;
+}
+
+.page.partie { visibility: hidden; }
+
+@keyframes envol {
+  0% { transform: none; opacity: 1; }
+  38% { transform: rotateY(-58deg) translate3d(-2%, -3%, 70px) rotateZ(-3deg); opacity: 1; }
+  100% { transform: rotateY(-88deg) translate3d(-30%, -75%, 180px) rotateZ(-24deg); opacity: 0; }
+}
+
+/* La couverture */
+.livre-couverture {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  z-index: 200;
+  display: block;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  outline: none;
+  transform-origin: 0 50%;
+  -webkit-transform-style: preserve-3d;
+  transform-style: preserve-3d;
+  transition: transform 1.7s cubic-bezier(.5, .05, .25, 1), opacity .7s ease 1.25s, visibility 0s linear 2s;
+}
+
+.livre.ouvert .livre-couverture {
+  transform: rotateY(-172deg);
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.couv-face,
+.couv-dos {
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  display: block;
+  border-radius: 3px 10px 10px 3px;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.couv-face {
+  background-color: var(--profonde);
+  background-image:
+    linear-gradient(90deg, rgba(0, 0, 0, .38) 0, rgba(0, 0, 0, 0) 7%, rgba(255, 255, 255, .1) 8%, rgba(0, 0, 0, 0) 10%),
+    radial-gradient(110% 80% at 35% 22%, rgba(var(--principale-rgb), .6), rgba(var(--principale-rgb), 0) 62%),
+    linear-gradient(160deg, var(--profonde), #240613);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .08), inset 0 0 50px rgba(0, 0, 0, .35);
+  animation: lueurCouverture 3.2s ease-in-out infinite;
+}
+
+@keyframes lueurCouverture {
+  0%, 100% { box-shadow: 0 24px 60px rgba(0, 0, 0, .55), 0 0 0 rgba(var(--principale-rgb), 0), inset 0 0 0 1px rgba(255, 255, 255, .08), inset 0 0 50px rgba(0, 0, 0, .35); }
+  50% { box-shadow: 0 24px 60px rgba(0, 0, 0, .55), 0 0 46px rgba(var(--principale-rgb), .55), inset 0 0 0 1px rgba(255, 255, 255, .08), inset 0 0 50px rgba(0, 0, 0, .35); }
+}
+
+.couv-cadre {
+  position: absolute;
+  top: 5%; left: 11%; right: 6%; bottom: 5%;
+  border: 1.5px solid rgba(var(--eclat-rgb), .75);
+  border-radius: 4px;
+  box-shadow: inset 0 0 0 5px rgba(var(--eclat-rgb), .1);
+}
+
+.couv-titre {
+  position: absolute;
+  top: 15%; left: 8%; right: 0;
+  font-family: var(--sans);
+  font-size: .78rem;
+  font-weight: 500;
+  letter-spacing: .34em;
+  text-transform: uppercase;
+  text-align: center;
+  color: rgba(var(--eclat-rgb), .92);
+}
+
+.couv-coeur {
+  position: absolute;
+  top: 31%; left: 50%;
+  width: 30%;
+  height: 0;
+  padding-top: 27.6%;
+  margin-left: -11%;
+}
+
+.couv-coeur svg {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: visible;
+  fill: url(#degrade-coeur);
+  -webkit-filter: drop-shadow(0 0 12px rgba(var(--eclat-rgb), .55));
+  filter: drop-shadow(0 0 12px rgba(var(--eclat-rgb), .55));
+  transform-origin: 50% 55%;
+  animation: battement var(--battement) ease-in-out infinite;
+}
+
+.couv-prenom {
+  position: absolute;
+  top: 63%; left: 8%; right: 0;
+  font-family: var(--script);
+  font-size: 3rem;
+  font-size: clamp(2.4rem, 12vw, 3.6rem);
+  line-height: 1.2;
+  text-align: center;
+  color: var(--eclat);
+  text-shadow: 0 0 18px rgba(var(--eclat-rgb), .55);
+}
+
+.couv-dos {
+  transform: rotateY(180deg);
+  background-color: #f3dde2;
+  background-image:
+    radial-gradient(60% 40% at 30% 30%, rgba(var(--claire-rgb), .6), rgba(var(--claire-rgb), 0)),
+    radial-gradient(50% 35% at 70% 70%, rgba(var(--principale-rgb), .25), rgba(var(--principale-rgb), 0));
+}
+
+.livre-couverture:focus-visible .couv-face { outline: 2px solid rgba(255, 255, 255, .8); outline-offset: 4px; }
+
+.livre-indice {
+  margin: 4vh 0 0;
+  font-family: var(--sans);
+  font-size: .72rem;
+  letter-spacing: .26em;
+  text-transform: uppercase;
+  color: rgba(var(--texte-rgb), .85);
+  opacity: 0;
+  transition: opacity .5s ease;
+}
+
+.scene-livre.est-active .livre-indice { animation: apparition 1s ease 1.3s both, respiration 2.8s ease-in-out 2.3s infinite; }
+.scene-livre.lecture .livre-indice { animation: none; opacity: 0; visibility: hidden; }
+
+.livre-fin {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  margin-top: 2.4vh;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 1s ease, visibility 0s linear 1s;
+}
+
+.livre-fin .bouton-doux { margin: 6px; }
+.scene-livre.lu .livre-fin { opacity: 1; visibility: visible; transition: opacity 1s ease, visibility 0s; }
+.scene-livre.lecture:not(.lu) .livre-fin { display: none; }
+
+/* ---------- 7. L'enveloppe (sans livre) ------------------------------------ */
 
 .env-cadre { transition: opacity .7s ease, transform .9s var(--doux); }
 .disparait .env-cadre { opacity: 0; transform: translate3d(0, 34px, 0) scale(.9); }
@@ -1095,7 +1395,7 @@ button {
 .scene-enveloppe.est-active .env-indice { animation: apparition 1s ease 1.2s both, respiration 2.8s ease-in-out 2.2s infinite; }
 .ouverte .env-indice { visibility: hidden; }
 
-/* ---------- 7. La lettre --------------------------------------------------- */
+/* ---------- 8. La lettre --------------------------------------------------- */
 
 .lettre {
   position: fixed;
@@ -1601,6 +1901,8 @@ button {
   .film-legende { bottom: 34px; font-size: 1.9rem; }
   .film-barres { bottom: 14px; }
   .constellation { width: 56vh; margin-top: 2%; }
+  .livre { width: 52vh; }
+  .livre-indice { margin-top: 2vh; }
   .film-fin .bouton-lettre { margin-top: 5vh; }
 }
 
@@ -1621,6 +1923,8 @@ button {
 .leger .mot-anime,
 .leger .mot-doux { animation-name: apparition; }
 .leger .revele { filter: none; }
+.leger .mot-livre { filter: none; }
+.leger .couv-face { animation: none; }
 .leger .film-titre.sort,
 .leger .film-legende.sort { filter: none; }
 .leger .cst-photo { box-shadow: 0 0 0 2px rgba(var(--principale-rgb), .55), 0 8px 18px rgba(0, 0, 0, .45); }
@@ -1642,6 +1946,11 @@ button {
   .env-corps { animation: none; }
   .bouton-lettre::after { animation: none; }
   .revele { transform: none; filter: none; }
+  .mot-livre { filter: none; }
+  .page.envolee { animation: fondu 1s ease reverse forwards; }
+  .livre-couverture { transition: opacity .8s ease, visibility 0s linear .8s; }
+  .livre.ouvert .livre-couverture { transform: none; }
+  .couv-face, .couv-coeur svg { animation: none; }
   .complete .cst-boite, .trace .cst-photo, .prenom.ecrit { animation: none; }
   .cst-medaillon.visible { animation-name: fondu; }
   .cst-medaillon.visible::after { animation: none; }

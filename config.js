@@ -45,17 +45,32 @@ window.DECLARATION = {
   /* Le texte du bouton qui ouvre la lettre                                    */
   boutonLettre: "Découvrir mon message 💌",
 
-  /* 5. LA LETTRE FINALE (ta déclaration personnelle)                          */
+  /* 5. LA LETTRE FINALE (ta déclaration personnelle)
+        Elle s'ouvre comme un livre et une voix la lit, la musique derrière :
+        les mots s'écrivent au rythme de la voix et chaque page lue s'envole.
+        La voix est rangée dans « medias » (lettre-voix.mp3 et lecture.js) :
+        si tu changes la lettre, il faut refaire la voix ; en attendant, la
+        lettre s'affiche dans l'enveloppe classique, sans voix.               */
   lettre: {
-    surEnveloppe: "Pour toi",   // écrit sur l'enveloppe
+    surEnveloppe: "Pour toi",   // écrit sur l'enveloppe et sur le livre
     titre: "",                  // vide = « Prénom, » automatiquement
     paragraphes: [
       "Je ne sais pas exactement quand c’est arrivé. Peut-être à travers un regard, un sourire, ou une conversation qui a duré bien plus longtemps que prévu.",
-      "Mais un jour, j’ai compris que tu n’étais plus tout à fait une personne comme les autres pour moi.",
-      "Depuis, je pense à toi plus souvent que je ne l’avoue. Un message de toi suffit à illuminer ma journée, et ta présence a quelque chose d’apaisant que je ne trouve nulle part ailleurs.",
+      "Mais un jour, j’ai compris que tu n’étais plus tout à fait une personne comme les autres pour moi. Quelque chose avait changé, doucement, sans faire de bruit, comme le jour qui se lève.",
+      "Depuis, je pense à toi plus souvent que je ne l’avoue. Le matin, c’est ton prénom qui me vient en premier. Le soir, c’est ton sourire qui m’accompagne avant de dormir.",
+      "Un message de toi suffit à illuminer ma journée. Parfois, je relis nos conversations, juste pour retrouver un peu de toi entre les lignes. Et ta présence a quelque chose d’apaisant que je ne trouve nulle part ailleurs.",
       "J’aime ta façon de rire, ta façon de voir le monde, et cette lumière que tu portes sans même t’en rendre compte.",
+      "J’aime ton élégance, ta douceur, et cette force tranquille qui te rend unique. En blanc, en rose ou en noir, avec tes boucles ou tes longs cheveux, tu restes la plus belle chose que mes yeux aient vue.",
+      "J’aime aussi la fierté que tu portes en toi : la fierté de ta Guinée, de tes racines, de ce que tu es. Elle te rend encore plus belle.",
+      "Quand je te regarde, j’oublie mes soucis. Le temps ralentit, le bruit du monde s’efface, et il ne reste plus que toi.",
+      "Tu ne le sais peut-être pas, mais tu as changé quelque chose en moi. Tu m’as donné envie d’être meilleur, plus patient, plus attentif, plus présent.",
+      "Avec toi, j’ai envie de construire, de rêver, de rire, et de traverser les jours, les plus beaux comme les plus difficiles, main dans la main.",
+      "Je sais que les mots ne suffiront jamais à tout dire. Mais ce que je ressens pour toi est vrai, simple et profond.",
       "Je ne t’écris pas pour te demander quoi que ce soit. Je voulais simplement que tu saches, avec sincérité, ce que tu représentes pour moi.",
-      "Tu comptes énormément. Et je t’aime, tout simplement. ❤️",
+      "Merci d’être toi. Merci pour chaque sourire, chaque mot doux, chaque instant que tu m’offres sans même le savoir.",
+      "Si un jour tu doutes de toi, relis ces mots. Ils te rappelleront qu’il existe quelqu’un qui croit en toi, qui t’admire, et qui pense à toi bien plus que tu ne l’imagines.",
+      "Mela, tu es ma plus belle rencontre, ma plus douce pensée, et la plus jolie page de mon histoire.",
+      "Tu comptes énormément pour moi. Et je t’aime, tout simplement. ❤️",
     ],
     formule: "Avec tout mon cœur,",
     signature: "Joël",          // ← ton prénom

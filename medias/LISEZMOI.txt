@@ -5,6 +5,13 @@ Dépose ici tes photos et ta musique, puis indique-les dans config.js :
              puis de la hauteur ; il reste au centre des médaillons et du zoom)
   musique →  fichier: "medias/notre-chanson.mp3",
 
+La voix qui lit la lettre :
+  lettre-voix.mp3  la voix ;
+  lecture.js       pour chaque phrase, sa page dans le livre et l'instant
+                   où la voix la dit (debut, fin, en secondes).
+  Si la lettre de config.js change, la voix ne correspond plus : le site
+  affiche alors l'enveloppe classique. Supprimer lecture.js retire la voix.
+
 Conseils :
 - photos en .jpg, .png ou .webp, réduites à environ 1200 pixels de large ;
 - musique en .mp3 (ou .m4a) ; un lien YouTube ne fonctionne pas.

@@ -441,13 +441,13 @@
     if (actif) lancer(true);
   }
 
-  // Pendant une vidéo avec le son, la musique se fait toute petite.
-  var attenuee = false;
-  function attenuer(oui) {
-    oui = !!oui;
-    if (oui === attenuee) return;
-    attenuee = oui;
-    var cible = oui ? 0.06 : 1;
+  // Pendant une voix ou une vidéo avec le son, la musique se fait plus
+  // discrète (niveau de 0 à 1, par défaut presque muette).
+  var attenuee = 1;
+  function attenuer(oui, niveau) {
+    var cible = oui ? (niveau || 0.06) : 1;
+    if (cible === attenuee) return;
+    attenuee = cible;
     if (ctx && fondu) {
       var t = ctx.currentTime;
       [fondu.gain, fonduSec.gain].forEach(function (g) {
@@ -492,6 +492,7 @@
     basculer: basculer,
     effet: effet,
     attenuer: attenuer,
+    estActif: function () { return actif; },
     reveiller: reveiller,
     disponible: function () { return !!(Contexte || reglages.fichier); },
     surChangement: function (f) { ecouteurs.push(f); }
