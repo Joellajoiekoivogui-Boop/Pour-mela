@@ -16,7 +16,7 @@
   var Amour = global.Amour = global.Amour || {};
   var doc = global.document;
 
-  var ENVOL = 1.45;          // durée de l'envol d'une page (s)
+  var ENVOL = 2;             // durée de l'envol d'une page (s), comme dans style.css
   var MUSIQUE = 0.3;         // volume de la musique pendant la voix
 
   var el = {}, donnees = null, E = null, M = null, remplirTexte = null, reduit = false;
