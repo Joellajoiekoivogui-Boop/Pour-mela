@@ -1,0 +1,4 @@
+Dépose ici les photos de Joël (format .jpg ou .webp, environ 1200 px de large),
+puis indique-les dans src/config/joel.ts (galerie.photos et souvenirs.liste).
+Les fichiers oeuvre-*.svg sont des œuvres lumineuses provisoires : remplace-les
+par les vraies photos quand tu les as.
