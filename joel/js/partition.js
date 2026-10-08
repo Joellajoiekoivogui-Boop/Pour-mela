@@ -693,9 +693,123 @@
     return m;
   }
 
+  // ================================================ LA FÊTE (la chanson)
+  // « Joyeux anniversaire » du début à la fin : cinq couplets enchaînés, de la
+  // boîte à musique jusqu'à l'explosion, puis le final. Mesure à 3 temps,
+  // un temps = 0,5 s, un couplet = 24 temps = 12 s (l'anacrouse « Jo-yeux »
+  // du couplet suivant tombe sur le dernier temps du précédent).
+  const AIR = [
+    [69, 0, 0.75], [69, 0.75, 0.25], [71, 1, 1], [69, 2, 1], [74, 3, 1], [73, 4, 2],
+    [69, 6, 0.75], [69, 6.75, 0.25], [71, 7, 1], [69, 8, 1], [76, 9, 1], [74, 10, 2],
+    [69, 12, 0.75], [69, 12.75, 0.25], [81, 13, 1], [78, 14, 1], [74, 15, 1], [73, 16, 1], [71, 17, 1],
+    [79, 18, 0.75], [79, 18.75, 0.25], [78, 19, 1], [74, 20, 1], [76, 21, 1], [74, 22, 2],
+  ];
+  const GRILLE = [['D', 0, 4], ['A', 4, 6], ['D', 10, 6], ['G', 16, 3], ['D', 19, 2], ['A', 21, 1], ['D', 22, 2]];
+  const fete = {
+    nom: 'fete',
+    duree: 65,
+    temps: 0.5,
+    couplets: [1, 13, 25, 37, 49],
+    air: AIR,
+    silences: [],
+    secousses: [[13.5, 0.3], [25.5, 0.5], [37.5, 1.3], [43.5, 0.4], [44.0, 0.4], [44.5, 0.5], [45.0, 1.1], [49.5, 0.4], [60.0, 1.2]],
+    vitesse: [[0, 0.2], [13, 0.4], [25, 0.9], [37, 1.4], [49, 0.5], [60, 0.8], [65, 0.2]],
+    fonds: [[0, 13.0, 'nuit'], [13.0, 25.0, 'fete'], [25.0, 37.0, 'club'], [37.0, 49.0, 'fete'], [49.0, 60.0, 'lumiere'], [60.0, 65, 'fete']],
+    transitions: [[1.0, 'zoom'], [13.0, 'flash'], [25.0, 'whip'], [28.0, 'whip'], [31.0, 'whip'], [34.0, 'whip'], [37.5, 'flash'],
+      [40.0, 'whip'], [45.0, 'flash'], [46.0, 'whip'], [49.0, 'zoom'], [60.0, 'flash']],
+  };
+
+  function musiqueFete() {
+    const m = [];
+    const b = fete.temps;
+    const pad = (t, d, a, gain, coupe, att, rel) => m.push({ i: 'pad', t, d, notes: ACCORDS[a].slice(1), gain, coupe, att, rel });
+    const basse = (t, d, a, gain) => m.push({ i: 'basse', t, d, note: ACCORDS[a][0], gain });
+    const cloches = (t, notes, gain, d) => notes.forEach((n, k) => m.push({ i: 'cloche', t: t + k * 0.03, f: n, gain, d: d || 2.5 }));
+    const n = fete.couplets.length;
+
+    // Ouverture : une étincelle, la boîte à musique se remonte.
+    m.push({ i: 'eclats', t: 0.0, d: 1.2, gain: 0.08, densite: 14 });
+    m.push({ i: 'riser', t: 0.0, d: 1.0, gain: 0.1 });
+
+    fete.couplets.forEach((s, k) => {
+      const dernier = k === n - 1;
+      // La mélodie, habillée différemment à chaque couplet.
+      for (const [note, temps, duree] of AIR) {
+        const t = s + temps * b;
+        const d = dernier && temps === 22 ? 4.5 : duree * b;
+        if (k === 0) m.push({ i: 'boite', t, f: note + 12, gain: 0.16, d: Math.max(1.5, d * 2) });
+        if (k === 1) { m.push({ i: 'boite', t, f: note + 12, gain: 0.15, d: Math.max(1.5, d * 2) }); m.push({ i: 'cloche', t, f: note, gain: 0.11, d: 2 }); }
+        if (k === 2) { m.push({ i: 'lead', t, f: note, gain: 0.2, d: d * 0.9, coupe: 2800 }); m.push({ i: 'boite', t, f: note + 12, gain: 0.07, d: 1.2 }); }
+        if (k === 3) { m.push({ i: 'lead', t, f: note, gain: 0.16, d: d * 0.9, coupe: 3600 }); m.push({ i: 'lead', t, f: note + 12, gain: 0.06, d: d * 0.9, coupe: 4200 }); m.push({ i: 'cloche', t, f: note + 12, gain: 0.07, d: 1.5 }); }
+        if (k === 4) { m.push({ i: 'lead', t, f: note, gain: 0.1, d: d * 0.95, coupe: 2000 }); m.push({ i: 'boite', t, f: note + 12, gain: 0.15, d: Math.max(1.5, d * 2) }); }
+      }
+      // Les accords et la basse.
+      for (const [a, temps, nb] of GRILLE) {
+        const t = s + temps * b;
+        const fin = dernier && temps === 22;
+        const d = fin ? 4.5 : nb * b;
+        pad(t, d + 0.05, a, [0.1, 0.12, 0.12, 0.15, 0.15][k], [800, 1400, 2200, 2800, 2000][k], k === 0 ? 0.4 : 0.05, fin ? 2.5 : 0.1);
+        if (k >= 1) basse(t, d, a, [0, 0.12, 0.2, 0.22, 0.18][k]);
+        if (k === 2 || k === 3) m.push({ i: 'arp', t, d, notes: ACCORDS[a].slice(1), gain: 0.06, c0: 2000, c1: 3500, pas: 0.25 });
+      }
+      // Les percussions, en mesure à trois temps (boum-tchak-tchak).
+      for (let temps = 1; temps < 24; temps++) {
+        if (dernier && temps >= 22) break;
+        const t = s + temps * b;
+        const fort = (temps - 1) % 3 === 0;
+        if (k === 1) { if (fort) m.push({ i: 'kick', t, gain: 0.35 }); m.push({ i: 'hat', t: t + b / 2, gain: 0.03 }); }
+        if (k === 2) { if (fort) m.push({ i: 'kick', t, gain: 0.85 }); else m.push({ i: 'clap', t, gain: 0.17 }); m.push({ i: 'hat', t, gain: 0.04 }); m.push({ i: 'hat', t: t + b / 2, gain: 0.03 }); }
+        if (k === 3) { m.push({ i: 'kick', t, gain: fort ? 0.78 : 0.45 }); if (!fort) m.push({ i: 'clap', t, gain: 0.15 }); for (let q = 0; q < 4; q++) m.push({ i: 'hat', t: t + (q * b) / 4, gain: 0.025 }); }
+        if (k === 4) { if (fort) m.push({ i: 'kick', t, gain: 0.45 }); else m.push({ i: 'hat', t, gain: 0.03 }); }
+      }
+    });
+
+    const s = fete.couplets;
+    // Couplet 1 : les bougies s'allument une à une.
+    for (const i of [0, 6, 12, 17, 19]) m.push({ i: 'allumage', t: s[0] + AIR[i][1] * b, gain: 0.16 });
+    for (let p = 0; p < 4; p++) m.push({ i: 'eclats', t: s[0] + p * 3, d: 1.2, gain: 0.06, densite: 9 });
+    // Couplet 2 : les cadeaux glissent et s'ouvrent, les ballons.
+    for (let p = 0; p < 4; p++) {
+      const t = s[1] + p * 3;
+      m.push({ i: 'whoosh', t: t - 0.1, d: 0.5, gain: 0.16 });
+      m.push({ i: 'pop', t: t + 1.4, gain: 0.16 });
+      m.push({ i: 'eclats', t: t + 1.4, d: 1.0, gain: 0.08, densite: 12 });
+      m.push({ i: 'pop', t: t + 0.6, gain: 0.08 });
+    }
+    // Couplet 3 : les affiches qui filent, le défilé.
+    for (let p = 0; p < 4; p++) { m.push({ i: 'whoosh', t: s[2] + p * 3 - 0.2, d: 0.4, gain: 0.18 }); m.push({ i: 'impact', t: s[2] + p * 3, gain: 0.3 }); }
+    m.push({ i: 'riser', t: s[3] - 3.0, d: 3.5, gain: 0.3 });
+    // Couplet 4 : l'explosion, les bougies soufflées, hip hip hip hourra.
+    const d4 = s[3] + 0.5;
+    m.push({ i: 'coupBasse', t: d4, gain: 1.2 });
+    m.push({ i: 'impact', t: d4, gain: 1.0 });
+    m.push({ i: 'eclats', t: d4, d: 4, gain: 0.15, densite: 30 });
+    for (const dt of [0.3, 0.9, 1.6]) m.push({ i: 'petard', t: d4 + dt - 0.55, gain: 0.25 });
+    m.push({ i: 'whoosh', t: s[3] + 4.7, d: 0.9, gain: 0.32 });
+    for (let c = 0; c < 5; c++) m.push({ i: 'allumage', t: s[3] + 5.4 + c * 0.08, gain: 0.12 });
+    for (const t of [s[3] + 6.5, s[3] + 7.0, s[3] + 7.5]) { m.push({ i: 'impact', t, gain: 0.45 }); m.push({ i: 'clap', t, gain: 0.2 }); }
+    m.push({ i: 'coupBasse', t: s[3] + 8.0, gain: 1.0 });
+    m.push({ i: 'impact', t: s[3] + 8.0, gain: 0.9 });
+    m.push({ i: 'eclats', t: s[3] + 8.0, d: 3, gain: 0.14, densite: 26 });
+    m.push({ i: 'petard', t: s[3] + 7.9, gain: 0.25 });
+    m.push({ i: 'petard', t: s[3] + 8.4, gain: 0.22 });
+    // Couplet 5 : feux d'artifice doux.
+    for (const dt of [3.2, 6.2, 9.1]) m.push({ i: 'petard', t: s[4] + dt - 0.55, gain: 0.16 });
+    // Final : grand accord, feu d'artifice, boîte à musique qui scintille.
+    const fin = s[4] + 22 * b;
+    m.push({ i: 'coupBasse', t: fin, gain: 1.0 });
+    m.push({ i: 'impact', t: fin, gain: 0.9 });
+    m.push({ i: 'eclats', t: fin, d: 4, gain: 0.14, densite: 26 });
+    for (const dt of [0.3, 0.9, 1.6]) m.push({ i: 'petard', t: fin + dt - 0.55, gain: 0.2 });
+    [74, 78, 81, 86, 90, 86, 81, 78].forEach((n2, j) => m.push({ i: 'boite', t: fin + 0.5 + j * 0.22, f: n2, gain: 0.1, d: 2.2 }));
+    cloches(fin + 0.02, [74, 78, 81], 0.08, 4);
+    return m;
+  }
+
   longue.musique = musiqueLongue();
   courte.musique = musiqueCourte();
   pub.musique = musiquePub();
+  fete.musique = musiqueFete();
 
-  return { versions: { longue, courte, pub }, ACCORDS };
+  return { versions: { longue, courte, pub, fete }, ACCORDS };
 });

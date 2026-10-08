@@ -97,7 +97,7 @@ async function rendre(navigateur, port, { version, format, k4, fps, sortie }) {
   const k4 = drapeau('4k');
   const dossier = path.join(ici, 'videos');
   fs.mkdirSync(dossier, { recursive: true });
-  const nom = (v, f) => path.join(dossier, (v === 'courte' ? 'joel-15s' : v === 'pub' ? 'joel-pub' : 'joel-anniversaire') + '-' + (f === 'portrait' ? '9x16' : '16x9') + (k4 ? '-4k' : '') + '.mp4');
+  const nom = (v, f) => path.join(dossier, (v === 'courte' ? 'joel-15s' : v === 'pub' ? 'joel-pub' : v === 'fete' ? 'joel-fete' : 'joel-anniversaire') + '-' + (f === 'portrait' ? '9x16' : '16x9') + (k4 ? '-4k' : '') + '.mp4');
   const travaux = drapeau('tout')
     ? [['longue', 'paysage'], ['longue', 'portrait'], ['courte', 'paysage'], ['courte', 'portrait']]
     : [[option('version', 'longue'), option('format', 'paysage')]];

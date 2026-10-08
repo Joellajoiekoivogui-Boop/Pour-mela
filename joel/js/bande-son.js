@@ -300,6 +300,32 @@
       grain(c, e.t, f * 4.2, 0.25, e.gain * 0.08, 0, 0.3);
     },
 
+    // Synthé mélodique (deux scies désaccordées, filtre qui se referme,
+    // léger vibrato) pour chanter l'air dans les couplets rythmés.
+    lead(c, e) {
+      const { sr } = c;
+      const f = freq(e.f);
+      const i0 = Math.floor(e.t * sr);
+      const rel = 0.12;
+      const n = Math.floor((e.d + rel) * sr);
+      let p1 = 0, p2 = 0.37, l1 = 0, l2 = 0;
+      for (let k = 0; k < n; k++) {
+        const x = k / sr;
+        const vib = 1 + (x > 0.15 ? 0.004 * Math.sin(DEUX_PI * 5.5 * x) : 0);
+        p1 += (f * vib) / sr; if (p1 >= 1) p1 -= 1;
+        p2 += (f * 1.006 * vib) / sr; if (p2 >= 1) p2 -= 1;
+        const s = (p1 * 2 - 1) + (p2 * 2 - 1) * 0.7 + (p1 < 0.5 ? 0.25 : -0.25);
+        const coupe = 300 + e.coupe * (0.55 + 0.45 * Math.exp(-x / 0.12));
+        const a = 1 - Math.exp((-DEUX_PI * coupe) / sr);
+        l1 += a * (s - l1); l2 += a * (l1 - l2);
+        let env = Math.min(1, x / 0.008);
+        env *= 0.7 + 0.3 * Math.exp(-x / 0.1);
+        if (x > e.d) env *= Math.max(0, 1 - (x - e.d) / rel);
+        const v = l2 * env * e.gain * 0.5;
+        ajouter(c, i0 + k, v * 0.92, v, 0.35);
+      }
+    },
+
     // Frappe de clavier.
     frappe(c, e) {
       const { sr } = c;

@@ -20,6 +20,27 @@ panneaux et réseaux redisposés, JOËL toujours en grand au centre).
 Le film se regarde aussi en direct dans le navigateur : ouvre `index.html`
 (ou `/joel/` sur le site en ligne) et touche « Lancer le film ».
 
+## La fête (65 s) — « Joyeux anniversaire » du début à la fin
+
+`videos/joel-fete-16x9.mp4` et `videos/joel-fete-9x16.mp4` : l’air de « Joyeux
+anniversaire » joue sans interruption, en cinq couplets de plus en plus
+festifs. On ne parle que de l’anniversaire.
+
+| Temps | Couplet | À l’écran |
+| --- | --- | --- |
+| 0:01 | Boîte à musique | Les paroles s’allument note après note (karaoké), une bougie s’allume à chaque phrase |
+| 0:13 | Cloches | « C’est ton jour, Joël ! », « Bon anniversaire ! », « 10 octobre », « Fais un vœu » : lettres qui volent, tombent et rebondissent, cadeaux qui glissent et s’ouvrent, ballons |
+| 0:25 | Rythme | Les paroles glissent sur les photos, des emojis courent à travers l’écran, lumières de fête |
+| 0:37 | Explosion | « JOYEUX ANNIVERSAIRE JOËL ! », « Souffle tes bougies ! » (soufflées puis rallumées), « Hip hip hip… Hourra ! », « Que la fête commence ! » |
+| 0:49 | Final | Les photos tournent autour des paroles, feux d’artifice |
+| 1:00 | Dernière note | Explosion de confettis, JOËL !, 10.10.2026 |
+
+Tout bouge sur la musique : textes qui flottent, glissent, sortent du flou et
+explosent ; emojis qui volent et qui courent ; cercles qui résonnent sur
+chaque temps fort ; reflets brillants.
+
+Pour la refaire : `node rendre-video.js --version fete` (et `--format portrait`).
+
 ## La publicité (3 min 54)
 
 Une troisième version, façon publicité de marque, sur le texte « Aujourd’hui

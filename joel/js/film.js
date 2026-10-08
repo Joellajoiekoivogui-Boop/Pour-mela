@@ -64,7 +64,7 @@
     const cx = W / 2;
     const cy = H / 2;
     const ctx = canvas.getContext('2d');
-    const nomVersion = options.version === 'courte' || options.version === 'pub' ? options.version : 'longue';
+    const nomVersion = ['courte', 'pub', 'fete'].includes(options.version) ? options.version : 'longue';
     const V = Partition.versions[nomVersion];
     const photos = (options.photos || []).filter((p) => p && p.naturalWidth);
     const grain = options.grain !== false;
@@ -1104,7 +1104,7 @@
     }
 
     // La version « publicité » vit dans pub.js et reçoit les outils du moteur.
-    const pub = nomVersion === 'pub' ? racine.JoelPub.creer({
+    const pub = nomVersion === 'pub' || nomVersion === 'fete' ? racine.JoelPub.creer({
       ctx, canvas, W, H, S, cx, cy, portrait, L, V, densite,
       borne, lin, melange, sortie, sortieForte, entree, douce, lisse, fenetre, hasard, toile, rgba, COULEURS, POLICES,
       point, spriteListe, bokeh, halo, voile, faisceau, onde, gerbe, confettis, etoiles, poussieres, fondNebuleuse,

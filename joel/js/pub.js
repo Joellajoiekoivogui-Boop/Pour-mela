@@ -13,6 +13,14 @@
     const { police, mesurer, couper, titre, poser, photosPretes, placer } = O;
     const EMOJI = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
 
+    const alea = (i, g) => { const x = Math.sin(i * 12.9898 + g * 78.233) * 43758.5453; return x - Math.floor(x); };
+    const rebond = (x) => {
+      const n1 = 7.5625, d1 = 2.75;
+      if (x < 1 / d1) return n1 * x * x;
+      if (x < 2 / d1) { x -= 1.5 / d1; return n1 * x * x + 0.75; }
+      if (x < 2.5 / d1) { x -= 2.25 / d1; return n1 * x * x + 0.9375; }
+      x -= 2.625 / d1; return n1 * x * x + 0.984375;
+    };
     const retour = (x) => { const c1 = 1.9, c3 = c1 + 1; return 1 + c3 * Math.pow(x - 1, 3) + c1 * Math.pow(x - 1, 2); };
     const TAILLES = { xl: S * 0.115, l: S * 0.08, m: S * 0.056, s: S * 0.042 };
     const visible = (t, a, b) => t >= a && t <= b;
@@ -121,7 +129,7 @@
       const u = t - p.t;
       const dur = p.fin - p.t;
       const coupe = p.sortie === 'coupe';
-      const q = coupe ? 0 : lin(t, p.fin - 0.35, p.fin);
+      const q = coupe ? 0 : lin(t, p.fin - (p.sortie === 'explose' ? 0.4 : 0.35), p.fin);
       const hl = taille * 1.2;
       const y0 = y - ((M.lignes.length - 1) * hl) / 2;
       const derive = 1 + 0.04 * (u / Math.max(1, dur)) + (o.echelle ? o.echelle - 1 : 0);
@@ -187,8 +195,34 @@
                 a = k; e = 1.12 - 0.12 * sortie(borne(u / dur));
                 break;
               }
+              case 'vole': {
+                // Les lettres arrivent en volant de partout, en tournant.
+                const k = borne((u - (le.i / Math.max(1, nbL)) * 0.35) / 0.6);
+                const s = sortieForte(k);
+                dx = (alea(le.i, 1) - 0.5) * W * 0.9 * (1 - s);
+                dy = (alea(le.i, 2) - 0.5) * H * 0.9 * (1 - s);
+                rot = (alea(le.i, 3) - 0.5) * 5 * (1 - s);
+                e = 1 + (1 - s) * 1.2; a = borne(k * 3); flou = (1 - s) * taille * 0.6;
+                break;
+              }
+              case 'chute': {
+                // Les lettres tombent du ciel et rebondissent.
+                const k = borne((u - (le.i / Math.max(1, nbL)) * 0.45) / 0.7);
+                dy = -(1 - rebond(k)) * H * 0.55; a = borne(k * 5);
+                rot = (1 - rebond(k)) * (alea(le.i, 4) - 0.5) * 1.5;
+                break;
+              }
             }
-            if (q > 0) {
+            if (p.flotte) { dy += Math.sin(t * 2.6 + le.i * 0.45) * taille * 0.07; rot += Math.sin(t * 2 + le.i) * 0.035; }
+            if (q > 0 && p.sortie === 'explose') {
+              // Les lettres explosent dans toutes les directions.
+              const k = sortie(q);
+              const dir = (lx + le.w / 2) / Math.max(1, M.largeur / 2);
+              dx += (dir * 0.6 + (alea(le.i, 5) - 0.5)) * W * 0.5 * k;
+              dy += ((alea(le.i, 6) - 0.5) * H * 0.7 - H * 0.08) * k;
+              rot += (alea(le.i, 7) - 0.5) * 6 * k;
+              e *= 1 + k * 1.2; a *= 1 - k; flou = Math.max(flou, k * taille * 0.5);
+            } else if (q > 0) {
               const k = borne(q * 1.6 - (le.i / Math.max(1, nbL)) * 0.6);
               a *= 1 - k; dy -= k * taille * 0.3; flou = Math.max(flou, k * taille * 0.3);
             }
@@ -436,14 +470,14 @@
     }
 
     // ---------------------------------------------------- les bougies
-    function flamme(x, y, l, t, graine, allume) {
+    function flamme(x, y, l, t, graine, allume, vent) {
       if (allume <= 0) return;
       const f = 1 + 0.08 * Math.sin(t * 13 + graine) + 0.05 * Math.sin(t * 23 + graine * 2);
       const h = l * 2.3 * allume * f, w = l * 0.75 * allume;
       halo(x, y - h * 0.4, l * 7 * allume, 0.45 * allume, [255, 200, 120]);
       ctx.save();
       ctx.translate(x, y);
-      ctx.rotate(0.06 * Math.sin(t * 7 + graine));
+      ctx.rotate(0.06 * Math.sin(t * 7 + graine) + (vent || 0));
       const d = ctx.createRadialGradient(0, -h * 0.25, 0, 0, -h * 0.3, h * 0.8);
       d.addColorStop(0, 'rgba(255,255,240,1)');
       d.addColorStop(0.3, 'rgba(255,225,120,0.95)');
@@ -462,7 +496,7 @@
       ctx.restore();
     }
     // Une bougie torsadée : corps, rayures, mèche, flamme.
-    function bougie(x, y, l, h, t, allume, teinte, graine) {
+    function bougie(x, y, l, h, t, allume, teinte, graine, vent) {
       const d = ctx.createLinearGradient(x - l / 2, 0, x + l / 2, 0);
       d.addColorStop(0, teinte[0]);
       d.addColorStop(0.45, teinte[1]);
@@ -493,7 +527,22 @@
       ctx.moveTo(x, y - h);
       ctx.lineTo(x + l * 0.04, y - h - l * 0.35);
       ctx.stroke();
-      flamme(x + l * 0.04, y - h - l * 0.3, l * 0.55, t, graine, allume);
+      flamme(x + l * 0.04, y - h - l * 0.3, l * 0.55, t, graine, allume, vent);
+    }
+    // Fumée qui monte d'une mèche soufflée.
+    function fumee(x, y, u, a, l) {
+      if (a <= 0) return;
+      for (let j = 0; j < 6; j++) {
+        const v = u - j * 0.12;
+        if (v < 0 || v > 1.6) continue;
+        const r = l * (0.3 + v * 1.4);
+        ctx.globalAlpha = a * 0.35 * (1 - v / 1.6);
+        ctx.fillStyle = '#c9c4d8';
+        ctx.beginPath();
+        ctx.arc(x + Math.sin(v * 4 + j) * l * 0.8, y - v * l * 9, r, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
     }
     const TEINTES = [['#b8a6e8', '#f4efff', '#9b87d6'], ['#e8a6c8', '#fff0f7', '#d487b0'], ['#a6c0e8', '#f0f6ff', '#879fd6'], ['#e8d6a6', '#fffaf0', '#d6bf87']];
 
@@ -588,8 +637,18 @@
       }
       liste.sort((a, b) => a.py - b.py);
       for (const b of liste) {
-        const al = borne((t - D.allume - b.i * 0.15) / 0.25);
-        bougie(b.px, b.py, e * 0.06, e * 0.32, t, al, TEINTES[b.i % TEINTES.length], b.i * 2.3);
+        let al = D.allumages ? borne((t - D.allumages[b.i % D.allumages.length]) / 0.25) : borne((t - D.allume - b.i * 0.15) / 0.25);
+        if (D.allumages && al > 0 && al < 1) gerbe(t, D.allumages[b.i], b.px, b.py - e * 0.36, 800 + b.i, { nombre: 26, vitesse: 0.2, duree: 0.6, gravite: 0.3 });
+        let vent = 0;
+        if (D.souffle && t > D.souffle) {
+          const q = borne((t - D.souffle - b.i * 0.05) / 0.3);
+          const re = D.rallume ? borne((t - D.rallume - b.i * 0.08) / 0.2) : 0;
+          vent = Math.sin(q * Math.PI) * 0.9 * (1 - re);
+          al = al * (1 - q) + re;
+          if (q > 0.4) fumee(b.px, b.py - e * 0.36, t - D.souffle - 0.15, 1 - re, e * 0.03);
+          if (re > 0 && re < 1) gerbe(t, D.rallume + b.i * 0.08, b.px, b.py - e * 0.36, 900 + b.i, { nombre: 30, vitesse: 0.25, duree: 0.7, gravite: 0.3 });
+        }
+        bougie(b.px, b.py, e * 0.06, e * 0.32, t, al, TEINTES[b.i % TEINTES.length], b.i * 2.3, vent);
       }
       ctx.restore();
       // Reflet qui glisse.
@@ -1321,13 +1380,402 @@
       ctx.fillRect(0, H - hb * w, W, hb * w);
     }
 
+    // ============================================ LA FÊTE (la chanson)
+    // Tout suit l'air de « Joyeux anniversaire » : les paroles s'allument
+    // note après note (karaoké), tout pulse sur les temps.
+    const AIR = V.air || [];
+    const MOTS = [
+      [['JOYEUX', 0, 1], ['ANNIVERSAIRE', 2, 5]],
+      [['JOYEUX', 6, 7], ['ANNIVERSAIRE', 8, 11]],
+      [['JOYEUX', 12, 13], ['ANNIVERSAIRE', 14, 16], ['JOËL', 17, 18]],
+      [['JOYEUX', 19, 20], ['ANNIVERSAIRE !', 21, 24]],
+    ];
+    const note = (k, i) => V.couplets[k] + AIR[i][1] * V.temps;
+    const debutPhrase = (k, p) => note(k, MOTS[p][0][1]);
+    const finPhrase = (k, p) => (p < 3 ? debutPhrase(k, p + 1) : V.couplets[k] + 24 * V.temps);
+    const finChant = () => V.couplets[V.couplets.length - 1] + 22 * V.temps;
+
+    // L'impulsion du rythme : forte sur le premier temps de chaque mesure.
+    function pouls(t) {
+      const s0 = V.couplets[0];
+      if (!V.couplets || t < s0 || t > finChant() + 0.6) return 0;
+      const x = (t - s0) / V.temps, i = Math.floor(x), f = (x - i) * V.temps;
+      const fort = (((i - 1) % 3) + 3) % 3 === 0 ? 1 : 0.55;
+      return fort * Math.exp(-f / 0.11);
+    }
+    // Cercles qui résonnent à chaque temps fort.
+    function resonance(t, x, y, force) {
+      const s0 = V.couplets[0];
+      const x0 = (t - s0) / V.temps;
+      if (x0 < 0 || t > finChant() + 1.5) return;
+      ctx.globalCompositeOperation = 'lighter';
+      for (let j = 0; j < 4; j++) {
+        const i = Math.floor(x0) - j;
+        const fort = (((i - 1) % 3) + 3) % 3 === 0;
+        if (!fort && force < 0.8) continue;
+        const d = t - (s0 + i * V.temps);
+        if (d < 0 || d > 1.3) continue;
+        const p = sortie(d / 1.3);
+        const r = S * (0.12 + p * 0.75);
+        ctx.globalAlpha = (1 - p) * 0.4 * force * (fort ? 1 : 0.6);
+        ctx.strokeStyle = fort ? '#dcc8ff' : '#ff9fd2';
+        ctx.lineWidth = S * 0.007 * (1 - p) + 1;
+        ctx.beginPath();
+        ctx.ellipse(x, y, r, r * (portrait ? 1 : 0.62), 0, 0, Math.PI * 2);
+        ctx.stroke();
+      }
+      ctx.globalAlpha = 1;
+      ctx.globalCompositeOperation = 'source-over';
+    }
+
+    // Un mot du karaoké : gris clair, puis rempli de lumière au fil du chant.
+    function motK(texte, x, y, taille, prog, alpha, ech, flou, eclat) {
+      if (alpha <= 0.01) return;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.scale(ech, ech);
+      ctx.font = police(700, taille, POLICES.titre);
+      ctx.letterSpacing = Math.round(taille * 0.03) + 'px';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      const l = ctx.measureText(texte).width;
+      ctx.fillStyle = 'rgba(232,224,255,1)';
+      if (flou > 1) { ctx.globalAlpha = alpha * 0.22; ctx.fillText(texte, -flou, 0); ctx.fillText(texte, flou, 0); ctx.fillText(texte, -flou * 2, 0); }
+      ctx.globalAlpha = alpha * (prog > 0 ? 0.5 : 0.85);
+      ctx.fillText(texte, 0, 0);
+      if (prog > 0) {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(-l / 2 - taille * 0.2, -taille, l * prog + taille * 0.2, taille * 2);
+        ctx.clip();
+        const d = ctx.createLinearGradient(0, -taille * 0.5, 0, taille * 0.5);
+        d.addColorStop(0, '#ffffff'); d.addColorStop(0.5, '#e6d2ff'); d.addColorStop(1, '#ff9fd2');
+        ctx.fillStyle = d;
+        ctx.shadowColor = 'rgba(190,120,255,0.95)';
+        ctx.shadowBlur = taille * 0.35 * (eclat || 1);
+        ctx.globalAlpha = alpha;
+        ctx.fillText(texte, 0, 0);
+        ctx.restore();
+      }
+      ctx.restore();
+      ctx.letterSpacing = '0px';
+      ctx.globalAlpha = 1;
+    }
+
+    function taillesK() {
+      const tA = Math.min(S * 0.115, (W * 0.86) / 7.7);
+      return { tA, tJ: tA * 0.72 };
+    }
+    // Les paroles d'un couplet, synchronisées sur les notes.
+    function paroles(k, t, o) {
+      const { tA, tJ } = taillesK();
+      const y0 = cy + (portrait && o.yP != null ? o.yP : o.y) * H;
+      for (let p = 0; p < 4; p++) {
+        const a0 = debutPhrase(k, p) - 0.15;
+        const a1 = p === 3 && o.fin ? o.fin : finPhrase(k, p) - 0.03;
+        if (t < a0 || t > a1) continue;
+        const q = o.coupe ? 0 : lin(t, a1 - 0.14, a1);
+        MOTS[p].forEach(([mot, i0, i1], j) => {
+          const tw = note(k, i0);
+          const yw = j === 0 ? y0 - tA * 0.95 : j === 1 ? y0 : y0 + tA * 1.4;
+          let prog = 0;
+          for (let i = i0; i <= i1; i++) prog += borne((t - note(k, i)) / Math.min(0.25, AIR[i][2] * V.temps));
+          prog /= i1 - i0 + 1;
+          let bump = 0;
+          for (let i = i0; i <= i1; i++) { const d = t - note(k, i); if (d >= 0) bump = Math.max(bump, Math.exp(-d / 0.12)); }
+          const u = t - tw;
+          const kk = borne((u + 0.05) / 0.35);
+          const e = sortieForte(kk);
+          const sens = (j + p) % 2 ? 1 : -1;
+          let dx = 0, dy = 0, ech = 1 + 0.09 * bump, flou = 0;
+          switch (o.entree) {
+            case 'glisse': dx = (1 - e) * W * 0.65 * sens; flou = (1 - e) * tA * 0.9; break;
+            case 'vole': dx = (1 - e) * W * 0.45 * sens; dy = -(1 - e) * H * 0.35; flou = (1 - e) * tA * 0.6; ech *= 1 + (1 - e) * 0.7; break;
+            case 'zoom': ech *= melange(2.4, 1, e); flou = (1 - e) * tA * 0.5; break;
+            default: dy = (1 - retour(kk)) * tA * 0.7; ech *= 0.55 + 0.45 * retour(kk); flou = (1 - kk) * tA * 0.4;
+          }
+          if (o.flotte) dy += Math.sin(t * 2.4 + j * 1.3 + p) * tA * 0.08;
+          if (q > 0) { dy -= q * tA * 0.7 * (j + 1); ech *= 1 + q * 0.5; flou = Math.max(flou, q * tA * 0.5); }
+          const alpha = (u >= -0.05 ? borne(kk * 3) : 0) * (1 - q) * (o.alpha == null ? 1 : o.alpha);
+          if (mot === 'JOËL') {
+            if (u < -0.05) return;
+            poser(T.joelK, cx + dx, yw + dy, { alpha, echelle: ech * (1 + 0.08 * bump) * melange(1.6, 1, e), flou: flou * 0.5, reflet: 0, lueur: 0.8 + bump, balayage: lin(t, tw + 0.15, tw + 0.85) });
+            onde(t, tw, cx, yw, 0.8);
+            gerbe(t, tw, cx, yw, 3000 + k * 10, { nombre: 220, vitesse: 1.3, duree: 1.4, gravite: 0.2 });
+            return;
+          }
+          const tt = j === 0 ? tJ : tA;
+          if (u < -0.05) { motK(mot, cx, yw, tt, 0, 0.16 * (1 - q), 1, 0); return; }
+          motK(mot, cx + dx, yw + dy, tt, prog, alpha, ech, flou, 1 + bump);
+          if (bump > 0.6 && prog > 0) {
+            const px = cx - (tt * mot.length * 0.33) + prog * tt * mot.length * 0.66;
+            point(spriteListe[0], px, yw, tt * 0.35 * bump, 0.8 * bump);
+          }
+        });
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Emojis qui courent en file à travers l'écran (traînée floue, petits sauts).
+    function defile(liste, t, t0, t1, y, sens, taille, vitesse) {
+      if (t < t0 || t > t1) return;
+      const u = t - t0;
+      const ecart = taille * 1.7;
+      for (let i = 0; i < liste.length; i++) {
+        const pos = u * vitesse * W - i * ecart;
+        if (pos < -taille * 2 || pos > W + taille * 4) continue;
+        const x = sens > 0 ? -taille + pos : W + taille - pos;
+        const saut = Math.abs(Math.sin(u * 10 + i * 1.3)) * taille * 0.4;
+        const img = imageEmoji(liste[i]);
+        for (let g = 3; g >= 1; g--) {
+          ctx.globalAlpha = 0.1 * (4 - g);
+          const xg = x - sens * g * taille * 0.4;
+          ctx.drawImage(img, xg - taille * 0.6, y - saut - taille * 0.6, taille * 1.2, taille * 1.2);
+        }
+        ctx.save();
+        ctx.translate(x, y - saut);
+        ctx.rotate(sens * 0.18 + Math.sin(u * 10 + i) * 0.12);
+        ctx.globalAlpha = 1;
+        ctx.drawImage(img, -taille * 0.62, -taille * 0.62, taille * 1.24, taille * 1.24);
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    // Emojis qui volent en vagues, avec une traînée d'étincelles.
+    function volants(t, t0, t1, liste, graine, densiteV) {
+      const r = hasard(graine);
+      const n = Math.round((t1 - t0) * 2.2 * densiteV);
+      for (let i = 0; i < n; i++) {
+        const dep = t0 + r() * Math.max(0.1, t1 - t0 - 1), duree = 1.6 + r() * 1.8, sens = r() < 0.5 ? 1 : -1;
+        const y0 = H * (0.08 + r() * 0.84), amp = S * (0.04 + r() * 0.1), fr = 1 + r() * 2, s = S * (0.035 + r() * 0.04), ch = liste[i % liste.length], ph = r() * 6;
+        const u = (t - dep) / duree;
+        if (u < 0 || u > 1) continue;
+        const x = sens > 0 ? -s + u * (W + 2 * s) : W + s - u * (W + 2 * s);
+        const y = y0 + Math.sin(u * Math.PI * 2 * fr + ph) * amp - u * S * 0.1;
+        const pente = Math.cos(u * Math.PI * 2 * fr + ph) * amp * Math.PI * 2 * fr / (W + 2 * s);
+        ctx.globalCompositeOperation = 'lighter';
+        for (let g = 1; g <= 5; g++) {
+          const ug = u - g * 0.012;
+          const xg = sens > 0 ? -s + ug * (W + 2 * s) : W + s - ug * (W + 2 * s);
+          const yg = y0 + Math.sin(ug * Math.PI * 2 * fr + ph) * amp - ug * S * 0.1;
+          point(spriteListe[g % 2 ? 1 : 4], xg, yg, s * 0.2 * (1 - g / 6), 0.6 * (1 - g / 6));
+        }
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(Math.atan(pente) * sens * 0.8);
+        ctx.globalAlpha = 0.95;
+        ctx.drawImage(imageEmoji(ch), -s * 0.62, -s * 0.62, s * 1.24, s * 1.24);
+        ctx.restore();
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function polaroid(P, x, y, h, rot, alpha) {
+      if (alpha <= 0.01) return;
+      const w = h * 0.82;
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rot);
+      ctx.globalAlpha = alpha;
+      ctx.shadowColor = 'rgba(0,0,0,0.5)';
+      ctx.shadowBlur = h * 0.08;
+      ctx.fillStyle = '#fbfaff';
+      ctx.fillRect(-w / 2, -h / 2, w, h);
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+      const iw = w * 0.88, ih = h * 0.74;
+      ctx.beginPath(); ctx.rect(-iw / 2, -h / 2 + w * 0.06, iw, ih); ctx.clip();
+      const [px, py, pw, ph] = placer(P, iw, ih, 1.05);
+      ctx.drawImage(P.img, -iw / 2 + px, -h / 2 + w * 0.06 + py, pw, ph);
+      ctx.restore();
+      ctx.globalAlpha = 1;
+    }
+    // Les photos tournent en orbite autour des paroles.
+    function orbite(t, t0, t1, y0) {
+      if (t < t0 || t > t1 || !photosPretes.length) return;
+      const a = fenetre(t, t0, t1, 0.8, 0.5);
+      const n = photosPretes.length;
+      const rx = W * L(0.4, 0.36), ry = H * L(0.34, 0.3);
+      const items = photosPretes.map((P, i) => {
+        const th = (i / n) * Math.PI * 2 + (t - t0) * 0.55;
+        return { P, i, th, z: Math.sin(th) };
+      }).sort((p1, p2) => p1.z - p2.z);
+      for (const it of items) {
+        const prof = (it.z + 1) / 2;
+        const x = cx + Math.cos(it.th) * rx;
+        const y = y0 + Math.sin(it.th) * ry;
+        polaroid(it.P, x, y, S * L(0.26, 0.22) * (0.65 + 0.35 * prof), Math.cos(it.th) * 0.12, a * (0.45 + 0.55 * prof));
+      }
+    }
+
+    FOND.club = function (t, a) {
+      fondNebuleuse(t, 0.5 * a);
+      const pz = pouls(t);
+      const cols = [[255, 120, 200], [140, 100, 255], [90, 160, 255], [255, 210, 120]];
+      ctx.globalCompositeOperation = 'lighter';
+      for (let k = 0; k < 4; k++) {
+        const sx = W * (0.1 + k * 0.27), sy = -S * 0.05;
+        const ang = Math.PI / 2 + Math.sin(t * 1.3 + k * 1.7) * 0.6;
+        const lg = S * 1.8, ou = 0.13;
+        const d = ctx.createLinearGradient(sx, sy, sx + Math.cos(ang) * lg, sy + Math.sin(ang) * lg);
+        d.addColorStop(0, rgba(cols[k], 0.32 * a * (0.55 + 0.6 * pz)));
+        d.addColorStop(1, rgba(cols[k], 0));
+        ctx.fillStyle = d;
+        ctx.beginPath();
+        ctx.moveTo(sx, sy);
+        ctx.lineTo(sx + Math.cos(ang - ou) * lg, sy + Math.sin(ang - ou) * lg);
+        ctx.lineTo(sx + Math.cos(ang + ou) * lg, sy + Math.sin(ang + ou) * lg);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.globalCompositeOperation = 'source-over';
+      etoiles(t, 0.45 * a, { part: 0.7 });
+      poussieres(t, 0.5 * a, 1);
+    };
+
+    // ---------------------------------------------------- les couplets
+    function couplet1(t) {
+      const s = V.couplets[0], fin = V.couplets[1];
+      if (t > fin + 0.3) return;
+      if (t < 1.3) halo(cx, cy, S * (0.05 + 0.4 * t), 0.7 * lin(t, 0, 0.5) * (1 - lin(t, 0.9, 1.4)));
+      etincelles(t, 0, fin + 0.3, 34, 21);
+      volants(t, s + 0.5, fin, ['✨', '⭐', '💫', '✨'], 31, 0.55);
+      gateau({ t: 0.3, fin: fin + 0.3, allumages: [0, 6, 12, 17, 19].map((i) => note(0, i)), y: L(0.24, 0.22), yP: 0.22, echelle: L(0.62, 0.8) }, t);
+      paroles(0, t, { y: -0.24, yP: -0.24, flotte: true });
+    }
+
+    function couplet2(t) {
+      const s = V.couplets[1], fin = V.couplets[2];
+      if (t < s - 0.3 || t > fin + 0.3) return;
+      ballons({ t: s - 0.6, fin: fin + 0.4, nombre: 24 }, t, 13);
+      volants(t, s, fin, ['🎈', '🎉', '🎊', '🥳', '🎁'], 41, 0.9);
+      const textes = [
+        { texte: 'C’EST TON JOUR, JOËL !', style: 'vole', taille: 'l', accent: ['JOËL'] },
+        { texte: 'BON ANNIVERSAIRE !', style: 'chute', taille: 'xl', accent: '*' },
+        { texte: '10 OCTOBRE', style: 'glisse', taille: 'xl', emoji: '🎂' },
+        { texte: 'FAIS UN VŒU', style: 'revele', taille: 'xl', emojis: ['✨', '✨'], lueur: true },
+      ];
+      for (let p = 0; p < 4; p++) {
+        const a0 = debutPhrase(1, p), a1 = finPhrase(1, p);
+        phrase(Object.assign({ type: 'texte', t: a0, fin: a1 - 0.02, y: L(-0.14, -0.14), sortie: 'explose', flotte: true }, textes[p]), t, { echelle: 1 + 0.06 * pouls(t) });
+        if (t >= a0 && t <= a1) {
+          const sens = p % 2 ? 1 : -1;
+          const glisse = sortieForte(lin(t, a0, a0 + 0.55));
+          const part = entree(lin(t, a1 - 0.3, a1));
+          cadeau({ t: a0, fin: a1, ouvre: a0 + 1.4, couleur: p, x: sens * (1 - glisse) * 0.7 - sens * part * 0.7, y: L(0.36, 0.3), echelle: L(1, 1.1) }, t);
+        }
+      }
+    }
+
+    function couplet3(t) {
+      const s = V.couplets[2], fin = V.couplets[3];
+      if (t < s - 0.3 || t > fin + 0.3) return;
+      resonance(t, cx, cy, 0.9);
+      for (let p = 0; p < 4; p++) {
+        const a0 = debutPhrase(2, p), a1 = finPhrase(2, p);
+        if (photosPretes.length && t >= a0 - 0.1 && t <= a1 + 0.3) {
+          const Ph = photosPretes[p % photosPretes.length];
+          const hb = H * L(0.6, 0.44), lb = W * L(0.46, 0.8);
+          const l = Math.min(lb, hb * Ph.ratio), h = l / Ph.ratio;
+          affiche(Ph, cx, cy + H * L(-0.1, -0.13), l, h, t, a0 - 0.1, a1 + 0.25, { sens: p % 2 ? -1 : 1 });
+        }
+        defile(['🎂', '🎁', '🎈', '🥳', '🎉', '🎊'], t, a0, a1 + 0.6, H * L(0.08, 0.06), p % 2 ? -1 : 1, S * L(0.07, 0.08), 0.6);
+        if (portrait) defile(['🎈', '🎉', '🎂', '🎁'], t, a0 + 0.3, a1 + 0.9, H * 0.95, p % 2 ? 1 : -1, S * 0.08, 0.7);
+      }
+      paroles(2, t, { y: L(0.19, 0.19), entree: 'glisse', coupe: true, alpha: 1 });
+    }
+
+    function couplet4(t) {
+      const s = V.couplets[3], fin = V.couplets[4];
+      if (t < s - 0.3 || t > fin + 0.3) return;
+      const d = s + 0.5;
+      ballons({ t: d, fin: fin + 0.3, nombre: 22 }, t, 37);
+      resonance(t, cx, cy, 1);
+      explosion({ t: d }, t);
+      serpentins({ t: d, fin: s + 6.5 }, t);
+      for (const [x, y, dt] of [[0.2, 0.25, 0.3], [0.8, 0.22, 0.9], [0.5, 0.12, 1.6]]) feu({ t: d + dt - 0.55, x, y }, t);
+      // « JOYEUX ANNIVERSAIRE JOËL ! »
+      grandTitre({ t: d - 0.05, fin: debutPhrase(3, 1) - 0.02 }, t);
+      // « SOUFFLE TES BOUGIES ! »
+      const b0 = debutPhrase(3, 1), b1 = finPhrase(3, 1);
+      phrase({ type: 'texte', t: b0, fin: b1 - 0.02, texte: 'SOUFFLE TES BOUGIES !', style: 'chute', taille: 'l', y: L(-0.32, -0.27), accent: ['BOUGIES'], sortie: 'explose', flotte: true }, t, { echelle: 1 + 0.05 * pouls(t) });
+      gateau({ t: b0 - 0.1, fin: b1 + 0.15, allume: b0, souffle: s + 4.75, rallume: s + 5.4, y: L(0.2, 0.16), echelle: L(0.72, 0.9) }, t);
+      // « HIP HIP HIP… HOURRA ! »
+      const hips = [[14, 'HIP'], [15, 'HIP'], [16, 'HIP…']];
+      const tH = note(3, 17);
+      const finH = finPhrase(3, 2) - 0.02;
+      hips.forEach(([i, mot], j) => {
+        const th = note(3, i);
+        const ex = portrait ? 0 : (j - 1) * W * 0.22;
+        const ey = portrait ? -0.26 + j * 0.085 : -0.12;
+        phrase({ type: 'texte', t: th, fin: tH + 0.4, texte: mot, style: 'punch', taille: 'xl', x: ex / W, xP: 0, y: ey, yP: ey, sortie: 'explose' }, t, { echelle: 1 + 0.08 * pouls(t) });
+        if (t >= th) onde(t, th, cx + ex, cy + ey * H, 0.6);
+      });
+      phrase({ type: 'texte', t: tH, fin: finH, texte: 'HOURRA !', style: 'punch', taille: 'xl', accent: '*', y: L(0.12, 0.12), rayons: true, sortie: 'explose' }, t, { echelle: 1.25 + 0.1 * pouls(t) });
+      if (t >= tH && t < tH + 3) {
+        explosion({ t: tH }, t);
+        canons({ t: tH, nombre: 300 }, t);
+        feu({ t: tH - 0.1, x: 0.25, y: 0.2 }, t);
+        feu({ t: tH + 0.4, x: 0.75, y: 0.18 }, t);
+      }
+      // « QUE LA FÊTE COMMENCE ! »
+      const c0 = debutPhrase(3, 3);
+      phrase({ type: 'texte', t: c0, fin: fin - 0.02, texte: 'QUE LA FÊTE COMMENCE !', style: 'vole', taille: 'l', emojis: ['🎉', '🎉'], accent: ['FÊTE'], sortie: 'explose', flotte: true }, t, { echelle: 1 + 0.06 * pouls(t) });
+      defile(['🎉', '🎂', '🎈', '🎁', '🥳', '🎊', '🎈'], t, c0, fin + 0.6, H * L(0.82, 0.8), 1, S * 0.08, 0.6);
+      defile(['🎈', '🎁', '🎂', '🎉'], t, c0 + 0.3, fin + 0.9, H * L(0.16, 0.2), -1, S * 0.07, 0.7);
+    }
+
+    function couplet5(t) {
+      const s = V.couplets[4], f = finChant();
+      if (t < s - 0.3 || t > f + 0.4) return;
+      orbite(t, s - 0.2, f + 0.4, cy + H * L(0.0, -0.02));
+      resonance(t, cx, cy, 0.7);
+      volants(t, s, f, ['✨', '💜', '🎈', '⭐', '🎂'], 51, 0.8);
+      for (const [dt, x, y] of [[3.2, 0.15, 0.2], [6.2, 0.85, 0.2], [9.1, 0.5, 0.12]]) feu({ t: s + dt - 0.55, x, y }, t);
+      paroles(4, t, { y: L(-0.06, -0.08), entree: 'zoom', flotte: true, fin: f + 0.3 });
+    }
+
+    function finaleFete(t) {
+      const t0 = finChant();
+      if (t < t0) return;
+      const a = 1 - lin(t, 64.0, 65.0);
+      ballons({ t: t0 - 0.8, fin: 65, nombre: 26 }, t, 61);
+      explosion({ t: t0 }, t);
+      canons({ t: t0, nombre: 380 }, t);
+      for (const [dt, x, y] of [[0.3, 0.2, 0.22], [0.9, 0.8, 0.2], [1.6, 0.5, 0.12]]) feu({ t: t0 + dt - 0.55, x, y }, t);
+      O.confettis(t, t0 + 0.6, { pluie: true, nombre: 220, graine: 17, fin: 64.8 });
+      rayons(cx, cy, t, 0.5 * a);
+      etincelles(t, t0, 65, 30, 99);
+      ['🎂', '🎉', '🎈', '✨'].forEach((ch, i) => emoji(ch, cx + (i - 1.5) * S * L(0.12, 0.16), cy + H * L(-0.39, -0.33), S * L(0.07, 0.09), t, t0 + 0.4 + i * 0.12, 64.9, { phase: i * 1.5, alpha: a }));
+      phrase({ type: 'texte', t: t0, fin: 65, texte: 'JOYEUX ANNIVERSAIRE', style: 'punch', taille: 'l', accent: '*', y: L(-0.24, -0.2), sortie: 'coupe', flotte: true }, t, { alpha: a, echelle: 1 + 0.04 * Math.sin((t - t0) * 3) });
+      const u = t - t0 - 0.25;
+      if (u > 0) poser(T.joelExcl, cx, cy + H * L(-0.02, -0.05), { alpha: borne(u * 5) * a, echelle: melange(1.5, 1, sortieForte(borne(u / 0.85))) * (1 + 0.03 * Math.sin(u * 3)), reflet: 0.3, lueur: 1, balayage: lin(t, t0 + 1.2, t0 + 2.2) });
+      phrase({ type: 'texte', t: t0 + 1.0, fin: 65, texte: '10.10.2026', style: 'chute', taille: 'm', y: L(0.2, 0.12), sortie: 'coupe', flotte: true }, t, { alpha: a });
+    }
+
+    function dessinerFete(t) {
+      fonds(t);
+      neuf(); couplet1(t);
+      neuf(); couplet2(t);
+      neuf(); couplet3(t);
+      neuf(); couplet4(t);
+      neuf(); couplet5(t);
+      neuf(); finaleFete(t);
+      neuf();
+      transitions(t);
+      if (t >= 64.0) voile('#000000', lin(t, 64.0, 65));
+    }
+
     // ===================================================== préparation
     const T = {};
     function preparer() {
       T.joel = titre('pub-joel', 'JOËL', { style: 'metal', taille: S * L(0.34, 0.38), maxL: W * L(0.6, 0.78) });
       T.joelExcl = titre('pub-joel-excl', 'JOËL !', { style: 'metal', taille: S * L(0.24, 0.3), maxL: W * L(0.56, 0.76) });
+      T.joelK = titre('fete-joel', 'JOËL', { style: 'metal', taille: S * L(0.2, 0.22), maxL: W * 0.7 });
       T.joelFinal = titre('pub-joel-final', 'JOËL !', { style: 'metal', taille: S * L(0.2, 0.3), maxL: W * L(0.5, 0.76) });
-      for (const ch of ['✨', '🎉', '🚨', '🕯️', '🎂', '🎊', '⭐', '❤️', '🎈', '🥂', '🌟', '🔥', '💪', '💭', '🚀', '🏆', '🔭', '😊', '🤝', '📸', '📚', '💡', '🥳', '😄', '😁', '🤩', '💜', '🤍', '💖']) imageEmoji(ch);
+      for (const ch of ['💫', '🎁', '✨', '🎉', '🚨', '🕯️', '🎂', '🎊', '⭐', '❤️', '🎈', '🥂', '🌟', '🔥', '💪', '💭', '🚀', '🏆', '🔭', '😊', '🤝', '📸', '📚', '💡', '🥳', '😄', '😁', '🤩', '💜', '🤍', '💖']) imageEmoji(ch);
     }
 
     const DECORS_AVANT = { calendrier, projecteurs, bougies: bougiesGeantes, page: livre, chemin, murPhotos, pluie, titreJoel, affiche: null, explosion, serpentins };
@@ -1336,6 +1784,7 @@
 
     // ===================================================== une image
     function dessiner(t) {
+      if (V.nom === 'fete') return dessinerFete(t);
       fonds(t);
       // Décors de fond (derrière les textes).
       for (const D of V.decors) {
