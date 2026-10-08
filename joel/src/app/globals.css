@@ -1,0 +1,294 @@
+@import "tailwindcss";
+
+@theme inline {
+  --font-display: var(--font-sora), system-ui, sans-serif;
+  --font-sans: var(--font-inter), system-ui, sans-serif;
+  --font-mono-ui: var(--font-grotesk), ui-monospace, monospace;
+  --ease-cine: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@property --angle {
+  syntax: "<angle>";
+  initial-value: 0deg;
+  inherits: false;
+}
+
+:root {
+  color-scheme: dark;
+  --noir: #05050a;
+  --nuit: #0a0f2c;
+  --violet: #8b5cf6;
+  --violet-clair: #c4b5fd;
+  --rose: #f5d0fe;
+  --bg-a: rgba(76, 29, 149, 0.22);
+  --bg-b: rgba(30, 58, 138, 0.18);
+  --bg-c: rgba(190, 24, 93, 0.06);
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* Le fond change de lumière selon le chapitre. */
+html[data-chapter="compte-a-rebours"] { --bg-a: rgba(30, 64, 175, 0.24); --bg-b: rgba(76, 29, 149, 0.2); --bg-c: rgba(14, 165, 233, 0.05); }
+html[data-chapter="nouvelle-annee"] { --bg-a: rgba(109, 40, 217, 0.26); --bg-b: rgba(190, 24, 93, 0.1); --bg-c: rgba(76, 29, 149, 0.12); }
+html[data-chapter="parcours"] { --bg-a: rgba(55, 48, 163, 0.24); --bg-b: rgba(10, 15, 44, 0.6); --bg-c: rgba(139, 92, 246, 0.08); }
+html[data-chapter="ambitions"] { --bg-a: rgba(91, 33, 182, 0.24); --bg-b: rgba(3, 105, 161, 0.14); --bg-c: rgba(139, 92, 246, 0.08); }
+html[data-chapter="souvenirs"] { --bg-a: rgba(157, 23, 77, 0.14); --bg-b: rgba(76, 29, 149, 0.2); --bg-c: rgba(244, 114, 182, 0.06); }
+html[data-chapter="message"] { --bg-a: rgba(76, 29, 149, 0.08); --bg-b: rgba(5, 5, 10, 0); --bg-c: rgba(5, 5, 10, 0); }
+html[data-chapter="celebration"] { --bg-a: rgba(109, 40, 217, 0.18); --bg-b: rgba(219, 39, 119, 0.12); --bg-c: rgba(139, 92, 246, 0.1); }
+html[data-party] { --bg-a: rgba(168, 85, 247, 0.5); --bg-b: rgba(236, 72, 153, 0.32); --bg-c: rgba(59, 130, 246, 0.25); }
+html[data-secret] { --violet: #e879f9; --violet-clair: #fde68a; }
+html[data-secret] .hero-name,
+html[data-secret] .era-title { filter: hue-rotate(60deg) saturate(1.4); }
+
+html {
+  background: var(--noir);
+  -webkit-text-size-adjust: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(167, 139, 250, 0.4) transparent;
+}
+
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-stopped { overflow: clip; }
+
+body {
+  margin: 0;
+  min-height: 100svh;
+  background: var(--noir);
+  color: #f5f3ff;
+  font-family: var(--font-sans);
+  overflow-x: clip;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+body[data-locked] { overflow: hidden; }
+
+::selection { background: rgba(139, 92, 246, 0.45); color: #fff; }
+
+:focus-visible {
+  outline: 2px solid var(--violet-clair);
+  outline-offset: 4px;
+  border-radius: 12px;
+}
+
+.skip-link {
+  position: fixed; left: 16px; top: -60px; z-index: 100;
+  padding: 10px 16px; border-radius: 999px; background: #fff; color: #05050a; font-weight: 600;
+}
+.skip-link:focus { top: 16px; }
+
+/* ------------------------------------------------------------------ */
+/* Atmosphère : halos lents et grain numérique                          */
+/* ------------------------------------------------------------------ */
+
+.atmosphere { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+/* Le dégradé radial est déjà flou : pas de filtre (très coûteux sur téléphone). */
+.halo { position: absolute; border-radius: 50%; transition: background 1.6s ease; will-change: transform; }
+.halo-a { width: 70vmax; height: 70vmax; left: -20vmax; top: -25vmax; background: radial-gradient(closest-side, var(--bg-a), transparent); animation: drift-a 26s ease-in-out infinite alternate; }
+.halo-b { width: 60vmax; height: 60vmax; right: -20vmax; bottom: -20vmax; background: radial-gradient(closest-side, var(--bg-b), transparent); animation: drift-b 32s ease-in-out infinite alternate; }
+.halo-c { width: 45vmax; height: 45vmax; left: 30%; top: 40%; background: radial-gradient(closest-side, var(--bg-c), transparent); animation: drift-a 40s ease-in-out infinite alternate-reverse; }
+html:not([data-tier="high"]) .halo { animation: none; }
+
+@keyframes drift-a { to { transform: translate3d(12vmax, 10vmax, 0) scale(1.15); } }
+@keyframes drift-b { to { transform: translate3d(-10vmax, -12vmax, 0) scale(1.1); } }
+
+.grain {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ------------------------------------------------------------------ */
+/* Typographie                                                          */
+/* ------------------------------------------------------------------ */
+
+.font-mono-ui { font-family: var(--font-mono-ui); }
+.label {
+  font-family: var(--font-mono-ui);
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+
+.title-lg { font-family: var(--font-display); font-weight: 700; font-size: clamp(2.2rem, 6vw, 4.8rem); line-height: 1; letter-spacing: -0.03em; text-transform: uppercase; }
+.title-xl { font-family: var(--font-display); font-weight: 800; font-size: clamp(2.6rem, 8vw, 7rem); line-height: 0.95; letter-spacing: -0.04em; text-transform: uppercase; }
+.title-xxl { font-family: var(--font-display); font-weight: 800; font-size: clamp(3rem, 11vw, 10rem); line-height: 0.9; letter-spacing: -0.045em; text-transform: uppercase; }
+
+/* Les dégradés « dans le texte » se posent sur chaque lettre animée :
+   sur le titre entier, ils disparaissent dès qu'une lettre bouge. */
+.hero-name {
+  font-size: clamp(5.5rem, 26vw, 19rem);
+  letter-spacing: -0.04em;
+  filter: drop-shadow(0 0 40px rgba(139, 92, 246, 0.45));
+}
+/* Un peu de marge autour de chaque lettre : sans elle, les accents (Ë, À)
+   dépassent de la boîte et le dégradé les efface. */
+.hero-char, .grad-char { padding: 0.18em 0.02em 0.06em; margin: -0.18em -0.02em -0.06em; }
+.hero-char {
+  background: linear-gradient(180deg, #ffffff 30%, #c4b5fd 75%, #8b5cf6 110%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.grad-char {
+  background: linear-gradient(100deg, #fff 0%, #c4b5fd 30%, #f5d0fe 55%, #fff 80%);
+  background-size: 300% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shine 5s linear infinite;
+}
+
+.text-glow { text-shadow: 0 0 24px rgba(196, 181, 253, 0.6), 0 0 80px rgba(139, 92, 246, 0.45); }
+
+.text-gradient {
+  background: linear-gradient(100deg, #fff 0%, #c4b5fd 40%, #f5d0fe 70%, #fff 100%);
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+
+@keyframes shine { to { background-position: -200% 0; } }
+
+.outline-number {
+  color: transparent;
+  -webkit-text-stroke: 1px rgba(196, 181, 253, 0.45);
+}
+
+.era-title {
+  background: linear-gradient(100deg, #ffffff 10%, #c4b5fd 45%, #f5d0fe 60%, #ffffff 90%);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shine 5s linear infinite;
+  filter: drop-shadow(0 0 30px rgba(139, 92, 246, 0.6));
+}
+.era-ring {
+  border: 1px solid rgba(196, 181, 253, 0.35);
+  box-shadow: 0 0 80px rgba(139, 92, 246, 0.35), inset 0 0 80px rgba(139, 92, 246, 0.25);
+}
+
+.best-title { filter: drop-shadow(0 0 36px rgba(139, 92, 246, 0.55)); }
+
+/* Un emoji dans un titre en dégradé garde ses couleurs. */
+.emoji { -webkit-text-fill-color: initial; color: initial; }
+
+.today-title {
+  background: linear-gradient(100deg, #fff, #c4b5fd, #f5d0fe, #fff);
+  background-size: 200% 100%;
+  -webkit-background-clip: text; background-clip: text; color: transparent;
+  animation: shine 3s linear infinite;
+}
+
+/* ------------------------------------------------------------------ */
+/* Verre, boutons, cartes                                               */
+/* ------------------------------------------------------------------ */
+
+.glass {
+  background: linear-gradient(140deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.02));
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  box-shadow: 0 30px 80px -30px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+html[data-tier="low"] .glass { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(18, 16, 36, 0.82); }
+
+.btn-glow {
+  position: relative;
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.6rem;
+  min-height: 52px; padding: 0 1.9rem;
+  border-radius: 999px;
+  font-family: var(--font-display); font-weight: 600; font-size: 1rem; letter-spacing: 0.02em;
+  color: #fff;
+  background: linear-gradient(#0b0918, #0b0918) padding-box,
+    conic-gradient(from var(--angle), #8b5cf6, #f5d0fe, #60a5fa, #8b5cf6) border-box;
+  border: 1.5px solid transparent;
+  box-shadow: 0 0 30px rgba(139, 92, 246, 0.35);
+  animation: spin-angle 4s linear infinite;
+  transition: transform 0.4s var(--ease-cine), box-shadow 0.4s;
+}
+.btn-glow:hover { box-shadow: 0 0 50px rgba(139, 92, 246, 0.65), 0 0 120px rgba(245, 208, 254, 0.2); transform: scale(1.04); }
+.btn-glow:active { transform: scale(0.97); }
+.btn-xl { min-height: 64px; padding: 0 2.6rem; font-size: 1.25rem; text-transform: uppercase; letter-spacing: 0.08em; }
+@keyframes spin-angle { to { --angle: 360deg; } }
+
+.tile { overflow: hidden; transition: border-color 0.5s, transform 0.5s var(--ease-cine); }
+.tile:hover { border-color: rgba(196, 181, 253, 0.4); }
+.tile-shine {
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.09) 45%, transparent 60%);
+  transform: translateX(-100%);
+  animation: sweep 6s var(--ease-cine) infinite;
+}
+@keyframes sweep { 0%, 70% { transform: translateX(-100%); } 100% { transform: translateX(100%); } }
+
+.card-spotlight {
+  position: absolute; inset: 0; pointer-events: none; opacity: 0; transition: opacity 0.5s;
+  background: radial-gradient(420px circle at var(--mx, 50%) var(--my, 50%), rgba(167, 139, 250, 0.22), transparent 45%);
+}
+.ambition-card:hover .card-spotlight { opacity: 1; }
+.ambition-card .glass { transition: border-color 0.5s, box-shadow 0.5s; }
+.ambition-card:hover .glass { border-color: rgba(196, 181, 253, 0.35); box-shadow: 0 40px 100px -30px rgba(139, 92, 246, 0.45); }
+
+.gallery-zoom { transition: transform 1.2s var(--ease-cine), filter 0.7s; }
+.gallery-tile:hover .gallery-zoom, .gallery-tile:focus-visible .gallery-zoom { transform: scale(1.08); filter: brightness(1.12); }
+
+.memory-card {
+  padding: 14px 14px 22px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.7);
+}
+
+.lightbox-btn {
+  display: grid; place-items: center; width: 48px; height: 48px; border-radius: 999px;
+  color: #fff; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(10px); transition: background 0.3s, transform 0.3s;
+}
+.lightbox-btn:hover { background: rgba(139, 92, 246, 0.35); transform: scale(1.08); }
+
+.orb-fallback {
+  border-radius: 50%;
+  background: radial-gradient(circle at 45% 40%, rgba(255, 255, 255, 0.5), rgba(167, 139, 250, 0.35) 18%, rgba(76, 29, 149, 0.15) 45%, transparent 65%);
+  animation: breathe 6s ease-in-out infinite;
+}
+@keyframes breathe { 50% { transform: scale(1.06); opacity: 0.85; } }
+
+/* Menu plein écran : le texte glisse vers le haut au survol. */
+.menu-link-text { display: inline-block; overflow: hidden; height: 1em; line-height: 1; }
+.menu-link-inner { position: relative; display: inline-block; transition: transform 0.6s var(--ease-cine); }
+.menu-link-inner::after {
+  content: attr(data-text); position: absolute; left: 0; top: 100%;
+  background: linear-gradient(90deg, #c4b5fd, #f5d0fe); -webkit-background-clip: text; background-clip: text; color: transparent;
+}
+.menu-link:hover .menu-link-inner, .menu-link:focus-visible .menu-link-inner { transform: translateY(-100%); }
+
+.scroll-cue { position: relative; width: 1px; height: 46px; background: rgba(255, 255, 255, 0.15); overflow: hidden; }
+.scroll-cue::after {
+  content: ""; position: absolute; left: 0; top: -40%; width: 1px; height: 40%;
+  background: linear-gradient(transparent, #fff); animation: cue 1.8s var(--ease-cine) infinite;
+}
+@keyframes cue { to { top: 100%; } }
+
+.eq-bar { height: 3px; animation: eq 0.9s ease-in-out infinite alternate; }
+@keyframes eq { to { height: 8px; } }
+
+/* ------------------------------------------------------------------ */
+/* Curseur                                                              */
+/* ------------------------------------------------------------------ */
+
+html.cursor-custom, html.cursor-custom * { cursor: none !important; }
+.cursor-layer > div { position: fixed; left: 0; top: 0; z-index: 90; pointer-events: none; border-radius: 50%; opacity: 0; transition: opacity 0.3s; will-change: transform; }
+html.cursor-visible .cursor-layer > div { opacity: 1; }
+html.cursor-visible .cursor-layer > .cursor-trail { opacity: var(--o, 0.25); }
+.cursor-dot { width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #fff; box-shadow: 0 0 10px #c4b5fd; }
+.cursor-ring {
+  width: 36px; height: 36px; margin: -18px 0 0 -18px;
+  border: 1px solid rgba(255, 255, 255, calc(0.45 + var(--hover, 0) * 0.4));
+  background: rgba(139, 92, 246, calc(var(--hover, 0) * 0.14));
+  box-shadow: 0 0 calc(var(--hover, 0) * 30px) rgba(167, 139, 250, 0.6);
+  mix-blend-mode: screen;
+}
+.cursor-trail { width: 5px; height: 5px; margin: -2.5px 0 0 -2.5px; background: #a78bfa; filter: blur(1px); }
+
+.hidden-star { opacity: 0.9; }
+
+@media (prefers-reduced-motion: reduce) {
+  .halo, .btn-glow, .tile-shine, .grad-char, .era-title, .today-title, .orb-fallback { animation: none !important; }
+}

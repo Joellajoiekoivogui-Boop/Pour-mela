@@ -5,6 +5,10 @@
 > Jeanne Kolié. Elle vit dans le dossier `reine/`, indépendante de ce site ;
 > voir [`reine/README.md`](reine/README.md) pour la personnaliser et la mettre
 > en ligne.
+>
+> **Et aussi : [🌌 Joël · 10.10](joel/)**, un site anniversaire cinématique
+> pour Joël Koivogui (10 octobre), en Next.js, Three.js et Motion. Il vit dans
+> le dossier `joel/` ; voir [`joel/README.md`](joel/README.md).
 
 Un site romantique, animé et immersif, pensé d’abord pour le téléphone :
 chaque toucher révèle un peu plus les sentiments, jusqu’à une lettre

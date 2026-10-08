@@ -3,6 +3,7 @@
   "framework": null,
   "buildCommand": "node preparer-vercel.js",
   "outputDirectory": "public",
+  "ignoreCommand": "node preparer-vercel.js --ignorer",
   "headers": [
     {
       "source": "/fonts/(.*)",
