@@ -30,7 +30,7 @@ export function Memories() {
   useSceneOnView(section, "sky");
 
   return (
-    <section id="souvenirs" ref={section} aria-labelledby="titre-souvenirs" className="relative px-5 py-[18svh]">
+    <section id="souvenirs" data-defilement="0.85" ref={section} aria-labelledby="titre-souvenirs" className="relative px-5 py-[18svh]">
       <div ref={header} className="mx-auto mb-[12svh] flex max-w-3xl flex-col items-center gap-6 text-center">
         <ChapterLabel>{souvenirs.chapitre}</ChapterLabel>
         <SplitText
@@ -123,10 +123,10 @@ function MemoryItem({ memory, index }: { memory: Memory; index: number }) {
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-or/30 bg-or/[0.06] text-or-clair shadow-[0_0_24px_-4px_rgb(233_196_106/0.6)]">
                 <MemoryIcon name={memory.icone} className="h-6 w-6" />
               </span>
-              <p className="font-display text-[0.6rem] uppercase tracking-[0.32em] text-rose-pale/80 sm:text-[0.66rem]">{memory.moment}</p>
+              <p className="font-display text-[0.72rem] uppercase tracking-[0.28em] text-rose-pale sm:text-[0.78rem]">{memory.moment}</p>
             </div>
-            <h3 className="mt-5 font-serif text-[clamp(1.7rem,6.4vw,2.4rem)] font-medium leading-tight text-gold">{memory.titre}</h3>
-            <p className="mt-3 font-serif text-[clamp(1.08rem,4.2vw,1.3rem)] leading-relaxed text-champagne/80">{memory.texte}</p>
+            <h3 className="mt-5 font-serif text-[clamp(1.9rem,7.2vw,2.6rem)] font-semibold leading-tight text-gold">{memory.titre}</h3>
+            <p className="mt-3 font-serif text-[clamp(1.28rem,5vw,1.5rem)] font-medium leading-relaxed text-champagne/95">{memory.texte}</p>
           </div>
         </Tilt>
       </motion.article>

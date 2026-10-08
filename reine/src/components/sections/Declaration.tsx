@@ -11,9 +11,9 @@ import { ChapterLabel } from "../ui/Ornament";
 import { SplitText } from "../ui/SplitText";
 
 const STYLES: Record<string, string> = {
-  texte: "font-serif text-[clamp(1.4rem,5.4vw,2.35rem)] font-light leading-[1.5] text-champagne",
-  grand: "font-serif text-[clamp(2.1rem,8.6vw,4.6rem)] font-light italic leading-[1.12] text-or-clair",
-  plume: "font-script text-[clamp(2.5rem,10.5vw,5.2rem)] leading-[1.15] text-or glow-gold",
+  texte: "font-serif text-[clamp(1.65rem,6.6vw,2.6rem)] font-medium leading-[1.45] text-champagne",
+  grand: "font-serif text-[clamp(2.3rem,9.4vw,4.8rem)] font-medium italic leading-[1.12] text-or-clair",
+  plume: "font-script text-[clamp(2.8rem,11.5vw,5.4rem)] leading-[1.15] text-or glow-gold",
 };
 
 /**
@@ -35,7 +35,7 @@ export function Declaration() {
   });
 
   return (
-    <section id="declaration" ref={section} aria-labelledby="titre-declaration" className="relative px-6 py-[20svh]">
+    <section id="declaration" data-defilement="0.72" ref={section} aria-labelledby="titre-declaration" className="relative px-6 py-[20svh]">
       <div ref={header} className="mx-auto mb-[16svh] flex max-w-3xl flex-col items-center gap-6 text-center">
         <ChapterLabel>{declaration.chapitre}</ChapterLabel>
         <SplitText

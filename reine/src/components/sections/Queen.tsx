@@ -72,7 +72,7 @@ export function Queen() {
             effect="blur"
             delay={1.1}
             stagger={0.06}
-            className="block font-display text-[clamp(0.8rem,3.4vw,1.2rem)] uppercase tracking-royal text-champagne/85"
+            className="block font-display text-[clamp(0.95rem,4vw,1.35rem)] uppercase tracking-royal text-champagne"
           />
         </h1>
 
@@ -80,7 +80,7 @@ export function Queen() {
 
         <motion.p
           ref={accrocheRef}
-          className="mt-7 max-w-md font-serif text-[clamp(1.1rem,4.4vw,1.4rem)] italic leading-relaxed text-champagne/75"
+          className="legible mt-7 max-w-md font-serif text-[clamp(1.32rem,5.4vw,1.65rem)] font-medium italic leading-relaxed text-champagne"
           initial={{ opacity: 0, y: 24, filter: "blur(8px)" }}
           animate={revealed && accrocheInView ? { opacity: 1, y: 0, filter: "blur(0px)" } : undefined}
           transition={{ delay: 2.1, duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
@@ -90,7 +90,7 @@ export function Queen() {
 
         <motion.div
           aria-hidden
-          className="mt-10 flex flex-col items-center gap-3 font-display text-[0.55rem] uppercase tracking-[0.45em] text-champagne/45"
+          className="mt-10 flex flex-col items-center gap-3 font-display text-[0.7rem] uppercase tracking-[0.4em] text-champagne/65"
           initial={{ opacity: 0 }}
           animate={revealed ? { opacity: 1 } : undefined}
           transition={{ delay: 3.4, duration: 1.5 }}

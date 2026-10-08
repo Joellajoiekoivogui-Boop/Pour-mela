@@ -124,7 +124,7 @@ export function Intro({ onEnter, leaving }: IntroProps) {
             delay={step === 0 ? 0.9 : 0.2}
             stagger={STAGGER}
             duration={LETTER_DURATION}
-            className="mx-auto max-w-[22ch] font-serif text-[clamp(1.85rem,7.4vw,3.6rem)] font-light italic leading-[1.25] text-champagne glow-soft sm:max-w-[28ch]"
+            className="mx-auto max-w-[22ch] legible font-serif text-[clamp(2.05rem,8.4vw,3.8rem)] font-medium italic leading-[1.22] text-champagne sm:max-w-[28ch]"
           />
         ) : null}
       </div>
@@ -154,7 +154,7 @@ export function Intro({ onEnter, leaving }: IntroProps) {
                 effect="rise"
                 stagger={0.07}
                 duration={1.1}
-                className="font-display text-[clamp(0.85rem,3.6vw,1.35rem)] uppercase tracking-royal text-gold"
+                className="font-display text-[clamp(1rem,4.2vw,1.5rem)] uppercase tracking-royal text-gold"
               />
               <SplitText
                 text={reine.intro.sousLePrenom}
@@ -163,7 +163,7 @@ export function Intro({ onEnter, leaving }: IntroProps) {
                 delay={1.1}
                 stagger={0.18}
                 duration={1.2}
-                className="mt-5 font-serif text-[clamp(1.05rem,4.4vw,1.5rem)] italic text-champagne/80"
+                className="legible mt-5 font-serif text-[clamp(1.3rem,5.4vw,1.7rem)] font-medium italic text-champagne"
               />
             </>
           ) : null}
@@ -186,7 +186,7 @@ export function Intro({ onEnter, leaving }: IntroProps) {
               <RoyalButton pulse onClick={onEnter} icon={<CrownIcon className="h-5 w-5 text-or float-slow" />}>
                 {reine.intro.bouton}
               </RoyalButton>
-              <p className="flex items-center gap-2 font-serif text-sm italic text-champagne/55">
+              <p className="flex items-center gap-2 font-serif text-base italic text-champagne/80">
                 <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="1.4" aria-hidden>
                   <path d="M4 14v-2a8 8 0 0116 0v2" />
                   <rect x="3" y="14" width="4" height="6" rx="1.5" />
@@ -199,7 +199,7 @@ export function Intro({ onEnter, leaving }: IntroProps) {
         </AnimatePresence>
         {!onName ? (
           <motion.p
-            className="font-display text-[0.6rem] uppercase tracking-[0.4em] text-champagne/30"
+            className="font-display text-[0.72rem] uppercase tracking-[0.35em] text-champagne/60"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 4, duration: 2 }}

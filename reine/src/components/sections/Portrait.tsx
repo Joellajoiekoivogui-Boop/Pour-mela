@@ -38,6 +38,7 @@ export function Portrait() {
 
       <motion.div
         ref={frame}
+        data-pause="2500"
         className="relative w-[min(74vw,360px)]"
         initial={{ opacity: 0, y: 80, scale: 0.9, filter: "blur(14px)" }}
         whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
@@ -95,7 +96,7 @@ export function Portrait() {
           by="word"
           delay={0.4}
           stagger={0.14}
-          className="mt-12 max-w-xs text-center font-script text-[clamp(1.9rem,8vw,2.8rem)] leading-tight text-gold glow-gold"
+          className="mt-12 max-w-xs text-center font-script text-[clamp(2.2rem,9vw,3rem)] leading-tight text-gold glow-gold"
         />
       </div>
     </div>

@@ -45,7 +45,7 @@ export function Kingdom() {
           stagger={0.045}
           className="font-display text-[clamp(1.5rem,6.5vw,3rem)] leading-tight text-gold"
         />
-        <p className="max-w-md font-serif text-[clamp(1.1rem,4.4vw,1.35rem)] italic text-champagne/75">{royaume.consigne}</p>
+        <p className="legible max-w-md font-serif text-[clamp(1.3rem,5.3vw,1.6rem)] font-medium italic text-champagne">{royaume.consigne}</p>
       </div>
 
       <Constellation />
@@ -53,7 +53,7 @@ export function Kingdom() {
       {/* Le pad dessine avec les particules : il n'a de sens qu'avec WebGL. */}
       {glActive ? (
         <>
-          <p className="mx-auto mt-16 max-w-md text-center font-serif text-[clamp(1.1rem,4.4vw,1.35rem)] italic text-champagne/75">
+          <p className="legible mx-auto mt-16 max-w-md text-center font-serif text-[clamp(1.3rem,5.3vw,1.6rem)] font-medium italic text-champagne">
             {royaume.libre}
           </p>
           <LightPad />
@@ -105,7 +105,7 @@ function Constellation() {
 
   return (
     <div className="mx-auto w-[min(88vw,520px)]">
-      <div ref={board} className="relative aspect-square" data-no-burst>
+      <div ref={board} className="relative aspect-square" data-no-burst data-pause="3500">
         <svg viewBox="0 0 100 100" className="absolute inset-0 h-full w-full overflow-visible" aria-hidden>
           <defs>
             <linearGradient id="couronne-or" x1="0" y1="0" x2="0" y2="1">
@@ -211,13 +211,13 @@ function Constellation() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ delay: 2.4 }}
-                className="font-display text-[0.6rem] uppercase tracking-[0.35em] text-champagne/50 underline-offset-8 hover:text-or-clair hover:underline"
+                className="font-display text-[0.72rem] uppercase tracking-[0.3em] text-champagne/70 underline-offset-8 hover:text-or-clair hover:underline"
               >
                 Rallumer les étoiles
               </motion.button>
             </motion.div>
           ) : (
-            <motion.p key="compte" className="font-display text-xs uppercase tracking-[0.35em] text-or/70" exit={{ opacity: 0 }}>
+            <motion.p key="compte" className="font-display text-sm uppercase tracking-[0.3em] text-or" exit={{ opacity: 0 }}>
               {count} / {STARS.length}
             </motion.p>
           )}
@@ -311,7 +311,7 @@ function LightPad() {
             role="radio"
             aria-checked={brush === b.kind}
             onClick={() => setBrush(b.kind)}
-            className={`rounded-full border px-4 py-2 font-display text-[0.62rem] uppercase tracking-[0.22em] transition-all duration-300 ${
+            className={`rounded-full border px-4 py-2 font-display text-[0.72rem] uppercase tracking-[0.18em] transition-all duration-300 ${
               brush === b.kind ? "border-or/70 bg-or/15 text-or-clair shadow-[0_0_20px_-4px_rgb(233_196_106/0.7)]" : "border-champagne/15 text-champagne/60"
             }`}
           >
@@ -336,12 +336,12 @@ function LightPad() {
               animate={{ scale: [1, 1.5, 1], opacity: [0.8, 0, 0.8] }}
               transition={{ duration: 2, repeat: Infinity }}
             />
-            <p className="font-serif text-lg italic text-champagne/60">Touche, glisse, maintiens…</p>
+            <p className="font-serif text-xl italic text-champagne/80">Touche, glisse, maintiens…</p>
           </motion.div>
         ) : null}
       </AnimatePresence>
 
-      <p className="absolute inset-x-0 bottom-4 text-center font-display text-[0.6rem] uppercase tracking-[0.3em] text-or/70" aria-live="off">
+      <p className="absolute inset-x-0 bottom-4 text-center font-display text-[0.7rem] uppercase tracking-[0.26em] text-or" aria-live="off">
         ✦ {numberFormat.format(sparks)} étincelles offertes
       </p>
     </div>
@@ -361,7 +361,7 @@ function TiltToggle() {
 
   if (state === "hidden") return null;
   return (
-    <p className="mt-6 text-center font-serif text-base italic text-champagne/60">
+    <p className="mt-6 text-center font-serif text-lg italic text-champagne/80">
       {state === "on" ? (
         "Incline ton téléphone : le ciel te suit."
       ) : (

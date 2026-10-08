@@ -82,7 +82,7 @@ export function Finale({ onReplay }: { onReplay: () => void }) {
   useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
 
   return (
-    <section id="revelation" ref={section} aria-labelledby="titre-revelation" className="relative h-[360svh]">
+    <section id="revelation" data-defilement="0.8" ref={section} aria-labelledby="titre-revelation" className="relative h-[360svh]">
       <div className="sticky top-0 h-[100svh] overflow-hidden px-6 text-center">
         <div className="absolute inset-x-0 top-[calc(var(--safe-top)+7svh)] flex justify-center">
           <ChapterLabel>{final.chapitre}</ChapterLabel>
@@ -108,15 +108,15 @@ export function Finale({ onReplay }: { onReplay: () => void }) {
                 duration={1}
                 className={
                   i === 0
-                    ? "font-serif text-[clamp(1.35rem,5.4vw,2.4rem)] font-light italic leading-snug text-champagne/90 glow-soft"
-                    : "font-serif text-[clamp(1.6rem,6.4vw,3rem)] leading-tight text-or-clair glow-soft"
+                    ? "legible font-serif text-[clamp(1.6rem,6.6vw,2.7rem)] italic leading-snug text-champagne"
+                    : "legible font-serif text-[clamp(1.9rem,7.8vw,3.3rem)] font-medium leading-tight text-or-clair"
                 }
               />
             ))}
           </div>
           <p
             aria-hidden
-            className="absolute bottom-[calc(var(--safe-bottom)+6svh)] font-display text-[0.58rem] uppercase tracking-[0.4em] text-champagne/45 transition-opacity duration-700"
+            className="absolute bottom-[calc(var(--safe-bottom)+6svh)] font-display text-[0.72rem] uppercase tracking-[0.35em] text-champagne/70 transition-opacity duration-700"
             style={{ opacity: phase === 0 ? 1 : 0 }}
           >
             <span className="animate-pulse">Continue de défiler</span>
@@ -180,7 +180,7 @@ function Epilogue({ onReplay }: { onReplay: () => void }) {
         state="visible"
         effect="rise"
         stagger={0.07}
-        className="font-display text-[clamp(0.85rem,3.6vw,1.3rem)] uppercase tracking-royal text-gold"
+        className="font-display text-[clamp(1rem,4.2vw,1.45rem)] uppercase tracking-royal text-gold"
       />
       <Ornament className="mt-5" />
       <SplitText
@@ -190,7 +190,7 @@ function Epilogue({ onReplay }: { onReplay: () => void }) {
         delay={0.8}
         stagger={0.2}
         duration={1.2}
-        className="mt-5 font-serif text-[clamp(1.2rem,5vw,1.7rem)] italic text-champagne/90"
+        className="legible mt-5 font-serif text-[clamp(1.45rem,6vw,1.95rem)] italic text-champagne"
       />
 
       {reine.signature ? (
@@ -235,7 +235,7 @@ function Epilogue({ onReplay }: { onReplay: () => void }) {
           {wish >= 0 ? (
             <motion.p
               key={wish}
-              className="font-serif text-lg italic text-or-clair"
+              className="legible font-serif text-xl italic text-or-clair"
               initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
@@ -249,7 +249,7 @@ function Epilogue({ onReplay }: { onReplay: () => void }) {
 
       {lights > 0 ? (
         <motion.p
-          className="mt-2 font-display text-[0.55rem] uppercase leading-relaxed tracking-[0.28em] text-champagne/45"
+          className="mt-2 font-display text-[0.68rem] uppercase leading-relaxed tracking-[0.24em] text-champagne/65"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 4.2, duration: 1.5 }}

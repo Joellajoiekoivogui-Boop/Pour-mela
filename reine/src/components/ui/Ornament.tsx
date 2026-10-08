@@ -39,7 +39,7 @@ export function Ornament({ show = true, className = "" }: { show?: boolean; clas
 /** Petite étiquette de chapitre : « ✦ Chapitre II ✦ ». */
 export function ChapterLabel({ children }: { children: React.ReactNode }) {
   return (
-    <p className="font-display text-[0.62rem] uppercase tracking-royal text-or/80 sm:text-xs">
+    <p className="font-display text-[0.74rem] uppercase tracking-royal text-or sm:text-sm">
       <span className="mr-3 inline-block text-rose-pale/70">✦</span>
       {children}
       <span className="ml-3 inline-block text-rose-pale/70">✦</span>

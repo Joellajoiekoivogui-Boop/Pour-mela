@@ -11,6 +11,7 @@ import { music } from "@/lib/music";
 import { GlBoundary } from "./gl/GlBoundary";
 import { Intro } from "./intro/Intro";
 import { Aurora, Overlays, StaticSky } from "./ui/Atmosphere";
+import { AutoScroll } from "./ui/AutoScroll";
 import { Cursor } from "./ui/Cursor";
 import { ProgressRail } from "./ui/ProgressRail";
 import { SoundToggle } from "./ui/SoundToggle";
@@ -105,6 +106,7 @@ export function Experience() {
       </main>
 
       {phase === "main" ? <ProgressRail /> : null}
+      {phase === "main" ? <AutoScroll /> : null}
       <SoundToggle />
       <Cursor />
       <div
