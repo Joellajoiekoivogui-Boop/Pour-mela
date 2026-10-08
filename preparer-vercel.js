@@ -9,7 +9,7 @@ const path = require('path');
 
 const ici = __dirname;
 const sortie = path.join(ici, 'public');
-const aCopier = ['index.html', 'personnaliser.html', 'config.js', 'apercu.jpg', 'icone.png', 'css', 'js', 'fonts', 'medias'];
+const aCopier = ['index.html', 'personnaliser.html', 'config.js', 'apercu.jpg', 'icone.png', 'css', 'js', 'fonts', 'medias', 'joel'];
 
 fs.rmSync(sortie, { recursive: true, force: true });
 fs.mkdirSync(sortie);

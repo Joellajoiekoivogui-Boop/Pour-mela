@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <meta name="robots" content="noindex, nofollow">
+  <title>JOËL — 10.10</title>
+  <meta name="description" content="Une année de plus. Une nouvelle ère.">
+  <style>
+    @font-face { font-family: "Space Grotesk"; font-weight: 300; font-display: block; src: url("fonts/space-grotesk-latin-300-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Space Grotesk"; font-weight: 500; font-display: block; src: url("fonts/space-grotesk-latin-500-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Space Grotesk"; font-weight: 700; font-display: block; src: url("fonts/space-grotesk-latin-700-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Sora"; font-weight: 300; font-display: block; src: url("fonts/sora-latin-300-normal.woff2") format("woff2"); }
+    @font-face { font-family: "Sora"; font-weight: 600; font-display: block; src: url("fonts/sora-latin-600-normal.woff2") format("woff2"); }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: #000; color: #f1ecff; overflow: hidden; }
+    body { font-family: "Sora", system-ui, sans-serif; -webkit-font-smoothing: antialiased; }
+    #scene { position: fixed; inset: 0; display: grid; place-items: center; }
+    canvas { display: block; max-width: 100vw; max-height: 100vh; max-height: 100dvh; }
+    body.capture canvas { max-width: none; max-height: none; }
+
+    #accueil {
+      position: fixed; inset: 0; display: grid; place-items: center; text-align: center;
+      background: radial-gradient(ellipse at center, rgba(90, 50, 200, 0.22), #000 65%);
+      transition: opacity 0.8s ease;
+    }
+    #accueil.cache { opacity: 0; pointer-events: none; }
+    .surtitre { font-family: "Space Grotesk", sans-serif; font-weight: 300; letter-spacing: 0.5em; font-size: 12px; color: #b9a6ff; margin-bottom: 18px; padding-left: 0.5em; }
+    h1 { font-family: "Space Grotesk", sans-serif; font-weight: 700; font-size: clamp(64px, 16vw, 160px); line-height: 0.9; letter-spacing: 0.02em;
+      background: linear-gradient(180deg, #fff 0%, #dcd8f2 45%, #6b5fb0 52%, #e8e2ff 85%); -webkit-background-clip: text; background-clip: text; color: transparent;
+      filter: drop-shadow(0 0 24px rgba(140, 90, 255, 0.45)); }
+    .date { font-family: "Space Grotesk", sans-serif; font-weight: 300; letter-spacing: 0.45em; padding-left: 0.45em; margin-top: 14px; color: #d8cfff; font-size: 14px; }
+    #lancer {
+      margin-top: 44px; font: 600 15px "Sora", sans-serif; letter-spacing: 0.12em; color: #fff; cursor: pointer;
+      padding: 16px 34px; border-radius: 999px; border: 1px solid rgba(200, 180, 255, 0.55);
+      background: rgba(124, 77, 255, 0.18); box-shadow: 0 0 40px rgba(124, 77, 255, 0.35), inset 0 0 20px rgba(124, 77, 255, 0.2);
+    }
+    #lancer:hover { background: rgba(124, 77, 255, 0.32); }
+    #lancer:disabled { opacity: 0.6; cursor: progress; }
+    .choix { margin-top: 26px; display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+    .choix button { font: 300 12px "Sora", sans-serif; letter-spacing: 0.08em; color: #cfc3ff; background: transparent; border: 1px solid rgba(200, 180, 255, 0.25); border-radius: 999px; padding: 8px 16px; cursor: pointer; }
+    .choix button[aria-pressed="true"] { color: #fff; border-color: rgba(200, 180, 255, 0.8); background: rgba(124, 77, 255, 0.2); }
+    .note { margin-top: 22px; font-size: 12px; color: #8f86b8; }
+    .note a { color: #c8b8ff; }
+
+    #rejouer { position: fixed; right: 16px; bottom: 16px; font: 300 12px "Sora", sans-serif; letter-spacing: 0.1em; color: #e6deff; background: rgba(20, 12, 50, 0.6);
+      border: 1px solid rgba(200, 180, 255, 0.35); border-radius: 999px; padding: 10px 18px; cursor: pointer; opacity: 0; transition: opacity 0.6s; pointer-events: none; }
+    #rejouer.visible { opacity: 1; pointer-events: auto; }
+  </style>
+</head>
+<body>
+  <div id="scene"><canvas id="toile" aria-label="Film d’anniversaire de Joël"></canvas></div>
+
+  <div id="accueil">
+    <div>
+      <p class="surtitre">UNE ANNÉE DE PLUS</p>
+      <h1>JOËL</h1>
+      <p class="date">10.10.2026</p>
+      <button id="lancer" type="button" disabled>Préparation…</button>
+      <div class="choix" role="group" aria-label="Version">
+        <button type="button" data-version="longue" aria-pressed="true">Film · 90 s</button>
+        <button type="button" data-version="courte" aria-pressed="false">Teaser · 15 s</button>
+      </div>
+      <p class="note">Monte le son 🔊 &nbsp;·&nbsp; Vidéos : <a href="videos/joel-anniversaire-16x9.mp4">16:9</a> · <a href="videos/joel-anniversaire-9x16.mp4">9:16</a> · <a href="videos/joel-15s-9x16.mp4">15 s</a></p>
+    </div>
+  </div>
+  <button id="rejouer" type="button">↻ Revoir</button>
+
+  <script src="config.js"></script>
+  <script src="js/partition.js"></script>
+  <script src="js/bande-son.js"></script>
+  <script src="js/film.js"></script>
+  <script>
+  (function () {
+    'use strict';
+    const params = new URLSearchParams(location.search);
+    const capture = params.has('capture');
+    const toile = document.getElementById('toile');
+    let version = params.get('version') === 'courte' ? 'courte' : 'longue';
+
+    function chargerPhotos() {
+      const liste = (window.JOEL && window.JOEL.photos) || [];
+      return Promise.all(liste.map((src) => new Promise((ok) => {
+        const img = new Image();
+        img.onload = () => ok(img);
+        img.onerror = () => ok(null);
+        img.src = src;
+      })));
+    }
+
+    // Format : imposé (?format=portrait|paysage) ou choisi selon l'écran.
+    function dimensions() {
+      const format = params.get('format');
+      if (capture) return [innerWidth, innerHeight];
+      const vertical = format ? format === 'portrait' : innerHeight > innerWidth;
+      const max = Math.min(1920, Math.max(innerWidth, innerHeight) * Math.min(2, devicePixelRatio || 1));
+      return vertical ? [Math.round(max * 9 / 16), Math.round(max)] : [Math.round(max), Math.round(max * 9 / 16)];
+    }
+
+    async function fabriquer() {
+      const [l, h] = dimensions();
+      toile.width = l;
+      toile.height = h;
+      await JoelFilm.chargerPolices();
+      const photos = (await chargerPhotos()).filter(Boolean);
+      return JoelFilm.creer(toile, { version, photos, grain: !capture });
+    }
+
+    // ---- Mode capture : piloté image par image par le script de rendu.
+    if (capture) {
+      document.body.classList.add('capture');
+      document.getElementById('accueil').remove();
+      window.__pret = fabriquer().then((film) => {
+        window.__film = film;
+        film.dessiner(0);
+        return film.duree;
+      });
+      return;
+    }
+
+    // ---- Lecture dans le navigateur, avec la bande-son synthétisée.
+    const bouton = document.getElementById('lancer');
+    const rejouer = document.getElementById('rejouer');
+    const accueil = document.getElementById('accueil');
+    let film = null, son = null, audio = null, source = null, depart = 0, boucle = 0;
+
+    async function preparer() {
+      bouton.disabled = true;
+      bouton.textContent = 'Préparation…';
+      film = await fabriquer();
+      await new Promise((ok) => setTimeout(ok, 30));
+      son = JoelBandeSon.generer(version, 44100);
+      film.dessiner(0);
+      bouton.disabled = false;
+      bouton.textContent = '▶  LANCER LE FILM';
+    }
+
+    function jouer() {
+      if (!audio) audio = new (window.AudioContext || window.webkitAudioContext)();
+      audio.resume();
+      const tampon = audio.createBuffer(2, son.gauche.length, son.sampleRate);
+      tampon.copyToChannel(son.gauche, 0);
+      tampon.copyToChannel(son.droite, 1);
+      if (source) try { source.stop(); } catch (e) { /* déjà arrêté */ }
+      source = audio.createBufferSource();
+      source.buffer = tampon;
+      source.connect(audio.destination);
+      depart = audio.currentTime + 0.1;
+      source.start(depart);
+      accueil.classList.add('cache');
+      rejouer.classList.remove('visible');
+      cancelAnimationFrame(boucle);
+      const image = () => {
+        const t = Math.max(0, audio.currentTime - depart);
+        film.dessiner(Math.min(t, film.duree - 0.001));
+        if (t < film.duree) boucle = requestAnimationFrame(image);
+        else rejouer.classList.add('visible');
+      };
+      boucle = requestAnimationFrame(image);
+    }
+
+    bouton.addEventListener('click', jouer);
+    rejouer.addEventListener('click', jouer);
+    document.querySelectorAll('[data-version]').forEach((b) => b.addEventListener('click', () => {
+      version = b.dataset.version;
+      document.querySelectorAll('[data-version]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      preparer();
+    }));
+    let attente = 0;
+    addEventListener('resize', () => {
+      if (!accueil.classList.contains('cache')) {
+        clearTimeout(attente);
+        attente = setTimeout(preparer, 300);
+      }
+    });
+    preparer().catch((e) => { bouton.textContent = 'Erreur : ' + e.message; });
+  })();
+  </script>
+</body>
+</html>

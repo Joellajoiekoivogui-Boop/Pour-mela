@@ -5,6 +5,10 @@
 > Jeanne Kolié. Elle vit dans le dossier `reine/`, indépendante de ce site ;
 > voir [`reine/README.md`](reine/README.md) pour la personnaliser et la mettre
 > en ligne.
+>
+> **Et aussi : [🎬 JOËL — 10.10](joel/)**, un film d’anniversaire cinématique
+> (90 s et 15 s, en 16:9 et 9:16) dans le dossier `joel/`, visible en ligne
+> sur `/joel/`. Voir [`joel/README.md`](joel/README.md).
 
 Un site romantique, animé et immersif, pensé d’abord pour le téléphone :
 chaque toucher révèle un peu plus les sentiments, jusqu’à une lettre
