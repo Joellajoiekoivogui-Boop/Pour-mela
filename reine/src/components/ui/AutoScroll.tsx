@@ -70,7 +70,8 @@ export function AutoScroll() {
         nextProbe = now + 250;
       }
       const atEnd = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 2;
-      const moving = playingRef.current && now - lastUser > RESUME_AFTER && now > pauseUntil && !atEnd;
+      const held = now < pauseUntil || now < director.holdUntil;
+      const moving = playingRef.current && now - lastUser > RESUME_AFTER && !held && !atEnd;
       const target = moving ? window.innerHeight * BASE_SPEED * factor : 0;
       speed += (target - speed) * (1 - Math.exp(-dt * 2.2));
       carry += speed * dt;
@@ -79,7 +80,7 @@ export function AutoScroll() {
         window.scrollBy(0, step);
         carry -= step;
       }
-      if (atEnd && playingRef.current && now > pauseUntil) setPlaying(false);
+      if (atEnd && playingRef.current && !held) setPlaying(false);
       frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);

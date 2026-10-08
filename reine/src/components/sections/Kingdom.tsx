@@ -8,15 +8,10 @@ import { useSceneOnView } from "@/hooks/useSceneOnView";
 import { enableTilt, tiltActive, tiltNeedsPermission, vibrate } from "@/lib/device";
 import { director, type SparkKind } from "@/lib/director";
 import { music } from "@/lib/music";
+import { CROWN_STARS as STARS } from "@/lib/constellation";
 import { ChapterLabel } from "../ui/Ornament";
 import { SplitText } from "../ui/SplitText";
 
-// Les étoiles dessinent une couronne (coordonnées en % du cadre), dans
-// l'ordre du contour : base gauche, cinq pointes, base droite.
-const STARS = [
-  [12, 80], [9, 36], [25, 57], [32, 25], [42, 51], [50, 12],
-  [58, 51], [68, 25], [75, 57], [91, 36], [88, 80],
-] as const;
 const JEWELS = [[30, 70], [50, 70], [70, 70]] as const;
 
 /**

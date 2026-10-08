@@ -7,7 +7,7 @@ import { music } from "@/lib/music";
 import { damp, glState, updateViewport } from "./state";
 
 const MORPH_SECONDS = 2.4;
-const SHAPE_KEYS = 5;
+const SHAPE_KEYS = 6;
 
 interface PerfState {
   frames: number;

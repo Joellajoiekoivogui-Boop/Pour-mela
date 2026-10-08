@@ -5,10 +5,10 @@
 
 import { detectQuality, SERVER_QUALITY, type Quality } from "./quality";
 
-export type SceneKey = "void" | "sky" | "name" | "crown" | "galaxy" | "play" | "heart" | "finale";
+export type SceneKey = "void" | "sky" | "name" | "crown" | "galaxy" | "play" | "heart" | "portrait" | "finale";
 
 /** Poids des formes vers lesquelles les particules convergent. */
-export type ShapeWeights = readonly [sky: number, name: number, crown: number, galaxy: number, heart: number];
+export type ShapeWeights = readonly [sky: number, name: number, crown: number, galaxy: number, heart: number, portrait: number];
 
 export interface SceneSpec {
   shape: ShapeWeights;
@@ -21,14 +21,15 @@ export interface SceneSpec {
 }
 
 export const SCENES: Record<SceneKey, SceneSpec> = {
-  void: { shape: [1, 0, 0, 0, 0], brightness: 0.4, petals: 0, pointer: 0.7, spin: 0.08 },
-  sky: { shape: [1, 0, 0, 0, 0], brightness: 0.85, petals: 0, pointer: 0.9, spin: 0.08 },
-  name: { shape: [0, 1, 0, 0, 0], brightness: 1, petals: 0.22, pointer: 0.75, spin: 0.08 },
-  crown: { shape: [0, 0, 1, 0, 0], brightness: 1, petals: 0.3, pointer: 0.8, spin: 0.32 },
-  galaxy: { shape: [0, 0, 0, 1, 0], brightness: 0.95, petals: 0.06, pointer: 0.9, spin: 0.05 },
-  play: { shape: [1, 0, 0, 0, 0], brightness: 1, petals: 0.12, pointer: 2.2, spin: 0.08 },
-  heart: { shape: [0, 0, 0, 0, 1], brightness: 1, petals: 0.3, pointer: 0.9, spin: 0.22 },
-  finale: { shape: [0, 1, 0, 0, 0], brightness: 1.15, petals: 1, pointer: 0.8, spin: 0.08 },
+  void: { shape: [1, 0, 0, 0, 0, 0], brightness: 0.4, petals: 0, pointer: 0.7, spin: 0.08 },
+  sky: { shape: [1, 0, 0, 0, 0, 0], brightness: 0.85, petals: 0, pointer: 0.9, spin: 0.08 },
+  name: { shape: [0, 1, 0, 0, 0, 0], brightness: 1, petals: 0.22, pointer: 0.75, spin: 0.08 },
+  crown: { shape: [0, 0, 1, 0, 0, 0], brightness: 1, petals: 0.3, pointer: 0.8, spin: 0.32 },
+  galaxy: { shape: [0, 0, 0, 1, 0, 0], brightness: 0.95, petals: 0.06, pointer: 0.9, spin: 0.05 },
+  play: { shape: [1, 0, 0, 0, 0, 0], brightness: 1, petals: 0.12, pointer: 2.2, spin: 0.08 },
+  heart: { shape: [0, 0, 0, 0, 1, 0], brightness: 1, petals: 0.3, pointer: 0.9, spin: 0.22 },
+  portrait: { shape: [0, 0, 0, 0, 0, 1], brightness: 1.3, petals: 0.55, pointer: 0.5, spin: 0.05 },
+  finale: { shape: [0, 1, 0, 0, 0, 0], brightness: 1.15, petals: 1, pointer: 0.8, spin: 0.08 },
 };
 
 export type SparkKind = "hearts" | "stars" | "dust" | "trail" | "ring" | "firework" | "gold";
@@ -74,6 +75,8 @@ export const director = {
   warp: 0,
   /** Vitesse de défilement (px/s) : les étoiles défilent avec la page. */
   scrollVelocity: 0,
+  /** La lecture automatique attend jusqu'à cet instant (performance.now). */
+  holdUntil: 0,
 
   sparks: [] as SparkRequest[],
   stats: { lights: 0, sparks: 0 },
@@ -104,6 +107,11 @@ export const director = {
 
   explode(strength = 1) {
     this.impulse = Math.max(this.impulse, strength);
+  },
+
+  /** Suspend la lecture automatique pendant un moment fort. */
+  holdScroll(ms: number) {
+    this.holdUntil = Math.max(this.holdUntil, performance.now() + ms);
   },
 
   pulse(strength = 1) {

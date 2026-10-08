@@ -4,8 +4,8 @@ import { CAMERA_Z, TAN_HALF_FOV } from "@/lib/shapes";
 // (Driver) les met à jour en premier à chaque image ; les autres les lisent.
 export const glState = {
   time: 0,
-  from: [1, 0, 0, 0, 0] as number[],
-  to: [1, 0, 0, 0, 0] as number[],
+  from: [1, 0, 0, 0, 0, 0] as number[],
+  to: [1, 0, 0, 0, 0, 0] as number[],
   morph: 1,
   chaos: 0,
   brightness: 0.4,
@@ -25,9 +25,10 @@ export const glState = {
   aspect: 1,
   viewW: 1,
   viewH: 2 * TAN_HALF_FOV * CAMERA_Z,
-  /** Ajustement des formes à l'écran : prénom, couronne, galaxie, cœur. */
-  fit: { text: 3, crown: 1, galaxy: 1, heart: 1.5 },
+  /** Ajustement des formes à l'écran : prénom, couronne, galaxie, cœur, visage. */
+  fit: { text: 3, crown: 1, galaxy: 1, heart: 1.5, portrait: 3 },
   textRatio: 0.5,
+  portraitRatio: 1.15,
   /** Part des particules affichées (baisse si l'appareil peine). */
   detail: 1,
 };
@@ -48,6 +49,7 @@ export function refit() {
   glState.fit.crown = Math.max(0.85, Math.min(viewW * 0.27, viewH * 0.13));
   glState.fit.galaxy = Math.max(viewW, viewH * 0.8) * 0.3;
   glState.fit.heart = Math.min(viewW * 0.37, viewH * 0.2);
+  glState.fit.portrait = Math.min(viewW * 0.86, (viewH * 0.5) / glState.portraitRatio);
 }
 
 /** Lissage indépendant du nombre d'images par seconde. */

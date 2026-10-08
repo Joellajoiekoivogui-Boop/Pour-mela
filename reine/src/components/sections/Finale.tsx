@@ -7,8 +7,9 @@ import { useDirector } from "@/hooks/useDirector";
 import { useSceneOnView } from "@/hooks/useSceneOnView";
 import { vibrate } from "@/lib/device";
 import { director } from "@/lib/director";
+import { keepStar, todayLabel } from "@/lib/keepsake";
 import { music } from "@/lib/music";
-import { ReplayIcon, StarIcon } from "../ui/Icons";
+import { CrownIcon, ReplayIcon, StarIcon } from "../ui/Icons";
 import { ChapterLabel, Ornament } from "../ui/Ornament";
 import { RoyalButton } from "../ui/RoyalButton";
 import { SplitText } from "../ui/SplitText";
@@ -26,9 +27,12 @@ export function Finale({ onReplay }: { onReplay: () => void }) {
   const section = useRef<HTMLElement>(null);
   const heartAnchor = useRef<HTMLDivElement>(null);
   const nameAnchor = useRef<HTMLDivElement>(null);
+  const portraitAnchor = useRef<HTMLDivElement>(null);
   const timers = useRef<number[]>([]);
   const [phase, setPhase] = useState(0);
   const [revealed, setRevealed] = useState(false);
+  // Après l'embrasement : 1 = son visage en lumière, 2 = son prénom.
+  const [afterglow, setAfterglow] = useState(0);
   const climax = phase > lines.length;
   const glActive = useDirector((d) => d.glActive);
   const { scrollYProgress } = useScroll({ target: section, offset: ["start start", "end end"] });
@@ -43,7 +47,9 @@ export function Finale({ onReplay }: { onReplay: () => void }) {
     setPhase((p) => Math.max(p, target));
   });
 
-  useSceneOnView(section, climax ? "finale" : "heart", climax ? nameAnchor : heartAnchor);
+  const scene = afterglow === 1 ? "portrait" : afterglow === 2 ? "finale" : "heart";
+  const anchor = afterglow === 1 ? portraitAnchor : afterglow === 2 ? nameAnchor : heartAnchor;
+  useSceneOnView(section, scene, anchor);
 
   // Sans musique, le cœur bat quand même.
   useEffect(() => {
@@ -75,9 +81,14 @@ export function Finale({ onReplay }: { onReplay: () => void }) {
         }, 200 + k * 430),
       );
     }
-    list.push(window.setTimeout(() => director.setScene("finale", nameAnchor.current), 900));
-    list.push(window.setTimeout(() => setRevealed(true), 2500));
-  }, [climax]);
+    // Son visage apparaît dans les étincelles, puis devient son prénom.
+    const withPortrait = Boolean(final.portrait.src) && director.glActive;
+    const toName = withPortrait ? 7200 : 900;
+    director.holdScroll(toName + 4000);
+    if (withPortrait) list.push(window.setTimeout(() => setAfterglow(1), 900));
+    list.push(window.setTimeout(() => setAfterglow(2), toName));
+    list.push(window.setTimeout(() => setRevealed(true), toName + 1600));
+  }, [climax, final.portrait.src]);
 
   useEffect(() => () => timers.current.forEach(window.clearTimeout), []);
 
@@ -123,8 +134,33 @@ export function Finale({ onReplay }: { onReplay: () => void }) {
           </p>
         </motion.div>
 
+        {/* Son visage, dessiné par les étoiles */}
+        <AnimatePresence>
+          {afterglow === 1 ? (
+            <motion.div
+              key="portrait"
+              className="absolute inset-0 flex flex-col items-center justify-center"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0, filter: "blur(8px)" }}
+              transition={{ duration: 1.2 }}
+            >
+              <div ref={portraitAnchor} aria-hidden className="h-[56svh] w-full" />
+              <SplitText
+                text={final.portrait.legende}
+                state="visible"
+                by="word"
+                delay={2.2}
+                stagger={0.16}
+                duration={1.2}
+                className="legible mt-4 max-w-sm font-script text-[clamp(2rem,8.4vw,3rem)] leading-tight text-gold glow-gold"
+              />
+            </motion.div>
+          ) : null}
+        </AnimatePresence>
+
         {/* Après l'embrasement : son prénom renaît */}
-        {climax ? (
+        {afterglow === 2 ? (
           <div className="absolute inset-0 flex flex-col items-center justify-center pb-[4svh]">
             <div ref={nameAnchor} className="flex h-[24svh] w-full items-center justify-center" aria-hidden={glActive}>
               {!glActive ? (
@@ -159,6 +195,14 @@ function Epilogue({ onReplay }: { onReplay: () => void }) {
     const timer = window.setInterval(() => setLights(director.stats.lights), 120);
     return () => window.clearInterval(timer);
   }, []);
+
+  const [star, setStar] = useState<"idle" | "busy" | "shared" | "downloaded" | "failed">("idle");
+  const keep = async (center: { x: number; y: number }) => {
+    if (star === "busy") return;
+    setStar("busy");
+    director.emit({ kind: "stars", x: center.x, y: center.y - 30, amount: 1.5 });
+    setStar(await keepStar());
+  };
 
   const makeWish = (center: { x: number; y: number }) => {
     director.emit({ kind: "firework", x: center.x, y: center.y - 40 });
@@ -225,12 +269,29 @@ function Epilogue({ onReplay }: { onReplay: () => void }) {
         <RoyalButton onClick={makeWish} icon={<StarIcon className="h-4 w-4 text-or" />}>
           {final.voeu}
         </RoyalButton>
+        <RoyalButton onClick={keep} icon={<CrownIcon className="h-4 w-4 text-or" />}>
+          {star === "busy" ? "Un instant…" : final.etoile.bouton}
+        </RoyalButton>
         <RoyalButton variant="ghost" onClick={() => onReplay()} icon={<ReplayIcon className="h-4 w-4" />}>
           {final.rejouer}
         </RoyalButton>
       </motion.div>
 
-      <div className="mt-5 min-h-[3.5rem] max-w-sm" aria-live="polite">
+      <motion.p
+        className="legible mt-4 font-serif text-base italic text-or-clair"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 3.8, duration: 1.2 }}
+        aria-live="polite"
+      >
+        {star === "downloaded"
+          ? "Ton étoile est enregistrée dans tes téléchargements."
+          : star === "failed"
+            ? "Ton étoile n’a pas pu être créée sur cet appareil."
+            : `✦ ${final.etoile.annonce} · allumée le ${todayLabel()}`}
+      </motion.p>
+
+      <div className="mt-3 min-h-[3.5rem] max-w-sm" aria-live="polite">
         <AnimatePresence mode="wait">
           {wish >= 0 ? (
             <motion.p

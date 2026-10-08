@@ -260,3 +260,92 @@ export function textShape(count: number, text: string, fontFamily: string, seed 
   }
   return { positions, ratio: (maxY - minY) / inkWidth };
 }
+
+export interface PortraitShape {
+  positions: Float32Array;
+  colors: Float32Array;
+  /** Hauteur / largeur du portrait. */
+  ratio: number;
+}
+
+const PORTRAIT_GOLD = [1, 0.8, 0.5] as const;
+
+/**
+ * Son visage en mosaïque de lumière : la photo est réduite en une grille,
+ * chaque particule prend la place et la couleur (rehaussée, dorée) d'une
+ * case, dans un ovale qui s'estompe sur les bords. Largeur normalisée à 1.
+ */
+export function portraitShape(
+  count: number,
+  image: HTMLImageElement,
+  centre: readonly [number, number],
+  taille: number,
+  seed = 101,
+): PortraitShape | null {
+  const ratio = 1.15;
+  const width = image.naturalWidth;
+  const height = image.naturalHeight;
+  const cropW = Math.min(width, taille * width);
+  const cropH = cropW * ratio;
+  const sx = Math.max(0, Math.min(width - cropW, (centre[0] / 100) * width - cropW / 2));
+  const sy = Math.max(0, Math.min(height - cropH, (centre[1] / 100) * height - cropH / 2));
+
+  // Environ deux particules par case dans l'ovale.
+  const gw = Math.max(40, Math.round(Math.sqrt((count * 0.55) / 0.785 / ratio)));
+  const gh = Math.round(gw * ratio);
+  const canvas = document.createElement("canvas");
+  canvas.width = gw;
+  canvas.height = gh;
+  const ctx = canvas.getContext("2d", { willReadFrequently: true });
+  if (!ctx) return null;
+  ctx.drawImage(image, sx, sy, cropW, cropH, 0, 0, gw, gh);
+  const data = ctx.getImageData(0, 0, gw, gh).data;
+
+  // Contraste automatique sur la luminosité (2 % – 98 %).
+  const lums: number[] = [];
+  for (let i = 0; i < gw * gh; i++) lums.push(0.299 * data[i * 4] + 0.587 * data[i * 4 + 1] + 0.114 * data[i * 4 + 2]);
+  const sorted = [...lums].sort((a, b) => a - b);
+  const low = sorted[Math.floor(sorted.length * 0.02)];
+  const high = Math.max(low + 1, sorted[Math.floor(sorted.length * 0.98)]);
+  const lift = (v: number) => Math.pow(Math.max(0, Math.min(1, (v - low) / (high - low))), 0.75);
+
+  const cells: { x: number; y: number; r: number; g: number; b: number }[] = [];
+  for (let y = 0; y < gh; y++) {
+    for (let x = 0; x < gw; x++) {
+      const d = ((x + 0.5 - gw / 2) / (gw / 2)) ** 2 + ((y + 0.5 - gh / 2) / (gh / 2)) ** 2;
+      if (d >= 1) continue;
+      const mask = Math.min(1, (1 - d) / 0.3) * 1.15;
+      const i = (y * gw + x) * 4;
+      const lum = lift(lums[y * gw + x]);
+      const [r, g, b] = [lift(data[i]), lift(data[i + 1]), lift(data[i + 2])];
+      cells.push({
+        x,
+        y,
+        r: (r * 0.65 + lum * PORTRAIT_GOLD[0] * 0.35) * mask,
+        g: (g * 0.65 + lum * PORTRAIT_GOLD[1] * 0.35) * mask,
+        b: (b * 0.65 + lum * PORTRAIT_GOLD[2] * 0.35) * mask,
+      });
+    }
+  }
+  if (!cells.length) return null;
+
+  // Ordre mélangé : si l'appareil n'affiche qu'une partie des particules,
+  // tout le visage reste dessiné, simplement moins dense.
+  const random = createRandom(seed);
+  for (let i = cells.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [cells[i], cells[j]] = [cells[j], cells[i]];
+  }
+  const positions = new Float32Array(count * 3);
+  const colors = new Float32Array(count * 3);
+  for (let i = 0; i < count; i++) {
+    const cell = cells[i % cells.length];
+    positions[i * 3] = (cell.x + 0.2 + random() * 0.6) / gw - 0.5;
+    positions[i * 3 + 1] = -((cell.y + 0.2 + random() * 0.6) / gw - ratio / 2);
+    positions[i * 3 + 2] = (random() - 0.5) * 0.03;
+    colors[i * 3] = cell.r;
+    colors[i * 3 + 1] = cell.g;
+    colors[i * 3 + 2] = cell.b;
+  }
+  return { positions, colors, ratio };
+}

@@ -14,12 +14,13 @@ uniform float uProj;
 uniform float uSize;
 uniform float uBrightness;
 uniform vec4 uFrom;
-uniform float uFromH;
+uniform vec2 uFromE; // cœur, portrait
 uniform vec4 uTo;
-uniform float uToH;
+uniform vec2 uToE;
 uniform float uMorph;
 uniform float uChaos;
 uniform vec4 uFit;
+uniform float uFitPortrait;
 uniform vec3 uOffset;
 uniform float uSpin;
 uniform float uTilt;
@@ -40,6 +41,8 @@ attribute vec3 aText;
 attribute vec3 aCrown;
 attribute vec3 aGalaxy;
 attribute vec3 aHeart;
+attribute vec3 aPortrait;
+attribute vec3 aPortraitColor;
 
 varying vec3 vColor;
 varying float vAlpha;
@@ -68,12 +71,12 @@ void main() {
   float isSky = step(aSeed.w, uSkyShare);
   float m = smoothstep(0.0, 1.0, clamp((uMorph - aSeed.x * 0.35) / 0.65, 0.0, 1.0));
   vec4 w = mix(uFrom, uTo, m);
-  float wh = mix(uFromH, uToH, m);
+  vec2 e = mix(uFromE, uToE, m) * (1.0 - isSky);
   w = mix(w, vec4(1.0, 0.0, 0.0, 0.0), isSky);
-  wh *= 1.0 - isSky;
-  float total = max(w.x + w.y + w.z + w.w + wh, 0.0001);
+  float total = max(w.x + w.y + w.z + w.w + e.x + e.y, 0.0001);
   w /= total;
-  wh /= total;
+  float wh = e.x / total;
+  float wp = e.y / total;
   float shapeW = 1.0 - w.x;
 
   vec3 drift = vec3(
@@ -98,7 +101,11 @@ void main() {
   float beat = 1.0 + uBeat * 0.09 + uAudio * 0.05;
   vec3 heartP = rotY(sin(uSpin) * 0.5) * aHeart * uFit.w * beat + drift * 0.008;
 
-  vec3 shape = nameP * w.y + crownP * w.z + galP * w.w + heartP * wh;
+  // Son visage : une mosaïque de lumière, chaque particule a la couleur
+  // du point de la photo qu'elle représente.
+  vec3 portraitP = aPortrait * uFitPortrait + drift * 0.004 * uFitPortrait;
+
+  vec3 shape = nameP * w.y + crownP * w.z + galP * w.w + heartP * wh + portraitP * wp;
   vec3 p = sky * w.x + shape + uOffset * shapeW;
 
   // Énergie des transitions et des explosions.
@@ -123,7 +130,7 @@ void main() {
   float depth = max(-mv.z, 0.5);
   float big = pow(aSeed.y, 7.0);
   float skySize = 0.028 + big * 0.12;
-  float shapeSize = 0.02 + aSeed.y * 0.022;
+  float shapeSize = mix(0.02 + aSeed.y * 0.022, 0.034 + aSeed.y * 0.012, wp);
   float worldSize = mix(skySize, shapeSize, shapeW) * uSize;
   worldSize *= 1.0 + uAudio * 0.5 * aSeed.z + uBeat * 0.3 * shapeW + uWarp * 1.4 * w.x;
   gl_PointSize = clamp(worldSize * uProj / depth, 1.3, 46.0);
@@ -132,6 +139,7 @@ void main() {
   float nearFade = smoothstep(0.8, 3.0, depth);
   float farFade = 1.0 - smoothstep(26.0, 36.0, depth) * 0.6;
   vAlpha = uBrightness * mix(twinkle, 0.82 + 0.18 * twinkle, shapeW) * nearFade * farFade;
+  vAlpha = mix(vAlpha, uBrightness * nearFade, wp * 0.7);
   vAlpha *= 1.0 + uBeat * 0.35 * shapeW;
 
   vec3 gold = vec3(1.0, 0.76, 0.38);
@@ -147,7 +155,7 @@ void main() {
   float gr = length(aGalaxy.xz) / 3.0;
   vec3 armCol = aSeed.z < 0.5 ? rose : aSeed.z < 0.8 ? lilac : gold;
   vec3 galCol = mix(champagne, armCol, smoothstep(0.05, 0.6, gr));
-  vColor = skyCol * w.x + goldCol * (w.y + w.z) + galCol * w.w + heartCol * wh;
+  vColor = skyCol * w.x + goldCol * (w.y + w.z) + galCol * w.w + heartCol * wh + aPortraitColor * wp;
   vColor = mix(vColor, vec3(1.0), uWarp * 0.5 * w.x);
   vSpark = step(0.985, aSeed.y);
 }

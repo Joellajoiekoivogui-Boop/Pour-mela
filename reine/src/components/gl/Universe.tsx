@@ -5,7 +5,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import { reine } from "@/config/reine";
 import { director } from "@/lib/director";
-import { crownShape, galaxyShape, heartShape, seeds, skyShape, TAN_HALF_FOV, textShape } from "@/lib/shapes";
+import { crownShape, galaxyShape, heartShape, portraitShape, seeds, skyShape, TAN_HALF_FOV, textShape } from "@/lib/shapes";
 import { additive } from "./blending";
 import { glowFragment, universeVertex } from "./shaders";
 import { glState, refit } from "./state";
@@ -35,6 +35,9 @@ export function Universe() {
     g.setAttribute("aCrown", new THREE.BufferAttribute(crownShape(count), 3));
     g.setAttribute("aGalaxy", new THREE.BufferAttribute(galaxyShape(count), 3));
     g.setAttribute("aHeart", new THREE.BufferAttribute(heart, 3));
+    // Le visage arrive avec sa photo ; en attendant, le cœur tient la place.
+    g.setAttribute("aPortrait", new THREE.BufferAttribute(heart.slice(), 3));
+    g.setAttribute("aPortraitColor", new THREE.BufferAttribute(new Float32Array(count * 3), 3));
     g.userData.aspect = aspect;
     return g;
   }, [count]);
@@ -54,12 +57,13 @@ export function Universe() {
           uSize: { value: 1 },
           uBrightness: { value: 0 },
           uFrom: { value: new THREE.Vector4(1, 0, 0, 0) },
-          uFromH: { value: 0 },
+          uFromE: { value: new THREE.Vector2() },
           uTo: { value: new THREE.Vector4(1, 0, 0, 0) },
-          uToH: { value: 0 },
+          uToE: { value: new THREE.Vector2() },
           uMorph: { value: 1 },
           uChaos: { value: 0 },
           uFit: { value: new THREE.Vector4(3, 1, 1, 1) },
+          uFitPortrait: { value: 3 },
           uOffset: { value: new THREE.Vector3() },
           uSpin: { value: 0 },
           uTilt: { value: 1.15 },
@@ -98,6 +102,32 @@ export function Universe() {
     };
   }, [count, geometry]);
 
+  // Son visage : la photo est chargée discrètement pendant l'histoire.
+  useEffect(() => {
+    const { src, centre, taille } = reine.final.portrait;
+    if (!src) return;
+    let cancelled = false;
+    const image = new Image();
+    image.decoding = "async";
+    image.onload = () => {
+      if (cancelled) return;
+      const shape = portraitShape(count, image, centre, taille);
+      if (!shape) return;
+      const positions = geometry.getAttribute("aPortrait") as THREE.BufferAttribute;
+      const colors = geometry.getAttribute("aPortraitColor") as THREE.BufferAttribute;
+      (positions.array as Float32Array).set(shape.positions);
+      (colors.array as Float32Array).set(shape.colors);
+      positions.needsUpdate = true;
+      colors.needsUpdate = true;
+      glState.portraitRatio = shape.ratio;
+      refit();
+    };
+    image.src = src;
+    return () => {
+      cancelled = true;
+    };
+  }, [count, geometry]);
+
   // Le ciel est recalculé si la forme de l'écran change nettement
   // (téléphone tourné), pour ne pas gaspiller de particules hors champ.
   useEffect(() => {
@@ -126,12 +156,13 @@ export function Universe() {
     u.uSize.value = director.quality.tier === "low" ? 1.25 : 1;
     u.uBrightness.value = g.brightness;
     (u.uFrom.value as THREE.Vector4).set(g.from[0], g.from[1], g.from[2], g.from[3]);
-    u.uFromH.value = g.from[4];
+    (u.uFromE.value as THREE.Vector2).set(g.from[4], g.from[5]);
     (u.uTo.value as THREE.Vector4).set(g.to[0], g.to[1], g.to[2], g.to[3]);
-    u.uToH.value = g.to[4];
+    (u.uToE.value as THREE.Vector2).set(g.to[4], g.to[5]);
     u.uMorph.value = g.morph;
     u.uChaos.value = g.chaos;
     (u.uFit.value as THREE.Vector4).set(g.fit.text, g.fit.crown, g.fit.galaxy, g.fit.heart);
+    u.uFitPortrait.value = g.fit.portrait;
     (u.uOffset.value as THREE.Vector3).set(0, g.offsetY, 0);
     u.uSpin.value = g.spin;
     u.uTilt.value = g.tilt;

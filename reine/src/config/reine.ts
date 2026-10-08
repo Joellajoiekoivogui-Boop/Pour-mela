@@ -92,6 +92,24 @@ export const reine = {
     ],
   },
 
+  /* 5 bis. LA GALERIE DE LUMIÈRE
+        Un anneau de photos en 3D qui tourne seul ; on le fait pivoter du
+        doigt, un toucher sur une photo l'amène devant.                    */
+  galerie: {
+    surtitre: "Interlude",
+    titre: "Ta lumière en images",
+    consigne: "Fais tourner l’anneau du doigt, touche une photo.",
+    photos: [
+      { src: "photos/bhama-portrait.jpg", cadrage: "44% 30%" },
+      { src: "photos/souvenir-sourire.jpg", cadrage: "55% 28%" },
+      { src: "photos/souvenir-rencontre.jpg", cadrage: "48% 30%" },
+      { src: "photos/souvenir-force.jpg", cadrage: "45% 30%" },
+      { src: "photos/souvenir-amitie.jpg", cadrage: "50% 32%" },
+      { src: "photos/souvenir-loyaute.jpg", cadrage: "55% 22%" },
+      { src: "photos/souvenir-joie.jpg", cadrage: "20% 40%" },
+    ],
+  },
+
   /* 6. CHAPITRE IV — SON ROYAUME (la partie interactive)                    */
   royaume: {
     chapitre: "Chapitre IV",
@@ -111,7 +129,22 @@ export const reine = {
       "tu es l’une des plus belles personnes",
       "que j’ai eu la chance de connaître. ❤️",
     ],
+    /* Après l'embrasement, les étoiles dessinent son visage à partir de
+       cette photo, avant de former son prénom. `centre` = le milieu du
+       visage (largeur puis hauteur, en %), `taille` = la part de la largeur
+       de la photo à garder autour. Laisse src vide pour passer ce moment. */
+    portrait: {
+      src: "photos/bhama-portrait.jpg",
+      centre: [44, 30],
+      taille: 0.6,
+      legende: "Telle que je te vois : faite de lumière.",
+    },
     apresLeNom: "Ma reine, mon amie, ma lumière.",
+    /* L'étoile à son nom : une image souvenir à garder ou partager.        */
+    etoile: {
+      annonce: "Une étoile porte désormais ton nom",
+      bouton: "Garder ton étoile",
+    },
     rejouer: "Revivre l’histoire",
     voeu: "Faire un vœu",
     /* Un vœu s'affiche à chaque clic sur « Faire un vœu ».                 */
