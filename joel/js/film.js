@@ -1027,14 +1027,28 @@
     }
 
     // ------------------------------------------------------- photos
+    // Où poser la photo dans un cadre l×h : elle le couvre, garde ses
+    // proportions, et son point d'intérêt (x, y entre 0 et 1, réglable dans
+    // config.js) vient au centre du cadre, sans jamais laisser de vide.
+    function placer(P, l, h, zoom) {
+      const img = P.img, c = P.cadrage;
+      const r = Math.max(l / img.naturalWidth, h / img.naturalHeight) * zoom * (c.zoom || 1);
+      const iw = img.naturalWidth * r, ih = img.naturalHeight * r;
+      const ix = borne(l / 2 - iw * (c.x == null ? 0.5 : c.x), l - iw, 0);
+      const iy = borne(h / 2 - ih * (c.y == null ? 0.4 : c.y), h - ih, 0);
+      return [ix, iy, iw, ih];
+    }
     const photosPretes = photos.map((img, k) => {
-      const ech = toile(48, 64);
-      const g = ech.getContext('2d');
-      const r = Math.max(48 / img.naturalWidth, 64 / img.naturalHeight);
-      g.drawImage(img, (48 - img.naturalWidth * r) / 2, (64 - img.naturalHeight * r) / 2, img.naturalWidth * r, img.naturalHeight * r);
-      let pix = null;
-      try { pix = g.getImageData(0, 0, 48, 64).data; } catch (e) { pix = null; }
-      return { img, pix, graine: k * 31 + 3 };
+      const P = { img, cadrage: img.cadrage || {}, graine: k * 31 + 3 };
+      P.ratio = borne(img.naturalWidth / img.naturalHeight, 0.66, 1.6);
+      // Échantillon de couleurs, cadré comme la fin du plan, pour la dissolution.
+      P.gl = Math.round(56 * Math.sqrt(P.ratio));
+      P.gh = Math.round(56 / Math.sqrt(P.ratio));
+      const g = toile(P.gl, P.gh).getContext('2d');
+      const [ix, iy, iw, ih] = placer(P, P.gl, P.gh, 1.12);
+      g.drawImage(img, ix, iy, iw, ih);
+      try { P.pix = g.getImageData(0, 0, P.gl, P.gh).data; } catch (e) { P.pix = null; }
+      return P;
     });
     // Une photo dans un cadre de cinéma : jamais déformée, lent zoom.
     function cadrePhoto(P, x, y, l, h, u, alpha, dissolution) {
@@ -1045,10 +1059,8 @@
       ctx.beginPath();
       ctx.rect(x - l / 2, y - h / 2, l, h);
       ctx.clip();
-      const zoom = 1.04 + 0.08 * u;
-      const r = Math.max(l / img.naturalWidth, h / img.naturalHeight) * zoom;
-      const iw = img.naturalWidth * r, ih = img.naturalHeight * r;
-      ctx.drawImage(img, x - iw / 2, y - ih * 0.45, iw, ih);
+      const [ix, iy, iw, ih] = placer(P, l, h, 1.04 + 0.08 * u);
+      ctx.drawImage(img, x - l / 2 + ix, y - h / 2 + iy, iw, ih);
       const d = ctx.createLinearGradient(0, y - h / 2, 0, y + h / 2);
       d.addColorStop(0, 'rgba(10,6,30,0.25)');
       d.addColorStop(0.6, 'rgba(10,6,30,0)');
@@ -1073,16 +1085,17 @@
       if (dissolution > 0 && P.pix) {
         const rr = hasard(P.graine);
         ctx.globalCompositeOperation = 'lighter';
-        for (let j = 0; j < 64; j++)
-          for (let i = 0; i < 48; i++) {
-            const o = (j * 48 + i) * 4;
+        const gl = P.gl, gh = P.gh;
+        for (let j = 0; j < gh; j++)
+          for (let i = 0; i < gl; i++) {
+            const o = (j * gl + i) * 4;
             const a = rr() * Math.PI * 2, v = rr();
             const q = borne(dissolution * 1.4 - rr() * 0.4);
-            const px = x - l / 2 + (i + 0.5) * (l / 48) + Math.cos(a) * q * S * 0.25 * v;
-            const py = y - h / 2 + (j + 0.5) * (h / 64) + (Math.sin(a) - 0.6) * q * S * 0.2 * v;
+            const px = x - l / 2 + (i + 0.5) * (l / gl) + Math.cos(a) * q * S * 0.25 * v;
+            const py = y - h / 2 + (j + 0.5) * (h / gh) + (Math.sin(a) - 0.6) * q * S * 0.2 * v;
             ctx.globalAlpha = alpha * (1 - q) * Math.min(1, dissolution * 4);
             ctx.fillStyle = 'rgb(' + P.pix[o] + ',' + P.pix[o + 1] + ',' + P.pix[o + 2] + ')';
-            const s = (l / 48) * (1 - q * 0.6);
+            const s = (l / gl) * (1 - q * 0.6);
             ctx.fillRect(px - s / 2, py - s / 2, s, s);
           }
         ctx.globalAlpha = 1;
@@ -1364,16 +1377,29 @@
         etoiles(t, 0.8 * a, { part: 1 });
         poussieres(t, 0.6 * a, 1);
         const avecPhotos = photosPretes.length > 0;
+        if (avecPhotos) {
+          // Les photos se partagent la scène : photo → zoom → dissolution en
+          // particules → lumière → photo suivante.
+          const n = photosPretes.length;
+          const d0 = 47.9, d1 = 58.3, seg = (d1 - d0) / n;
+          // Le cadre épouse le format de la photo (dans une boîte maximale) :
+          // une photo en largeur reste en largeur, rien n'est déformé.
+          const boiteL = L(W * 0.5, W * 0.86), boiteH = L(H * 0.64, H * 0.5);
+          const yP = L(H * 0.4, H * 0.38);
+          photosPretes.forEach((P0, j) => {
+            const a0 = d0 + j * seg, b0 = a0 + seg;
+            if (t < a0 || t > b0 + 0.2) return;
+            const pl = Math.min(boiteL, boiteH * P0.ratio), ph = pl / P0.ratio;
+            const derniere = j === n - 1;
+            const apparition = sortie(lin(t, a0, a0 + 0.5)) * (derniere ? a : 1);
+            cadrePhoto(P0, cx, yP, pl, ph, (t - a0) / seg, apparition, derniere ? 0 : lin(t, b0 - 0.6, b0 + 0.15));
+            halo(cx, yP, S * 0.55, 0.4 * (1 - lin(t, a0, a0 + 0.7)));
+          });
+        }
         P.reves.forEach((r, k) => {
           if (t < r.t - 0.3 || t > r.t + 2.3) return;
           const N = nuageDe('reve' + k, T['reve' + k]);
-          const y = avecPhotos ? L(H * 0.84, H * 0.8) : cy;
-          if (avecPhotos) {
-            const P0 = photosPretes[k % photosPretes.length];
-            const pl = L(W * 0.34, W * 0.74), ph = L(H * 0.6, H * 0.5);
-            const u = (t - r.t + 0.3) / 2.4;
-            cadrePhoto(P0, cx, L(H * 0.4, H * 0.38), pl, ph, u, lin(t, r.t - 0.3, r.t + 0.1), lin(t, r.t + 1.55, r.t + 2.2));
-          }
+          const y = avecPhotos ? L(H * 0.86, H * 0.8) : cy;
           former(N, cx, y, t, { t0: r.t - 0.2, t1: r.t + 0.75, t2: r.t + 1.45, t3: r.t + 2.2, tourbillon: 1.2, taille: 1 });
           poser(T['reve' + k], cx, y, { alpha: 0.85 * fenetre(t, r.t + 0.45, r.t + 1.55, 0.35, 0.3), lueur: 0.9, balayage: lin(t, r.t + 0.6, r.t + 1.4) });
         });

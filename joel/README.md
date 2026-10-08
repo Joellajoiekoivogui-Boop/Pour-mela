@@ -36,14 +36,18 @@ Le film se regarde aussi en direct dans le navigateur : ouvre `index.html`
 
 Version 15 s : 10 → OCTOBRE → JOËL → JOYEUX ANNIVERSAIRE → 10.10.2026.
 
-## Ajouter des photos de Joël
+## Les photos de Joël
+
+Cinq photos sont déjà intégrées (`photos/joel-1.jpg` à `joel-5.jpg`), une par
+mot de la scène « Les rêves ». Pour en ajouter ou les changer :
 
 1. Dépose les photos dans `photos/` (JPG ou PNG, de préférence en portrait).
 2. Liste-les dans [`config.js`](config.js) : `photos: ['photos/joel-1.jpg', …]`.
 3. Relance le rendu (ci-dessous).
 
-Les photos apparaissent pendant « Les rêves », dans des cadres de cinéma, avec
-un lent zoom, puis se dissolvent en particules vers la suivante. Elles ne sont
+Les photos se partagent la scène « Les rêves » (48–58 s) : chacune dans un
+cadre de cinéma, avec un lent zoom, puis elle se dissout en particules et un
+éclat de lumière fait naître la suivante. Elles ne sont
 jamais étirées ni retouchées.
 
 ## Refaire les vidéos

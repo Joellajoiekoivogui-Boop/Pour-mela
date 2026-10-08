@@ -82,11 +82,13 @@
 
     function chargerPhotos() {
       const liste = (window.JOEL && window.JOEL.photos) || [];
-      return Promise.all(liste.map((src) => new Promise((ok) => {
+      return Promise.all(liste.map((entree) => new Promise((ok) => {
+        const reglage = typeof entree === 'string' ? { src: entree } : entree;
         const img = new Image();
+        img.cadrage = reglage;
         img.onload = () => ok(img);
         img.onerror = () => ok(null);
-        img.src = src;
+        img.src = reglage.src;
       })));
     }
 
