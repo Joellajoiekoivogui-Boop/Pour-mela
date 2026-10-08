@@ -3,7 +3,7 @@
   "framework": null,
   "buildCommand": "node preparer-vercel.js",
   "outputDirectory": "public",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD -- index.html personnaliser.html config.js apercu.jpg icone.png css js fonts medias preparer-vercel.js",
+  "ignoreCommand": "node preparer-vercel.js --ignorer",
   "headers": [
     {
       "source": "/fonts/(.*)",
