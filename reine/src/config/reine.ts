@@ -42,14 +42,14 @@ export const reine = {
       "Il y a des couronnes qui ne se portent pas sur la tête. Elles se voient dans un regard, dans une façon d’aimer, dans une manière de rester digne quand tout vacille.",
     /* La photo (facultative).
        Dépose-la dans le dossier « public/photos/ », par exemple
-       public/photos/bhama.jpg, puis écris :  src: "/photos/bhama.jpg"
+       public/photos/bhama.jpg, puis écris :  src: "photos/bhama.jpg"
        `cadrage` = où se trouve le visage (largeur puis hauteur, en %).
        Conseil : une photo verticale d'environ 1000 px de large (.jpg/.webp).
        Laisse src vide ("") : un médaillon à son initiale la remplace.     */
     photo: {
-      src: "",
+      src: "photos/bhama-portrait.jpg",
       alt: "Bhama, la reine de cette histoire",
-      cadrage: "50% 30%",
+      cadrage: "44% 30%",
       legende: "Celle qui illumine sans même le savoir.",
     },
   },
@@ -76,17 +76,19 @@ export const reine = {
   /* 5. CHAPITRE III — SOUVENIRS & AMITIÉ
         Une ligne par souvenir ou par qualité. Ajoutes-en autant que tu veux.
         icone : "etoile", "sourire", "main", "rire", "couronne", "coeur",
-                "rose" ou "infini".                                          */
+                "rose" ou "infini".
+        photo (facultative) : une image de public/photos/, et son `cadrage`
+                (où se trouve le visage, largeur puis hauteur en %).          */
   souvenirs: {
     chapitre: "Chapitre III",
     titre: "Nos souvenirs, tes merveilles",
     liste: [
-      { moment: "Le commencement", titre: "Notre rencontre", texte: "Un jour comme les autres… qui ne l’était pas du tout. Ce jour-là, sans le savoir, j’ai rencontré quelqu’un d’exceptionnel.", icone: "etoile" },
-      { moment: "Chaque jour", titre: "Ton sourire", texte: "Celui qui transforme une journée grise en souvenir lumineux. Il devrait être classé trésor national.", icone: "sourire" },
-      { moment: "Dans les moments durs", titre: "Ta loyauté", texte: "Tu es de celles qui restent. Qui écoutent. Qui tiennent la main quand le monde tremble.", icone: "main" },
-      { moment: "Nos fous rires", titre: "Ta joie", texte: "Ces rires qui arrivent sans prévenir, qui font mal au ventre et qu’on se raconte encore des jours après.", icone: "rire" },
-      { moment: "Toujours", titre: "Ta force", texte: "Tu avances la tête haute, avec grâce, même quand c’est difficile. C’est ça, la vraie couronne.", icone: "couronne" },
-      { moment: "Pour longtemps", titre: "Notre amitié", texte: "Un lien rare et précieux, que je compte bien garder longtemps. Très longtemps.", icone: "infini" },
+      { moment: "Le commencement", titre: "Notre rencontre", texte: "Un jour comme les autres… qui ne l’était pas du tout. Ce jour-là, sans le savoir, j’ai rencontré quelqu’un d’exceptionnel.", icone: "etoile", photo: "photos/souvenir-rencontre.jpg", cadrage: "48% 30%" },
+      { moment: "Chaque jour", titre: "Ton sourire", texte: "Celui qui transforme une journée grise en souvenir lumineux. Il devrait être classé trésor national.", icone: "sourire", photo: "photos/souvenir-sourire.jpg", cadrage: "55% 28%" },
+      { moment: "Dans les moments durs", titre: "Ta loyauté", texte: "Tu es de celles qui restent. Qui écoutent. Qui tiennent la main quand le monde tremble.", icone: "main", photo: "photos/souvenir-loyaute.jpg", cadrage: "55% 22%" },
+      { moment: "Nos fous rires", titre: "Ta joie", texte: "Ces rires qui arrivent sans prévenir, qui font mal au ventre et qu’on se raconte encore des jours après.", icone: "rire", photo: "photos/souvenir-joie.jpg", cadrage: "20% 40%" },
+      { moment: "Toujours", titre: "Ta force", texte: "Tu avances la tête haute, fière de tes couleurs, avec grâce, même quand c’est difficile. C’est ça, la vraie couronne.", icone: "couronne", photo: "photos/souvenir-force.jpg", cadrage: "45% 30%" },
+      { moment: "Pour longtemps", titre: "Notre amitié", texte: "Un lien rare et précieux, que je compte bien garder longtemps. Très longtemps.", icone: "infini", photo: "photos/souvenir-amitie.jpg", cadrage: "50% 32%" },
     ],
   },
 

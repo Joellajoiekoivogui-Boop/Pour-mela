@@ -69,6 +69,10 @@ export function Memories() {
 function MemoryItem({ memory, index }: { memory: Memory; index: number }) {
   const node = useRef<HTMLSpanElement>(null);
   const left = index % 2 === 0;
+  const photo =
+    "photo" in memory && memory.photo
+      ? { src: memory.photo, cadrage: "cadrage" in memory ? memory.cadrage : "50% 30%" }
+      : null;
 
   const onEnter = () => {
     const rect = node.current?.getBoundingClientRect();
@@ -100,6 +104,21 @@ function MemoryItem({ memory, index }: { memory: Memory; index: number }) {
         <Tilt className="rounded-[1.75rem]">
           <div className="relative overflow-hidden rounded-[1.75rem] border border-or/15 bg-[linear-gradient(145deg,rgb(42_13_34/0.72),rgb(10_5_14/0.82))] p-7 shadow-[0_24px_60px_-30px_rgb(255_111_154/0.4)] sm:p-9">
             <div aria-hidden className="absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[radial-gradient(closest-side,rgb(233_196_106/0.18),transparent)]" />
+            {photo ? (
+              <div className="group/photo relative -mx-7 -mt-7 mb-7 aspect-[4/3] overflow-hidden sm:-mx-9 sm:-mt-9">
+                {/* eslint-disable-next-line @next/next/no-img-element -- site statique, sans optimiseur d'images */}
+                <img
+                  src={photo.src}
+                  alt={`${reine.prenom}, ${memory.titre.toLowerCase()}`}
+                  loading="lazy"
+                  decoding="async"
+                  className="h-full w-full object-cover transition-transform duration-[1.6s] ease-[cubic-bezier(0.22,1,0.36,1)] group-hover/photo:scale-105"
+                  style={{ objectPosition: photo.cadrage }}
+                />
+                <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-[rgb(20_7_20)] via-transparent to-or/10" />
+                <span aria-hidden className="shine" />
+              </div>
+            ) : null}
             <div className={`flex items-center gap-4 ${left ? "md:flex-row-reverse" : ""}`}>
               <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-or/30 bg-or/[0.06] text-or-clair shadow-[0_0_24px_-4px_rgb(233_196_106/0.6)]">
                 <MemoryIcon name={memory.icone} className="h-6 w-6" />

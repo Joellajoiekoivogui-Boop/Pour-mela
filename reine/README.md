@@ -63,7 +63,7 @@ Dépose-la dans `public/photos/` (par exemple `public/photos/bhama.jpg`), puis
 dans la configuration :
 
 ```ts
-photo: { src: "/photos/bhama.jpg", alt: "…", cadrage: "50% 30%", legende: "…" },
+photo: { src: "photos/bhama.jpg", alt: "…", cadrage: "50% 30%", legende: "…" },
 ```
 
 `cadrage` place le visage au centre de l’arche (largeur puis hauteur, en %).
