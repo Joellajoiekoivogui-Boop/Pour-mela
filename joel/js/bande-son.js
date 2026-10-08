@@ -232,6 +232,87 @@
       }
     },
 
+    // Petit « pop » (ballon, emoji qui apparaît).
+    pop(c, e) {
+      const { sr } = c;
+      const i0 = Math.floor(e.t * sr);
+      const n = Math.floor(0.09 * sr);
+      let phase = 0;
+      for (let k = 0; k < n; k++) {
+        const x = k / sr;
+        phase += DEUX_PI * (300 + 700 * Math.exp(-x / 0.012)) / sr;
+        const v = Math.sin(phase) * Math.exp(-x / 0.025) * Math.min(1, x / 0.001) * e.gain;
+        ajouter(c, i0 + k, v, v, 0.2);
+      }
+    },
+
+    // Une bougie qui s'allume : frottement, puis souffle de la flamme.
+    allumage(c, e) {
+      const { sr } = c;
+      const r = hasard(Math.floor(e.t * 1000) + 61);
+      const i0 = Math.floor(e.t * sr);
+      const n = Math.floor(0.45 * sr);
+      let lp = 0, prec = 0;
+      for (let k = 0; k < n; k++) {
+        const x = k / sr;
+        const b = r() * 2 - 1;
+        const hp = b - prec;
+        prec = b;
+        lp += 0.04 * (b - lp);
+        const frotte = hp * Math.exp(-x / 0.04) * 0.6;
+        const flamme = lp * 4 * Math.min(1, x / 0.05) * Math.exp(-x / 0.18);
+        const crepite = r() < 0.002 ? (r() - 0.5) * 2 : 0;
+        const v = (frotte + flamme + crepite * 0.5) * e.gain;
+        ajouter(c, i0 + k, v * 0.9, v, 0.2);
+      }
+    },
+
+    // Un projecteur qui s'allume : choc sourd et déclic métallique.
+    clunk(c, e) {
+      cogner(c, e.t, e.gain, 110, 55, 0.12);
+      grain(c, e.t, 2600, 0.08, e.gain * 0.25, 0.3, 0.3, [1, 0.5, 0.3]);
+    },
+
+    // Feu d'artifice : sifflement qui monte, explosion, crépitements.
+    petard(c, e) {
+      const { sr } = c;
+      const r = hasard(Math.floor(e.t * 1000) + 71);
+      const i0 = Math.floor(e.t * sr);
+      const n = Math.floor(0.55 * sr);
+      let phase = 0;
+      for (let k = 0; k < n; k++) {
+        const x = k / n;
+        phase += DEUX_PI * (900 + 1600 * x) / sr;
+        const v = Math.sin(phase) * x * (1 - x) * 4 * 0.12 * e.gain;
+        ajouter(c, i0 + k, v * (1 - x), v * x, 0.3);
+      }
+      INSTRUMENTS.impact(c, { t: e.t + 0.55, gain: e.gain * 1.2 });
+      for (let k = 0; k < 40; k++) {
+        const t = e.t + 0.8 + r() * 1.3;
+        grain(c, t, 3000 + r() * 5000, 0.03, e.gain * 0.25 * r(), r() * 2 - 1, 0.3);
+      }
+    },
+
+    // Boîte à musique : une note claire qui s'éteint doucement.
+    boite(c, e) {
+      const f = freq(e.f);
+      grain(c, e.t, f, e.d, e.gain, 0, 0.5, [1, 0, 0.32, 0, 0.1]);
+      grain(c, e.t, f * 4.2, 0.25, e.gain * 0.08, 0, 0.3);
+    },
+
+    // Frappe de clavier.
+    frappe(c, e) {
+      const { sr } = c;
+      const r = hasard(Math.floor(e.t * 1000) + 83);
+      const i0 = Math.floor(e.t * sr);
+      const n = Math.floor(0.03 * sr);
+      for (let k = 0; k < n; k++) {
+        const x = k / sr;
+        const v = ((r() * 2 - 1) * 0.7 + Math.sin(DEUX_PI * 1800 * x) * 0.3) * Math.exp(-x / 0.006) * e.gain;
+        ajouter(c, i0 + k, v, v * 0.8, 0.1);
+      }
+    },
+
     // Cloche douce (presque un piano) pour la mélodie.
     cloche(c, e) {
       const f = freq(e.f);

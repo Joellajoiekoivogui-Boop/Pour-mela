@@ -64,7 +64,7 @@
     const cx = W / 2;
     const cy = H / 2;
     const ctx = canvas.getContext('2d');
-    const nomVersion = options.version === 'courte' ? 'courte' : 'longue';
+    const nomVersion = options.version === 'courte' || options.version === 'pub' ? options.version : 'longue';
     const V = Partition.versions[nomVersion];
     const photos = (options.photos || []).filter((p) => p && p.naturalWidth);
     const grain = options.grain !== false;
@@ -1103,9 +1103,18 @@
       }
     }
 
+    // La version « publicité » vit dans pub.js et reçoit les outils du moteur.
+    const pub = nomVersion === 'pub' ? racine.JoelPub.creer({
+      ctx, canvas, W, H, S, cx, cy, portrait, L, V, densite,
+      borne, lin, melange, sortie, sortieForte, entree, douce, lisse, fenetre, hasard, toile, rgba, COULEURS, POLICES,
+      point, spriteListe, bokeh, halo, voile, faisceau, onde, gerbe, confettis, etoiles, poussieres, fondNebuleuse,
+      police, ecrire, ecrireFlou, mesurer, couper, titre, poser, glitch, nuageDe, former, photosPretes, placer, cadrePhoto, camZ, vitesse,
+    }) : null;
+
     // ===================================================== préparation
     const T = {};
     function preparer() {
+      if (pub) return pub.preparer();
       const ttl = (cle, texte, o) => (T[cle] = titre(cle, texte, o));
       if (nomVersion === 'longue') {
         ttl('dix', '10', { style: 'metal', taille: S * L(0.62, 0.7), maxL: W * L(0.6, 0.8) });
@@ -1132,7 +1141,7 @@
         nuageDe('joel', T.joel, 2600);
         nuageSilhouette();
         Partition.versions.longue.reves.forEach((p, k) => nuageDe('reve' + k, T['reve' + k], 2400));
-      } else {
+      } else if (nomVersion === 'courte') {
         ttl('dix', '10', { style: 'metal', taille: S * L(0.66, 0.74), maxL: W * L(0.6, 0.82) });
         ttl('octobre', 'OCTOBRE', { style: 'metal', poids: 700, taille: S * L(0.26, 0.2), espacement: 0.04, maxL: W * L(0.8, 0.88) });
         ttl('joel', 'JOËL', { style: 'metal', taille: S * L(0.4, 0.44), maxL: W * L(0.7, 0.86) });
@@ -1607,6 +1616,7 @@
         const [sx, sy] = secousse(t);
         ctx.setTransform(1, 0, 0, 1, sx, sy);
         if (nomVersion === 'longue') scenesLongues(t);
+        else if (pub) pub.dessiner(t);
         else scenesCourtes(t);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
       }

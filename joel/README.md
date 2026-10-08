@@ -20,6 +20,36 @@ panneaux et réseaux redisposés, JOËL toujours en grand au centre).
 Le film se regarde aussi en direct dans le navigateur : ouvre `index.html`
 (ou `/joel/` sur le site en ligne) et touche « Lancer le film ».
 
+## La publicité (3 min 54)
+
+Une troisième version, façon publicité de marque, sur le texte « Aujourd’hui
+n’est pas un jour comme les autres… » : `videos/joel-pub-16x9.mp4` et
+`videos/joel-pub-9x16.mp4`.
+
+| Temps | Partie |
+| --- | --- |
+| 0:00 | **Introduction** — ambiance mystérieuse, calendrier qui tourne jusqu’au 10 octobre |
+| 0:26 | **L’annonce** — alerte, projecteurs qui s’allument, emojis, bougies, gâteau 3D, confettis et serpentins, puis **JOËL** en affiche |
+| 0:54 | **Le message** — livre qui s’ouvre, phrases empilées, le chemin parcouru bordé des photos |
+| 1:22 | **Célébration** — lâcher de ballons, « UNE ANNÉE… » avec les photos en affiches, feux d’artifice |
+| 1:43 | **Les vœux** — un cadeau s’ouvre pour chaque vœu |
+| 2:08 | **Moment émotionnel** — la nuit, puis « TON HISTOIRE NE FAIT QUE COMMENCER » |
+| 2:32 | **Le grand moment** — explosion de confettis : JOYEUX ANNIVERSAIRE JOËL ! |
+| 2:53 | **Message final** — « PLUS DE… », puis « merci à la vie » |
+| 3:11 | **Fin publicitaire** — message officiel, cartes de bande-annonce, affiche de cinéma |
+| 3:38 | **Écran final** — « Joyeux anniversaire » joué en boîte à musique |
+
+Tout le texte bouge (lettres qui montent, mots qui rebondissent, phrases qui
+glissent, se dévoilent ou s’écrivent), et la musique suit le récit : intro
+mystérieuse, montée émotionnelle, rythme énergique, explosion au « JOYEUX
+ANNIVERSAIRE JOËL ! », conclusion élégante. La mélodie de « Joyeux
+anniversaire » est dans le domaine public.
+
+Pour la refaire : `node rendre-video.js --version pub` (ajoute
+`--format portrait` pour le 9:16). Les textes et leurs instants sont dans
+[`js/partition.js`](js/partition.js) (section « LA PUBLICITÉ »), les visuels
+dans [`js/pub.js`](js/pub.js).
+
 ## Le découpage (90 s)
 
 | Temps | Scène |
