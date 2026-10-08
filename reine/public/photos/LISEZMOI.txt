@@ -1,0 +1,6 @@
+Dépose ici sa photo (par exemple bhama.jpg), puis dans src/config/reine.ts :
+
+  photo: { src: "/photos/bhama.jpg", alt: "…", cadrage: "50% 30%", legende: "…" },
+
+Conseil : photo verticale d'environ 1000 px de large, en .jpg ou .webp.
+`cadrage` = où se trouve le visage (largeur puis hauteur, en %).

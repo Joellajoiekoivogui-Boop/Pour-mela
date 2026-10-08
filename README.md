@@ -1,5 +1,11 @@
 # 💌 Déclaration d’amour — une petite histoire interactive
 
+> **Aussi dans ce dépôt : [👑 Le royaume de Bhama](reine/)**, une expérience
+> cinématographique en Next.js, React Three Fiber et Motion, pour Bhama
+> Jeanne Kolié. Elle vit dans le dossier `reine/`, indépendante de ce site ;
+> voir [`reine/README.md`](reine/README.md) pour la personnaliser et la mettre
+> en ligne.
+
 Un site romantique, animé et immersif, pensé d’abord pour le téléphone :
 chaque toucher révèle un peu plus les sentiments, jusqu’à une lettre
 personnelle cachée dans une enveloppe scellée.
