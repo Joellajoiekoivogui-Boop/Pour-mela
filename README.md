@@ -10,6 +10,8 @@
 > pour Joël Koivogui (10 octobre), en Next.js, Three.js et Motion. Il vit dans
 > le dossier `joel/` ; voir [`joel/README.md`](joel/README.md).
 
+La déclaration d’amour de **Joël la joie** pour **Fanta** 💌
+
 Un site romantique, animé et immersif, pensé d’abord pour le téléphone :
 chaque toucher révèle un peu plus les sentiments, jusqu’à une lettre
 personnelle cachée dans une enveloppe scellée.
@@ -160,17 +162,13 @@ simplement ignorée.
 
 ### La voix qui lit la lettre
 
-La lecture à voix haute tient dans deux fichiers du dossier `medias/` :
+La lecture à voix haute est facultative (la déclaration pour Fanta n’en a
+pas pour l’instant). Elle tient dans deux fichiers du dossier `medias/` :
 
-- `lettre-voix.mp3` : la voix (environ 2 min 50 s, 1,2 Mo, téléchargée
-  seulement quand le livre arrive) ;
+- `lettre-voix.mp3` : la voix (téléchargée seulement quand le livre arrive) ;
 - `lecture.js` : la frise de lecture. Pour chaque phrase, elle donne la page
   du livre où elle s’écrit et l’instant où la voix la dit (`debut`, `fin`, en
   secondes).
-
-Ici, la voix a le timbre d’un message vocal fourni pour le site : la
-lecture a été convertie vers cette voix sans changer son rythme, donc la
-frise reste exacte.
 
 Pendant la lecture, la musique baisse puis remonte à la fin. Le bouton en
 haut à droite coupe la voix et la musique ensemble.

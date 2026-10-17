@@ -19,11 +19,11 @@ window.DECLARATION = {
 
   /* 1. SON PRÉNOM — il s'écrit progressivement à l'écran.
         Exemple : "Aïcha", "Mariam", "Ibrahima"…                              */
-  prenom: "Mela",
+  prenom: "Fanta",
 
   /* 2. L'ÉCRAN D'ACCUEIL                                                       */
   accueil: {
-    titre: "J’ai quelque chose à te dire…",
+    titre: "Fanta, j’ai quelque chose à te dire…",
     invitation: "Clique sur le cœur ❤️",
   },
 
@@ -37,43 +37,40 @@ window.DECLARATION = {
         Ajoute ou retire autant de lignes que tu veux.
         Le dernier est mis en valeur (grand, écrit à la main).                 */
   messages: [
-    "Depuis quelque temps, tu occupes une place particulière dans mes pensées.",
-    "Et aujourd’hui, j’avais simplement envie de te le dire…",
+    "Il y a des personnes qui passent dans une vie… et d’autres qui l’illuminent.",
+    "Toi, Fanta, tu fais partie de la deuxième catégorie.",
+    "Depuis que tu es là, mes journées ont une autre couleur.",
+    "Alors aujourd’hui, j’ai décidé de ne plus garder ça pour moi…",
     "Je t’aime ❤️",
   ],
 
   /* Le texte du bouton qui ouvre la lettre                                    */
-  boutonLettre: "Découvrir mon message 💌",
+  boutonLettre: "Découvrir ma lettre 💌",
 
   /* 5. LA LETTRE FINALE (ta déclaration personnelle)
         Elle s'ouvre comme un livre et une voix la lit, la musique derrière :
         les mots s'écrivent au rythme de la voix et chaque page lue s'envole.
-        La voix est rangée dans « medias » (lettre-voix.mp3 et lecture.js) :
-        si tu changes la lettre, il faut refaire la voix ; en attendant, la
-        lettre s'affiche dans l'enveloppe classique, sans voix.               */
+        Pour qu'une voix la lise, ajoute dans « medias » lettre-voix.mp3 et
+        lecture.js (voir le README) ; sans eux, la lettre s'affiche dans
+        l'enveloppe classique, sans voix.                                     */
   lettre: {
-    surEnveloppe: "Pour toi",   // écrit sur l'enveloppe et sur le livre
-    titre: "",                  // vide = « Prénom, » automatiquement
+    surEnveloppe: "Pour Fanta",  // écrit sur l'enveloppe et sur le livre
+    titre: "Ma chère Fanta,",   // vide = « Prénom, » automatiquement
     paragraphes: [
-      "Je ne sais pas exactement quand c’est arrivé. Peut-être à travers un regard, un sourire, ou une conversation qui a duré bien plus longtemps que prévu.",
-      "Mais un jour, j’ai compris que tu n’étais plus tout à fait une personne comme les autres pour moi. Quelque chose avait changé, doucement, sans faire de bruit, comme le jour qui se lève.",
-      "Depuis, je pense à toi plus souvent que je ne l’avoue. Le matin, c’est ton prénom qui me vient en premier. Le soir, c’est ton sourire qui m’accompagne avant de dormir.",
-      "Un message de toi suffit à illuminer ma journée. Parfois, je relis nos conversations, juste pour retrouver un peu de toi entre les lignes. Et ta présence a quelque chose d’apaisant que je ne trouve nulle part ailleurs.",
-      "J’aime ta façon de rire, ta façon de voir le monde, et cette lumière que tu portes sans même t’en rendre compte.",
-      "J’aime ton élégance, ta douceur, et cette force tranquille qui te rend unique. En blanc, en rose ou en noir, avec tes boucles ou tes longs cheveux, tu restes la plus belle chose que mes yeux aient vue.",
-      "J’aime aussi la fierté que tu portes en toi : la fierté de ta Guinée, de tes racines, de ce que tu es. Elle te rend encore plus belle.",
-      "Quand je te regarde, j’oublie mes soucis. Le temps ralentit, le bruit du monde s’efface, et il ne reste plus que toi.",
-      "Tu ne le sais peut-être pas, mais tu as changé quelque chose en moi. Tu m’as donné envie d’être meilleur, plus patient, plus attentif, plus présent.",
-      "Avec toi, j’ai envie de construire, de rêver, de rire, et de traverser les jours, les plus beaux comme les plus difficiles, main dans la main.",
-      "Je sais que les mots ne suffiront jamais à tout dire. Mais ce que je ressens pour toi est vrai, simple et profond.",
-      "Je ne t’écris pas pour te demander quoi que ce soit. Je voulais simplement que tu saches, avec sincérité, ce que tu représentes pour moi.",
-      "Merci d’être toi. Merci pour chaque sourire, chaque mot doux, chaque instant que tu m’offres sans même le savoir.",
-      "Si un jour tu doutes de toi, relis ces mots. Ils te rappelleront qu’il existe quelqu’un qui croit en toi, qui t’admire, et qui pense à toi bien plus que tu ne l’imagines.",
-      "Mela, tu es ma plus belle rencontre, ma plus douce pensée, et la plus jolie page de mon histoire.",
-      "Tu comptes énormément pour moi. Et je t’aime, tout simplement. ❤️",
+      "Je cherche ces mots depuis longtemps. Je les ai écrits dans ma tête des dizaines de fois, effacés, recommencés… et ce soir, j’ai enfin trouvé le courage de te les offrir.",
+      "Je ne saurais pas dire à quel moment exact tout a commencé. Je sais seulement qu’un jour, ton sourire est devenu ma lumière préférée, et que ta voix est devenue la plus douce des musiques.",
+      "On m’appelle Joël la joie. Mais la vérité, c’est que ma plus grande joie, c’est toi. Chaque fois que je pense à toi, quelque chose s’allume en moi, et le monde devient un peu plus beau.",
+      "J’aime ta douceur, ta force, ta façon de rire et cette manière unique que tu as de rendre les choses simples plus belles. Avec toi, même les jours ordinaires ressemblent à une fête.",
+      "Quand tu es là, le temps passe trop vite. Quand tu n’es pas là, il me tarde déjà de te revoir. Un simple message de toi suffit à changer toute ma journée.",
+      "Tu m’as donné envie d’être meilleur : plus patient, plus attentif, plus présent. Tu réveilles en moi le meilleur de ce que je suis.",
+      "Je rêve de partager avec toi les rires et les silences, les projets et les petits riens, les beaux jours comme les plus difficiles, toujours main dans la main.",
+      "Je ne t’écris pas pour te presser ni pour te demander quoi que ce soit. Je voulais seulement que tu saches, avec tout mon cœur et en toute sincérité, ce que tu représentes pour moi.",
+      "Si un jour tu doutes de toi, relis ces mots : ils te rappelleront que quelqu’un t’admire, croit en toi et pense à toi bien plus souvent que tu ne l’imagines.",
+      "Fanta, tu es ma plus belle rencontre, ma plus douce pensée et ma plus grande joie.",
+      "Je t’aime, tout simplement. ❤️",
     ],
-    formule: "Avec tout mon cœur,",
-    signature: "Joël",          // ← ton prénom
+    formule: "Avec tout mon amour,",
+    signature: "Joël la joie",  // ← ton prénom
   },
 
   /* 6. LES PHOTOS ET VIDÉOS (facultatif)
@@ -92,14 +89,7 @@ window.DECLARATION = {
   photos: {
     titre: "Regarde comme tu es belle…",
     liste: [
-      { image: "medias/photo-1.jpg", legende: "Hello weekend… et hello mon cœur", cadrage: "54% 28%" },
-      { image: "medias/photo-2.jpg", legende: "Même en vert, tu restes ma couleur préférée", cadrage: "45% 33%" },
-      { image: "medias/photo-3.jpg", legende: "Ce regard… je m’y perds à chaque fois", cadrage: "44% 46%" },
-      { video: ["medias/video-1.mp4", "medias/video-1.webm"], image: "medias/video-1.jpg", legende: "Et quand tu bouges, tout mon cœur danse avec toi", cadrage: "48% 32%" },
-      { image: "medias/photo-4.jpg", legende: "Douce comme ce rose, belle comme toujours", cadrage: "49% 20%" },
-      { image: "medias/photo-5.jpg", legende: "Fière de ta Guinée… et tellement belle", cadrage: "40% 10%" },
-      { image: "medias/photo-6.jpg", legende: "Un regard en arrière… et mon cœur chavire", cadrage: "52% 16%" },
-      { image: "medias/photo-7.jpg", legende: "Mela, tu es ma plus belle histoire ❤️", cadrage: "51% 29%" },
+      // { image: "medias/photo-1.jpg", legende: "Ton sourire, ma lumière", cadrage: "50% 25%" },
     ],
   },
 

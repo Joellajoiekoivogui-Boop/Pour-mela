@@ -5,7 +5,7 @@ Dépose ici tes photos et ta musique, puis indique-les dans config.js :
              puis de la hauteur ; il reste au centre des médaillons et du zoom)
   musique →  fichier: "medias/notre-chanson.mp3",
 
-La voix qui lit la lettre :
+La voix qui lit la lettre (facultative, absente pour l'instant) :
   lettre-voix.mp3  la voix ;
   lecture.js       pour chaque phrase, sa page dans le livre et l'instant
                    où la voix la dit (debut, fin, en secondes).
