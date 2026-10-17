@@ -7,7 +7,7 @@
   'use strict';
 
   var Amour = window.Amour;
-  var O = Amour.outils, E = Amour.effets, M = Amour.musique, F = Amour.film, B = Amour.livre;
+  var O = Amour.outils, E = Amour.effets, M = Amour.musique, F = Amour.film, B = Amour.livre, S = Amour.souvenir;
   var html = document.documentElement;
 
   var charge = O.chargerConfig();
@@ -1101,6 +1101,43 @@
   }
 
   /* ------------------------------------------------------------------ */
+  /* La lettre en image, à garder sur le téléphone                       */
+  /* ------------------------------------------------------------------ */
+
+  function nomFichierLettre() {
+    var p = String(config.prenom || '').normalize ? String(config.prenom || '').normalize('NFD') : String(config.prenom || '');
+    p = p.replace(/[\u0300-\u036f]/g, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    return 'lettre' + (p ? '-pour-' + p : '') + '.png';
+  }
+
+  function garderLettre(e) {
+    var bouton = e.currentTarget;
+    if (!S || bouton.disabled) return;
+    var etiquette = bouton.querySelector('.etiquette');
+    var texte = etiquette.textContent;
+    bouton.disabled = true;
+    etiquette.textContent = 'Préparation de ta lettre…';
+    S.creerImage(config).then(function (blob) {
+      // L'image reste visible : un appui long l'enregistre si le
+      // téléchargement est bloqué (navigateur intégré de WhatsApp…).
+      var img = $('lettre-image-img');
+      if (img.src) URL.revokeObjectURL(img.src);
+      img.src = URL.createObjectURL(blob);
+      $('lettre-image').hidden = bouton.id !== 'bouton-garder';
+      return S.enregistrer(blob, nomFichierLettre());
+    }).then(function (resultat) {
+      etiquette.textContent = resultat === 'annule' ? texte : 'Lettre enregistrée';
+      M.effet('pop');
+    }, function (err) {
+      if (window.console) console.warn('Lettre en image impossible : ' + (err && err.message));
+      etiquette.textContent = texte;
+    }).then(function () {
+      bouton.disabled = false;
+      setTimeout(function () { etiquette.textContent = texte; }, 4000);
+    });
+  }
+
+  /* ------------------------------------------------------------------ */
   /* Visionneuse de photos                                               */
   /* ------------------------------------------------------------------ */
 
@@ -1176,6 +1213,7 @@
     setTimeout(function () { if (etat !== 'lettre') el.lettre.hidden = true; }, 900);
     var reveles = el.lettre.querySelectorAll('.revele');
     for (var i = 0; i < reveles.length; i++) reveles[i].classList.remove('visible');
+    $('lettre-image').hidden = true;
     var trace = el.coeurDessine.querySelector('.trace');
     if (trace) trace.style.strokeDashoffset = trace.style.strokeDasharray ? trace.style.strokeDasharray.split(' ')[0] : '';
     html.classList.remove('eclate', 'lecture', 'pret', 'defile');
@@ -1273,6 +1311,8 @@
   el.boutonFilm.addEventListener('click', surBoutonLettre);
   el.enveloppe.addEventListener('click', surEnveloppe);
   el.boutonRejouer.addEventListener('click', rejouer);
+  $('bouton-garder').addEventListener('click', garderLettre);
+  $('livre-garder').addEventListener('click', garderLettre);
   el.livreCouverture.addEventListener('click', surLivre);
   el.livreRejouer.addEventListener('click', rejouer);
   el.livrePhotos.addEventListener('click', revoirPhotos);

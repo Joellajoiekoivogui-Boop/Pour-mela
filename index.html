@@ -23,7 +23,7 @@
   <link rel="preload" href="fonts/cormorant-italique-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="fonts/great-vibes-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="css/polices.css">
-  <link rel="stylesheet" href="css/style.css?v=2">
+  <link rel="stylesheet" href="css/style.css?v=3">
 
   <script>
     // Repère une erreur de frappe dans config.js pour l'afficher clairement.
@@ -34,14 +34,15 @@
       }
     });
   </script>
-  <script src="config.js?v=2" defer></script>
-  <script src="js/outils.js?v=2" defer></script>
-  <script src="js/effets.js?v=2" defer></script>
-  <script src="js/musique.js?v=2" defer></script>
-  <script src="js/film.js?v=2" defer></script>
-  <script src="js/livre.js?v=2" defer></script>
+  <script src="config.js?v=3" defer></script>
+  <script src="js/outils.js?v=3" defer></script>
+  <script src="js/effets.js?v=3" defer></script>
+  <script src="js/musique.js?v=3" defer></script>
+  <script src="js/film.js?v=3" defer></script>
+  <script src="js/livre.js?v=3" defer></script>
   <script src="medias/lecture.js" defer></script>
-  <script src="js/app.js?v=2" defer></script>
+  <script src="js/souvenir.js?v=3" defer></script>
+  <script src="js/app.js?v=3" defer></script>
 </head>
 <body>
   <!-- Formes partagées : le cœur et ses dégradés -->
@@ -156,6 +157,10 @@
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 7h3l2-2h6l2 2h3v12H4z"/><circle cx="12" cy="13" r="3.5"/></svg>
           Revoir ses photos
         </button>
+        <button class="bouton-doux bouton-garder" id="livre-garder" type="button">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+          <span class="etiquette">Télécharger ma lettre</span>
+        </button>
         <button class="bouton-doux" id="livre-rejouer" type="button">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg>
           Revivre ce moment
@@ -200,10 +205,18 @@
     </section>
 
     <div class="lettre-fin revele" id="lettre-fin">
+      <button class="bouton-doux bouton-garder" id="bouton-garder" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+        <span class="etiquette">Télécharger ma lettre</span>
+      </button>
       <button class="bouton-doux" id="bouton-rejouer" type="button">
         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M4 12a8 8 0 1 0 2.4-5.7M4 4v4h4"/></svg>
         Revivre ce moment
       </button>
+      <figure class="lettre-image" id="lettre-image" hidden>
+        <img id="lettre-image-img" alt="Ta lettre, en image">
+        <figcaption>Si rien ne s’est enregistré, appuie longuement sur l’image puis choisis « Enregistrer l’image ».</figcaption>
+      </figure>
     </div>
   </div>
 

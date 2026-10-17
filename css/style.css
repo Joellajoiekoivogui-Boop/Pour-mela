@@ -1713,8 +1713,49 @@ button {
 }
 
 .lettre-fin {
+  display: -webkit-box;
+  display: -webkit-flex;
+  display: flex;
+  -webkit-flex-wrap: wrap;
+  flex-wrap: wrap;
+  -webkit-justify-content: center;
+  justify-content: center;
+  gap: 12px;
   margin: 2.6rem auto 0;
   text-align: center;
+}
+
+/* Télécharger la lettre en image : le bouton mis en avant. */
+.bouton-doux.bouton-garder {
+  border-color: rgba(255, 255, 255, .4);
+  background-color: var(--principale);
+  background-image: linear-gradient(135deg, var(--principale), var(--profonde));
+  color: #fff;
+  box-shadow: 0 10px 28px rgba(var(--principale-rgb), .4), inset 0 1px 0 rgba(255, 255, 255, .35);
+}
+.bouton-garder[disabled] { opacity: .75; cursor: progress; }
+.leger .bouton-doux.bouton-garder { background-color: var(--principale); }
+
+.lettre-image {
+  -webkit-flex-basis: 100%;
+  flex-basis: 100%;
+  margin: 1rem 0 0;
+}
+.lettre-image img {
+  display: block;
+  width: 11rem;
+  max-width: 100%;
+  margin: 0 auto;
+  border-radius: 8px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, .5);
+  -webkit-touch-callout: default;
+}
+.lettre-image figcaption {
+  margin-top: .8rem;
+  font-family: var(--sans);
+  font-size: .8rem;
+  line-height: 1.5;
+  color: rgba(var(--texte-rgb), .75);
 }
 
 .bouton-doux {

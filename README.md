@@ -57,6 +57,13 @@ gratuitement en une minute.
    lettre se déplie et se révèle au rythme de la lecture ; les photos
    s’affichent alors en polaroïds sous la lettre.
 
+Sous la lettre, **« Télécharger ma lettre »** enregistre la lettre en image
+(titre, paragraphes, signature et cœur, sur une feuille aux couleurs du
+thème) : la feuille de partage sur iPhone, pour la garder dans Photos, un
+téléchargement ailleurs. Une vignette s’affiche aussi : un appui long
+l’enregistre quand le navigateur bloque les téléchargements (celui de
+WhatsApp, par exemple).
+
 Avec `options.avancementAuto` (par défaut), personne n’a besoin de toucher
 l’écran après le cœur de l’accueil : le bouton de la lettre se remplit de
 lumière puis s’ouvre seul, l’enveloppe s’ouvre d’elle-même, et la lettre
@@ -245,6 +252,7 @@ tester les liens de l’atelier, sers le dossier : `npx serve .` ou
   js/musique.js        boîte à musique (Web Audio) ou ta chanson, petits sons
   js/film.js           le film des photos : médaillons en cœur, zoom, lumières (canvas)
   js/livre.js          le livre : pages, mots au rythme de la voix, pages qui s’envolent
+  js/souvenir.js       la lettre en image, à télécharger (canvas)
   js/app.js            le scénario, scène par scène
   js/editeur.js        l’atelier
   tests/               tests de la configuration (node --test tests/*.test.js)
