@@ -112,7 +112,7 @@ window.DECLARATION = {
 
   /* 9. RÉGLAGES                                                               */
   options: {
-    avancementAuto: true,       // les messages défilent seuls (un toucher accélère)
+    avancementAuto: true,       // tout passe seul : messages, enveloppe, la lettre qui monte
     vibration: true,            // petit battement de cœur sur les téléphones Android
     personnalisationParLien: true, // autorise les liens créés avec personnaliser.html
     diaporama: true,            // le film animé des photos (false = photos seulement sous la lettre)

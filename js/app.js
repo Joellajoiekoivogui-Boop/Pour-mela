@@ -455,13 +455,24 @@
     montrerBouton(el.boutonLettre);
   }
 
+  // En mode automatique, la lettre vient d'elle-même quand le bouton s'est
+  // rempli de lumière ; le toucher permet seulement de ne pas attendre.
+  var ATTENTE_BOUTON = 5900;   // = délai + durée de « remplissage » (style.css)
+
   function montrerBouton(bouton) {
     etat = 'bouton';
     bouton.classList.add('visible');
     bouton.removeAttribute('tabindex');
+    if (!config.options.avancementAuto) return;
+    var j = jeton;
+    bouton.classList.add('auto');
+    setTimeout(function () {
+      if (encore(j) && etat === 'bouton') surBoutonLettre({ currentTarget: bouton });
+    }, ATTENTE_BOUTON);
   }
 
   async function unMessage(j, texte, dernier) {
+    var auto = config.options.avancementAuto;
     var bloc = document.createElement('div');
     bloc.className = 'message' + (dernier ? ' message-final' : '');
     var p = document.createElement('p');
@@ -472,10 +483,15 @@
     el.zoneMessages.appendChild(bloc);
     annoncer(texte);
 
-    // Révélation des mots (un toucher l'accélère).
-    var touche = await attendreOuToucher(n * pas + 900);
-    if (!encore(j)) return;
-    if (touche) bloc.classList.add('instantane');
+    // Révélation des mots : seule en mode automatique, sinon un toucher l'accélère.
+    if (auto) {
+      await attendre(n * pas + 900);
+      if (!encore(j)) return;
+    } else {
+      var touche = await attendreOuToucher(n * pas + 900);
+      if (!encore(j)) return;
+      if (touche) bloc.classList.add('instantane');
+    }
 
     if (dernier) {
       var coeur = p.querySelector('.coeur-inline');
@@ -486,15 +502,30 @@
       return;
     }
 
-    // Lecture : passage automatique, ou au toucher.
-    el.sceneMessages.classList.add('attend-toucher');
-    var lecture = config.options.avancementAuto ? Math.min(9000, 2000 + texte.length * 50) : -1;
-    await attendreOuToucher(lecture);
-    el.sceneMessages.classList.remove('attend-toucher');
+    // Lecture : un fil de lumière se remplit puis le message passe seul ;
+    // sans avancement automatique, il attend un toucher.
+    if (auto) {
+      var lecture = Math.min(9500, 2600 + texte.length * 55);
+      var fil = document.createElement('span');
+      fil.className = 'message-fil';
+      fil.setAttribute('aria-hidden', 'true');
+      fil.style.setProperty('--lecture', lecture + 'ms');
+      bloc.appendChild(fil);
+      await attendre(lecture);
+    } else {
+      el.sceneMessages.classList.add('attend-toucher');
+      await attendreOuToucher(-1);
+      el.sceneMessages.classList.remove('attend-toucher');
+    }
     if (!encore(j)) return;
 
+    // Les mots s'envolent un à un, dans une poussière d'étincelles.
+    var mots = p.querySelectorAll('.mot-anime');
+    for (var i = 0; i < mots.length; i++) mots[i].style.animationDelay = (i * 45) + 'ms';
     bloc.classList.add('sort');
-    await attendre(700);
+    var c = centre(p);
+    E.etincelles(c.x, c.y, 14);
+    await attendre(950 + Math.min(mots.length, 24) * 45);
     if (bloc.parentNode) bloc.parentNode.removeChild(bloc);
   }
 
@@ -799,6 +830,10 @@
     el.sceneEnveloppe.classList.remove('ouverte', 'disparait');
     montrer('scene-enveloppe');
     setTimeout(function () { try { el.enveloppe.focus({ preventScroll: true }); } catch (e) { /* rien */ } }, 900);
+    if (config.options.avancementAuto) {
+      var j = jeton;
+      setTimeout(function () { if (encore(j)) surEnveloppe(); }, 2800);
+    }
   }
 
   /* ------------------------------------------------------------------ */
@@ -971,6 +1006,43 @@
     setTimeout(function () {
       if (encore(j)) revelerProgressivement(aReveler, j);
     }, 700);
+    if (config.options.avancementAuto) defilerLettre(j);
+  }
+
+  // La lettre monte d'elle-même, au rythme d'une lecture tranquille, ses
+  // bords fondus dans la lumière. Un toucher ou un défilement la met en
+  // pause ; elle repart quelques secondes plus tard.
+  var repriseLettre = 0;
+
+  function pauseLettre() { repriseLettre = Date.now() + 3500; }
+
+  function defilerLettre(j) {
+    var lettre = el.lettre;
+    var premier = el.lettreCorps.firstElementChild || el.lettreCorps;
+    var ligne = parseFloat(window.getComputedStyle(premier).lineHeight) || 32;
+    var vitesse = ligne * 0.45;                    // pixels par seconde
+    var pos = lettre.scrollTop, attendu = pos, avant = 0;
+    repriseLettre = Date.now() + 3200;             // le temps de lire le début
+    html.classList.add('defile');
+
+    function fin() { html.classList.remove('defile'); }
+
+    function etape(t) {
+      if (!encore(j) || etat !== 'lettre') return fin();
+      var dt = avant ? Math.min(100, t - avant) : 0;
+      avant = t;
+      // Elle a fait défiler la lettre elle-même : on repart d'où elle est.
+      if (Math.abs(lettre.scrollTop - attendu) > 3) { pos = lettre.scrollTop; pauseLettre(); }
+      if (Date.now() >= repriseLettre) {
+        var max = lettre.scrollHeight - lettre.clientHeight;
+        pos = Math.min(max, pos + vitesse * dt / 1000);
+        lettre.scrollTop = pos;
+        if (pos >= max) return fin();
+      }
+      attendu = lettre.scrollTop;
+      window.requestAnimationFrame(etape);
+    }
+    window.requestAnimationFrame(etape);
   }
 
   // Révèle les éléments dans l'ordre, au rythme de la lecture, en attendant
@@ -1106,20 +1178,20 @@
     for (var i = 0; i < reveles.length; i++) reveles[i].classList.remove('visible');
     var trace = el.coeurDessine.querySelector('.trace');
     if (trace) trace.style.strokeDashoffset = trace.style.strokeDasharray ? trace.style.strokeDasharray.split(' ')[0] : '';
-    html.classList.remove('eclate', 'lecture', 'pret');
+    html.classList.remove('eclate', 'lecture', 'pret', 'defile');
     el.jetaime.classList.remove('sort', 'brille');
     el.scenePrenom.classList.remove('sort');
     el.prenom.classList.remove('en-ecriture', 'ecrit', 'simple');
     el.prenomCoeur.classList.remove('visible');
     el.sceneEnveloppe.classList.remove('ouverte', 'disparait');
     el.sceneMessages.classList.remove('attend-toucher');
-    el.boutonLettre.classList.remove('visible');
+    el.boutonLettre.classList.remove('visible', 'auto');
     el.boutonLettre.setAttribute('tabindex', '-1');
     el.sceneFilm.classList.remove('photo-pleine', 'plein');
     el.filmFin.classList.remove('visible');
     el.filmBarres.classList.remove('visible');
     el.constellation.classList.remove('trace', 'complete');
-    el.boutonFilm.classList.remove('visible');
+    el.boutonFilm.classList.remove('visible', 'auto');
     el.boutonFilm.setAttribute('tabindex', '-1');
     vider(el.zoneMessages);
     void html.offsetWidth;
@@ -1190,6 +1262,10 @@
       e.preventDefault();
       toucherEnAttente(true);
     }
+  });
+
+  ['touchstart', 'wheel', 'pointerdown', 'keydown'].forEach(function (type) {
+    el.lettre.addEventListener(type, pauseLettre, { passive: true });
   });
 
   el.grandCoeur.addEventListener('click', surCoeur);
@@ -1272,7 +1348,8 @@
   }
 
   el.indice.textContent = tactile ? 'Touche l’écran pour continuer' : 'Clique pour continuer';
-  el.envIndice.textContent = tactile ? 'Touche l’enveloppe pour l’ouvrir' : 'Clique sur l’enveloppe pour l’ouvrir';
+  el.envIndice.textContent = config.options.avancementAuto ? 'Elle s’ouvre pour toi…'
+    : tactile ? 'Touche l’enveloppe pour l’ouvrir' : 'Clique sur l’enveloppe pour l’ouvrir';
   el.livreIndice.textContent = tactile ? 'Touche le livre pour l’ouvrir' : 'Clique sur le livre pour l’ouvrir';
   remplirTexte(el.couvTitre, config.lettre.surEnveloppe);
   el.couvPrenom.textContent = config.prenom;

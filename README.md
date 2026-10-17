@@ -31,9 +31,10 @@ gratuitement en une minute.
 3. **« JE T’AIME ❤️ »** apparaît lettre par lettre, puis scintille.
 4. **« Je t’aime, Prénom ❤️ »** : le prénom s’écrit à la main, tracé par une
    plume lumineuse qui sème des paillettes.
-5. **Les petits messages** apparaissent un à un, mot par mot. Ils défilent
-   seuls ; un toucher accélère. Le dernier, *« Je t’aime ❤️ »*, est mis en
-   valeur.
+5. **Les petits messages** apparaissent un à un, mot par mot. Ils passent
+   tout seuls : un fil de lumière se remplit sous chacun, puis ses mots
+   s’envolent un à un dans des étincelles. Le dernier, *« Je t’aime ❤️ »*,
+   est mis en valeur.
 6. **Le film des photos** (s’il y a des photos) : un titre, puis chaque
    photo naît dans un médaillon en forme de cœur, son visage au creux du
    cœur ; le cœur bat, des petits cœurs jaillissent, puis il s’ouvre jusqu’à
@@ -55,6 +56,13 @@ gratuitement en une minute.
    c’est une enveloppe scellée d’un cachet en cœur : le sceau saute, la
    lettre se déplie et se révèle au rythme de la lecture ; les photos
    s’affichent alors en polaroïds sous la lettre.
+
+Avec `options.avancementAuto` (par défaut), personne n’a besoin de toucher
+l’écran après le cœur de l’accueil : le bouton de la lettre se remplit de
+lumière puis s’ouvre seul, l’enveloppe s’ouvre d’elle-même, et la lettre
+monte toute seule au rythme d’une lecture tranquille, ses bords fondus
+comme un générique. Un toucher ou un défilement la met en pause ; elle
+repart quelques secondes après.
 
 ## Personnaliser
 
