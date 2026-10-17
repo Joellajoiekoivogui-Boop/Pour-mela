@@ -610,10 +610,46 @@ button {
   animation-delay: 0s !important;
 }
 
-.message.sort { animation: messageSortie .7s ease forwards; }
+/* Sortie : chaque mot s'envole à son tour et se dissout dans la lumière. */
+.message.sort .mot-anime { animation: motEnvol .95s ease-in forwards; }
 
-@keyframes messageSortie {
-  to { opacity: 0; transform: translate3d(0, -14px, 0); filter: blur(6px); }
+@keyframes motEnvol {
+  from { opacity: 1; transform: none; filter: blur(0); }
+  to { opacity: 0; transform: translate3d(0, -.9em, 0) scale(1.06); filter: blur(7px); }
+}
+
+/* Le fil de lumière sous le message : il se remplit pendant la lecture,
+   puis le message passe tout seul. */
+.message-fil {
+  position: absolute;
+  left: 50%;
+  bottom: 6%;
+  width: 84px;
+  height: 2px;
+  margin-left: -42px;
+  border-radius: 2px;
+  overflow: hidden;
+  background: rgba(var(--claire-rgb), .18);
+  animation: apparition 1s ease both;
+}
+
+.message-fil::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; bottom: 0;
+  width: 100%;
+  background: linear-gradient(90deg, rgba(var(--claire-rgb), .2), var(--claire));
+  box-shadow: 0 0 10px var(--claire);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: remplissage var(--lecture, 5s) linear forwards;
+}
+
+.message.sort .message-fil { animation: fondu .5s ease reverse forwards; }
+
+@keyframes remplissage {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
 }
 
 .message-final .message-texte {
@@ -672,6 +708,20 @@ button {
   background: linear-gradient(100deg, rgba(255, 255, 255, 0), rgba(255, 255, 255, .5), rgba(255, 255, 255, 0));
   transform: translate3d(-130%, 0, 0) skewX(-20deg);
   animation: balayage 3.4s ease-in-out 1.6s infinite;
+}
+
+/* Mode automatique : le bouton se remplit de lumière, puis la lettre vient
+   d'elle-même (5,9 s au total : ATTENTE_BOUTON dans app.js). */
+.bouton-lettre.auto.visible::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(255, 255, 255, .35), rgba(255, 255, 255, .95));
+  box-shadow: 0 0 8px rgba(255, 255, 255, .8);
+  transform: scaleX(0);
+  transform-origin: left center;
+  animation: remplissage 5s linear .9s forwards;
 }
 
 .bouton-lettre:active { transform: scale(.96); }
@@ -1422,6 +1472,13 @@ button {
 
 .lettre.ouverte { opacity: 1; }
 
+/* Pendant qu'elle monte d'elle-même, la lettre naît du bas dans un fondu
+   et s'efface doucement en haut, comme un générique. */
+.defile .lettre {
+  -webkit-mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0, #000 7%, #000 80%, rgba(0, 0, 0, 0) 100%);
+  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0) 0, #000 7%, #000 80%, rgba(0, 0, 0, 0) 100%);
+}
+
 .papier {
   position: relative;
   max-width: 35rem;
@@ -1928,6 +1985,8 @@ button {
 .leger .mot-anime,
 .leger .mot-doux { animation-name: apparition; }
 .leger .revele { filter: none; }
+.leger .message.sort .mot-anime { animation-name: motEnvolLeger; }
+.leger.defile .lettre { -webkit-mask-image: none; mask-image: none; }
 .leger .mot-livre { filter: none; }
 .leger .couv-face { animation: none; }
 .leger .film-titre.sort,
@@ -1936,6 +1995,11 @@ button {
 .leger .prenom.ecrit { -webkit-filter: none; filter: none; text-shadow: none; }
 .leger .bouton-son,
 .leger .bouton-doux { -webkit-backdrop-filter: none; backdrop-filter: none; background-color: rgba(var(--fond-2-rgb), .7); }
+
+@keyframes motEnvolLeger {
+  from { opacity: 1; transform: none; }
+  to { opacity: 0; transform: translate3d(0, -.9em, 0); }
+}
 
 @keyframes lettreGrandeLegere {
   0% { opacity: 0; transform: translate3d(0, .3em, 0) scale(1.5); }
@@ -1947,6 +2011,7 @@ button {
 @media (prefers-reduced-motion: reduce) {
   .aurore { animation: none; }
   .lettre-douce, .lettre-grande, .mot-anime, .mot-doux, .prenom.simple { animation-name: fondu !important; }
+  .message.sort .mot-anime { animation-name: fonduSortie !important; }
   .grand-coeur-onde { display: none; }
   .env-corps { animation: none; }
   .bouton-lettre::after { animation: none; }
@@ -1964,4 +2029,9 @@ button {
 @keyframes fondu {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+@keyframes fonduSortie {
+  from { opacity: 1; }
+  to { opacity: 0; }
 }
