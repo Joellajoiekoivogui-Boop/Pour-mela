@@ -19,11 +19,11 @@ window.DECLARATION = {
 
   /* 1. SON PRÉNOM — il s'écrit progressivement à l'écran.
         Exemple : "Aïcha", "Mariam", "Ibrahima"…                              */
-  prenom: "Prisca Amoka Manga",
+  prenom: "Georgette",
 
   /* 2. L'ÉCRAN D'ACCUEIL                                                       */
   accueil: {
-    titre: "Prisca, j’ai quelque chose à te dire…",
+    titre: "Georgette, j’ai quelque chose à te dire…",
     invitation: "Clique sur le cœur ❤️",
   },
 
@@ -38,7 +38,7 @@ window.DECLARATION = {
         Le dernier est mis en valeur (grand, écrit à la main).                 */
   messages: [
     "Il y a des personnes qui passent dans une vie… et d’autres qui l’illuminent.",
-    "Toi, Prisca, tu fais partie de la deuxième catégorie.",
+    "Toi, Georgette, tu fais partie de la deuxième catégorie.",
     "Depuis que tu es là, mes journées ont une autre couleur.",
     "Alors aujourd’hui, j’ai décidé de ne plus garder ça pour moi…",
     "Je t’aime ❤️",
@@ -54,8 +54,8 @@ window.DECLARATION = {
         lecture.js (voir le README) ; sans eux, la lettre s'affiche dans
         l'enveloppe classique, sans voix.                                     */
   lettre: {
-    surEnveloppe: "Pour Prisca",  // écrit sur l'enveloppe et sur le livre
-    titre: "Ma chère Prisca,",   // vide = « Prénom, » automatiquement
+    surEnveloppe: "Pour Georgette",// écrit sur l'enveloppe et sur le livre
+    titre: "Ma chère Georgette,",// vide = « Prénom, » automatiquement
     paragraphes: [
       "Je cherche ces mots depuis longtemps. Je les ai écrits dans ma tête des dizaines de fois, effacés, recommencés… et ce soir, j’ai enfin trouvé le courage de te les offrir.",
       "Je ne saurais pas dire à quel moment exact tout a commencé. Je sais seulement qu’un jour, ton sourire est devenu ma lumière préférée, et que ta voix est devenue la plus douce des musiques.",
@@ -66,7 +66,7 @@ window.DECLARATION = {
       "Je rêve de partager avec toi les rires et les silences, les projets et les petits riens, les beaux jours comme les plus difficiles, toujours main dans la main.",
       "Je ne t’écris pas pour te presser ni pour te demander quoi que ce soit. Je voulais seulement que tu saches, avec tout mon cœur et en toute sincérité, ce que tu représentes pour moi.",
       "Si un jour tu doutes de toi, relis ces mots : ils te rappelleront que quelqu’un t’admire, croit en toi et pense à toi bien plus souvent que tu ne l’imagines.",
-      "Prisca, tu es ma plus belle rencontre, ma plus douce pensée et ma plus grande joie.",
+      "Georgette, tu es ma plus belle rencontre, ma plus douce pensée et ma plus grande joie.",
       "Je t’aime, tout simplement. ❤️",
     ],
     formule: "Avec tout mon amour,",

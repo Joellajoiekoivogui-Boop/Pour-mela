@@ -10,7 +10,7 @@
 > pour Joël Koivogui (10 octobre), en Next.js, Three.js et Motion. Il vit dans
 > le dossier `joel/` ; voir [`joel/README.md`](joel/README.md).
 
-La déclaration d’amour de **Joël la joie** pour **Prisca Amoka Manga** 💌
+La déclaration d’amour de **Joël la joie** pour **Georgette** 💌
 
 Un site romantique, animé et immersif, pensé d’abord pour le téléphone :
 chaque toucher révèle un peu plus les sentiments, jusqu’à une lettre
@@ -177,7 +177,7 @@ simplement ignorée.
 
 ### La voix qui lit la lettre
 
-La lecture à voix haute est facultative (la déclaration pour Prisca n’en a
+La lecture à voix haute est facultative (la déclaration pour Georgette n’en a
 pas pour l’instant). Elle tient dans deux fichiers du dossier `medias/` :
 
 - `lettre-voix.mp3` : la voix (téléchargée seulement quand le livre arrive) ;
