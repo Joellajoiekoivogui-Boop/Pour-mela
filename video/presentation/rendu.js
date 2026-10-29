@@ -3,6 +3,7 @@
 // (sortie/voix.wav, faite par voix.py) avec la musique, baissée sous la voix.
 //
 //   node video/presentation/rendu.js                       → sortie/presentation-joel-koivogui.mp4
+//   node video/presentation/rendu.js --courte              → sortie/presentation-2min.mp4 (courte.html)
 //   node video/presentation/rendu.js --apercu nom+1,sgs+3  → images PNG (instant = segment + secondes)
 'use strict';
 
@@ -16,13 +17,17 @@ const sortie = path.join(ici, 'sortie');
 const IPS = 30;
 const args = process.argv.slice(2);
 const apercu = args.includes('--apercu') ? args[args.indexOf('--apercu') + 1].split(',') : null;
+const courte = args.includes('--courte');
+const VERSION = courte
+  ? { page: 'courte.html', voix: 'voix-2min.wav', video: 'presentation-2min.mp4' }
+  : { page: 'presentation.html', voix: 'voix.wav', video: 'presentation-joel-koivogui.mp4' };
 
 (async () => {
   // Sans cette option, les photos locales « contaminent » le canvas et toDataURL échoue.
   const navigateur = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   const page = await navigateur.newPage({ viewport: { width: 1920, height: 1080 } });
   page.on('pageerror', e => { console.error('Erreur dans la page :', e.message); process.exitCode = 1; });
-  await page.goto('file://' + path.join(ici, 'presentation.html') + '?rendu');
+  await page.goto('file://' + path.join(ici, VERSION.page) + '?rendu');
   await page.evaluate(async () => {
     await document.fonts.load('italic 40px Cormorant');
     await document.fonts.load('800 40px Inter');
@@ -63,8 +68,8 @@ const apercu = args.includes('--apercu') ? args[args.indexOf('--apercu') + 1].sp
   // musique baissée automatiquement quand la voix parle
   const musique = path.join(sortie, 'musique.wav');
   execFileSync('python3', [path.join(ici, 'musique.py'), musique, String(duree)], { stdio: 'inherit' });
-  const finale = path.join(sortie, 'presentation-joel-koivogui.mp4');
-  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', muet, '-i', path.join(sortie, 'voix.wav'), '-i', musique,
+  const finale = path.join(sortie, VERSION.video);
+  execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', muet, '-i', path.join(sortie, VERSION.voix), '-i', musique,
     '-filter_complex',
     '[1:a]aformat=channel_layouts=stereo,volume=1.0,asplit=2[voix][cle];' +
     '[2:a]volume=0.5[mus];' +

@@ -1,0 +1,386 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Joël Koïkoï Koïvogui · Présentation 2 min</title>
+<style>
+  @font-face { font-family: 'Cormorant'; font-style: italic; src: url('../../fonts/cormorant-italique-latin.woff2') format('woff2'); }
+  @font-face { font-family: 'Cormorant'; font-style: italic; src: url('../../fonts/cormorant-italique-latin-ext.woff2') format('woff2'); unicode-range: U+0100-024F; }
+  html, body { margin: 0; background: #05070f; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; object-fit: contain; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script src="timeline-2min.js"></script>
+<script src="commun.js"></script>
+<script>
+'use strict';
+// Présentation courte (2 min), calée sur la voix off de timeline-2min.js.
+
+// ---------- introduction ----------
+function scIntro(t) {
+  const a = scene(t, 'intro', .01);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  const cx = W / 2;
+  // ouverture lumineuse
+  lueur(cx, 420, 320 * sortie3(prog(t, 0, 1.4)) + 20, COUL.or, .45 * (1 - prog(t, 2.5, 5)) + .1);
+  for (let i = 0; i < 3; i++) {
+    const p = prog(t, .2 + i * .35, 2.6 + i * .35);
+    if (p > 0 && p < 1) { g.save(); g.globalAlpha *= (1 - p) * .5; anneau(cx, 420, 30 + sortie3(p) * 700, COUL.or, 2); g.restore(); }
+  }
+  // « Bonjour… » puis le nom
+  const ab = fenetre(t, D('c-bonjour') - .3, frac('c-bonjour', .5), .3, .4);
+  if (ab) {
+    g.save(); g.globalAlpha *= ab;
+    texteMots('Bonjour à toutes et à tous !', cx, 470, prog(t, D('c-bonjour') - .2, frac('c-bonjour', .4)), { taille: 110, graisse: 500, famille: SERIF, italique: true });
+    g.restore();
+  }
+  const an = fenetre(t, frac('c-bonjour', .45), D('c-ambition') + .1, .2, .5);
+  if (an) {
+    g.save(); g.globalAlpha *= an;
+    texteLettres('JOËL KOÏKOÏ KOÏVOGUI', cx, 420, prog(t, frac('c-bonjour', .45), F('c-bonjour') + .3), { taille: 112, graisse: 800, espace: 6, montee: 50 });
+    const pl = entreeSortie(prog(t, frac('c-bonjour', .6), F('c-bonjour') + .4));
+    g.fillStyle = COUL.or; g.fillRect(cx - 480 * pl, 465, 960 * pl, 3);
+    const roles = [['Développeur web & mobile', COUL.cyan, 0], ['Entrepreneur technologique', COUL.or, .2], ['Autodidacte', COUL.corail, .42]];
+    police(30, 600);
+    const ws = roles.map(([r]) => g.measureText(r).width + 48);
+    let x = cx - (ws.reduce((p, q) => p + q, 0) + 40) / 2;
+    roles.forEach(([r, k, f], i) => { pastille(r, x, 560, prog(t, frac('c-roles', f), frac('c-roles', f) + .5), { couleur: k, taille: 30 }); x += ws[i] + 20; });
+    const pg = sortie3(prog(t, frac('c-roles', .6), frac('c-roles', .6) + .6));
+    if (pg > 0) {
+      g.save(); g.globalAlpha *= pg;
+      police(40, 700); const w = g.measureText('Conakry · Guinée').width;
+      drapeau(cx - w / 2 - 50, 650, 30);
+      g.fillStyle = COUL.encre; g.textAlign = 'left'; g.fillText('Conakry · Guinée', cx - w / 2 + 10, 677);
+      g.restore();
+    }
+    g.restore();
+  }
+  // l'ambition
+  const aa = fenetre(t, D('c-ambition') - .1, Infinity, .5);
+  if (aa) {
+    g.save(); g.globalAlpha *= aa;
+    texteMots('Mon ambition', cx, 330, prog(t, D('c-ambition'), frac('c-ambition', .2)), { taille: 40, graisse: 500, famille: SERIF, italique: true, couleur: COUL.doux });
+    texteMots('Transformer des idées', cx, 450, prog(t, frac('c-ambition', .1), frac('c-ambition', .45)), { taille: 84, graisse: 800 });
+    texteMots('en solutions technologiques', cx, 550, prog(t, frac('c-ambition', .3), frac('c-ambition', .65)), { taille: 84, graisse: 800, couleur: COUL.or });
+    texteMots('qui répondent à des problèmes réels.', cx, 640, prog(t, frac('c-ambition', .6), F('c-ambition')), { taille: 44, graisse: 500, couleur: COUL.doux });
+    g.restore();
+  }
+  g.restore();
+}
+
+// ---------- parcours et compétences ----------
+function scParcours(t) {
+  const a = scene(t, 'parcours');
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 'parcours', '01', 'Parcours & compétences', COUL.cyan);
+  // depuis 2022 + UNC, avec deux photos
+  const a1 = fenetre(t, D('c-2022') - .3, D('c-stack') - .1, .4, .5);
+  if (a1) {
+    g.save(); g.globalAlpha *= a1;
+    const p1 = sortie5(prog(t, D('c-2022') - .2, D('c-2022') + .8)), p2 = sortie5(prog(t, frac('c-2022', .5), frac('c-2022', .5) + .8));
+    g.save(); g.globalAlpha *= p1; g.translate(0, (1 - p1) * 60);
+    cadrePhoto('ev-cloud-unc', 140, 170, 440, 640, { foyer: [.5, .42], zoom: 1 + (t - D('c-2022')) * .01, legende: 'Journée du Cloud 2024 · UNC', bord: 'rgba(139,123,255,0.6)' });
+    g.restore();
+    g.save(); g.globalAlpha *= p2; g.translate(0, (1 - p2) * 60);
+    cadrePhoto('ev-odc', 620, 250, 420, 560, { foyer: [.5, .45], zoom: 1 + (t - D('c-2022')) * .01, legende: 'Orange Digital Center', bord: 'rgba(58,214,230,0.6)' });
+    g.restore();
+    texteMots('Depuis 2022', 1120, 380, prog(t, D('c-2022'), frac('c-2022', .3)), { taille: 84, graisse: 900, align: 'left', couleur: COUL.cyan });
+    texteMots('Autodidacte,', 1120, 480, prog(t, frac('c-2022', .2), frac('c-2022', .5)), { taille: 54, graisse: 800, align: 'left', couleur: COUL.corail });
+    texteMots('j’apprends par la pratique', 1120, 550, prog(t, frac('c-2022', .3), frac('c-2022', .6)), { taille: 46, graisse: 700, align: 'left' });
+    pastille('+ Études à l’UNC', 1120, 650, prog(t, frac('c-2022', .7), frac('c-2022', .7) + .5), { couleur: COUL.violet, taille: 32 });
+    g.restore();
+  }
+  // les technologies, citées une à une
+  const a2 = fenetre(t, D('c-stack') - .1, Infinity, .5);
+  if (a2) {
+    g.save(); g.globalAlpha *= a2;
+    texteMots('Ma boîte à outils', W / 2, 230, prog(t, D('c-stack'), D('c-stack') + .8), { taille: 60, graisse: 800 });
+    const T = {}; [...TECHS.web, ...TECHS.mobile, ...TECHS.autres].forEach(tc => { T[tc[0]] = tc; });
+    const rang1 = [['React', 'c-stack', .2], ['Next.js', 'c-stack', .3], ['Node.js', 'c-stack', .4], ['MongoDB', 'c-stack', .5], ['Supabase', 'c-stack', .58]];
+    const rang2 = [['React Native', 'c-stack', .8], ['Expo', 'c-stack', .92], ['Python', 'c-iot', .3], ['Arduino', 'c-iot', .45], ['ESP32', 'c-iot', .6]];
+    [rang1, rang2].forEach((rang, j) => rang.forEach(([nom, seg, f], i) => {
+      tuile(t, T[nom], W / 2 + (i - 2) * 240, 410 + j * 240, prog(t, frac(seg, f) - .25, frac(seg, f) + .35));
+    }));
+    pastille('Web', 200, 410, prog(t, D('c-stack'), D('c-stack') + .5), { couleur: COUL.cyan, taille: 26, align: 'center' });
+    pastille('Mobile · IoT', 200, 650, prog(t, frac('c-stack', .75), frac('c-stack', .75) + .5), { couleur: COUL.vert, taille: 26, align: 'center' });
+    g.restore();
+  }
+  g.restore();
+}
+
+// ---------- réalisations ----------
+const IDS_PRODUITS = { nabele: 'c-nabele', smartstock: 'c-smartstock', sgs: 'c-sgs', solarbox: 'c-solarbox', ast: 'c-ast', om: 'c-om' };
+function scRealisations(t) {
+  const a = scene(t, 'realisations');
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 'realisations', '02', 'Réalisations', COUL.or);
+  const at = fenetre(t, D('c-real') - .3, D('c-nabele'), .3, .3);
+  if (at) {
+    g.save(); g.globalAlpha *= at;
+    texteMots('Des idées devenues', W / 2, 440, prog(t, D('c-real'), frac('c-real', .6)), { taille: 88, graisse: 800 });
+    texteMots('produits concrets.', W / 2, 545, prog(t, frac('c-real', .3), F('c-real')), { taille: 88, graisse: 800, couleur: COUL.or });
+    g.restore();
+  }
+  PRODUITS.forEach((pr, i) => {
+    const id = IDS_PRODUITS[pr.id];
+    const debut = i === 0 ? D(id) : D(id) - .1;  // le premier attend que le titre soit parti
+    const fin = i < PRODUITS.length - 1 ? D(IDS_PRODUITS[PRODUITS[i + 1].id]) - .1 : BORNES.realisations.b;
+    const ap = fenetre(t, debut, fin, .35, .3);
+    if (!ap) return;
+    const entree = sortie5(prog(t, debut, debut + .6)), sortie = entreeSortie(prog(t, fin - .3, fin));
+    g.save(); g.globalAlpha *= ap;
+    g.save(); g.globalAlpha *= entree; police(22, 700); g.fillStyle = pr.k; g.textAlign = 'left';
+    g.fillText(`RÉALISATION ${String(i + 1).padStart(2, '0')} / 06`, 140 - sortie * 80, 300); g.restore();
+    texteLettres(pr.nom, 140 - sortie * 80, 390, prog(t, debut, debut + .7), { taille: pr.nom.length > 14 ? 58 : 88, graisse: 900, align: 'left', espace: 2 });
+    pr.desc.forEach((l, j) => texteMots(l, 140 - sortie * 80, 470 + j * 52, prog(t, debut + .3 + j * .2, debut + .9 + j * .2), { taille: 36, graisse: j === 2 ? 600 : 400, align: 'left', couleur: j === 2 ? pr.k : COUL.doux }));
+    const mx = 1000 + (1 - entree) * 120 + sortie * 120;
+    g.save(); g.globalAlpha *= entree * (1 - sortie);
+    const capture = MEDIAS['capture-' + pr.id];
+    if (capture) navigateur(mx, 220, 780, 520, pr.nom, (X, Y, Wd, Hd) => photo(capture, X, Y, Wd, Hd, { r: 0, foyer: [.5, 0] }));
+    else pr.maquette(mx, 220, 780, 520, prog(t, debut + .2, fin - .2), t);
+    g.restore();
+    g.restore();
+  });
+  g.restore();
+}
+
+// ---------- IA, ML, robotique ----------
+function scIA(t) {
+  const a = scene(t, 'ia');
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 'ia', '03', 'IA · Machine learning · Robotique', COUL.violet);
+  texteMots('Au-delà du web', 140, 300, prog(t, D('c-ia') - .3, frac('c-ia', .2)), { taille: 66, graisse: 800, align: 'left' });
+  texteMots('et du mobile.', 140, 380, prog(t, frac('c-ia', .05), frac('c-ia', .3)), { taille: 66, graisse: 800, align: 'left', couleur: COUL.violet });
+  reseau(t, D('c-ia') - .3, 1120, 1760, 470, 520);
+  const dom = [['Intelligence artificielle', COUL.violet, .25], ['Machine learning', COUL.cyan, .5], ['Robotique', COUL.or, .66], ['Automatisation', COUL.corail, .82]];
+  dom.forEach(([d, k, f], i) => {
+    const p = sortie3(prog(t, frac('c-ia', f) - .2, frac('c-ia', f) + .4));
+    if (p <= 0) return;
+    g.save(); g.globalAlpha *= p; g.translate((1 - p) * -40, 0);
+    cercle(156, 490 + i * 66, 9, k);
+    police(38, 700); g.fillStyle = COUL.encre; g.textAlign = 'left'; g.fillText(d, 186, 503 + i * 66);
+    g.restore();
+  });
+  g.restore();
+}
+
+// ---------- FATA.SCHOOL & ELITECH ACADEMY ----------
+function scFata(t) {
+  const a = scene(t, 'fata');
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 'fata', '04', 'Éducation numérique', COUL.fata);
+  // les deux structures
+  const a1 = fenetre(t, D('c-fata') - .3, D('c-ambassadeur') + .2, .4, .5);
+  if (a1) {
+    g.save(); g.globalAlpha *= a1;
+    texteMots('Former les jeunes au numérique', W / 2, 280, prog(t, D('c-fata'), frac('c-fata', .5)), { taille: 60, graisse: 800 });
+    const p1 = rebond(prog(t, frac('c-fata', .55), frac('c-fata', .55) + .6));
+    if (p1 > 0) {
+      g.save(); g.translate(W / 2 - 380, 540); g.scale(p1, p1); logoFata(0, 0, 150); g.restore();
+      g.save(); g.globalAlpha *= borne(p1); police(30, 800); g.fillStyle = COUL.encre; g.textAlign = 'center'; g.fillText('FATA.SCHOOL', W / 2 - 380, 680); g.restore();
+    }
+    const p2 = rebond(prog(t, frac('c-fata', .75), frac('c-fata', .75) + .6));
+    if (p2 > 0) { g.save(); g.translate(W / 2 + 380, 540); g.scale(p2, p2); logoTexte(MEDIAS['logo-elitech'], 'ELITECH', 'ACADEMY', 0, 0, COUL.cyan, 1); g.restore(); }
+    g.restore();
+  }
+  // le parcours chez FATA, avec les photos
+  const a2 = fenetre(t, D('c-ambassadeur') + .1, D('c-createurs') - .1, .5, .5);
+  if (a2) {
+    g.save(); g.globalAlpha *= a2;
+    logoFata(220, 205, 70, sortie3(prog(t, D('c-ambassadeur'), D('c-ambassadeur') + .6)));
+    const etapes = [['Ambassadeur', 'FATA.SCHOOL', 0, COUL.fata], ['Country Lead', 'FATA.SCHOOL Guinée', .2, COUL.or],
+      ['Prises de parole', 'et événements', .45, COUL.cyan], ['Représentation', 'auprès des partenaires', .75, COUL.vert]];
+    const x = 170, y0 = 330, pas = 140;
+    g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y0); g.lineTo(x, y0 + pas * 3); g.stroke();
+    etapes.forEach(([titre, sous, f, k], i) => {
+      const d = frac('c-ambassadeur', f);
+      const p = sortie5(prog(t, d, d + .6));
+      if (p <= 0) return;
+      const y = y0 + i * pas;
+      if (i > 0) { g.strokeStyle = k; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y - pas); g.lineTo(x, y - pas + pas * p); g.stroke(); }
+      cercle(x, y, 16 * p, COUL.sombre); anneau(x, y, 16 * p, k, 3); cercle(x, y, 6 * p, k);
+      g.save(); g.globalAlpha *= p; g.translate((1 - p) * -30, 0);
+      police(40, 800); g.fillStyle = COUL.encre; g.textAlign = 'left'; g.fillText(titre, x + 50, y + 12);
+      police(24, 400); g.fillStyle = COUL.doux; g.fillText(sous, x + 50, y + 50);
+      g.restore();
+    });
+    const visuels = [
+      [D('c-ambassadeur'), frac('c-ambassadeur', .22), 'ev-presentation', [.5, .3], 'Présenter FATA.SCHOOL et son application'],
+      [frac('c-ambassadeur', .22), frac('c-ambassadeur', .45), 'photo-joel', [.58, .22], 'Country Lead FATA.SCHOOL Guinée'],
+      [frac('c-ambassadeur', .45), frac('c-ambassadeur', .62), 'ev-micro', [.48, .45], 'Prise de parole en public'],
+      [frac('c-ambassadeur', .62), frac('c-ambassadeur', .8), 'ev-remise', [.45, .4], 'Remise d’ordinateurs · Université Nongo Conakry'],
+      [frac('c-ambassadeur', .8), Infinity, 'ev-stand', [.62, .5], 'Stand FATA.SCHOOL · Afrinov Tech Expo'],
+    ];
+    visuels.forEach(([va, vb, nom, foyer, legende]) => {
+      const av = fenetre(t, va, vb, .4, .4);
+      if (!av) return;
+      g.save(); g.globalAlpha *= av;
+      cadrePhoto(nom, 1060, 200, 740, 600, { foyer, legende, zoom: 1 + (t - va) * .015, bord: 'rgba(255,216,77,0.5)', lumiere: nom === 'ev-micro' ? 1.35 : 1 });
+      g.restore();
+    });
+    g.restore();
+  }
+  // utilisateurs → créateurs
+  const a3 = fenetre(t, D('c-createurs') - .1, Infinity, .5);
+  if (a3) {
+    g.save(); g.globalAlpha *= a3;
+    const cols = 24, rangs = 5, esp = 40, gx = W / 2 - cols * esp / 2, gy = 520;
+    const rayon = (t - frac('c-createurs', .3)) * 400;
+    for (let i = 0; i < cols; i++) for (let j = 0; j < rangs; j++) {
+      const x = gx + i * esp + (j % 2) * esp / 2, y = gy + j * esp * 1.2;
+      const pa = sortie3(prog(t, D('c-createurs') + alea(i * 31 + j), D('c-createurs') + .6 + alea(i * 31 + j)));
+      const on = borne((rayon - Math.hypot(x - W / 2, y - gy - 2 * esp * 1.2)) / 120);
+      const k = alea(i + j * 7) > .7 ? COUL.or : COUL.vert;
+      g.save(); g.globalAlpha *= pa;
+      if (on > 0) lueur(x, y, 30, k, .35 * on);
+      g.fillStyle = on > 0 ? k : 'rgba(255,255,255,0.16)';
+      g.beginPath(); g.arc(x, y - 7, 7, 0, Math.PI * 2); g.fill();
+      g.beginPath(); g.ellipse(x, y + 13, 11, 9, 0, Math.PI, 0); g.fill();
+      g.restore();
+    }
+    const sw = entreeSortie(prog(t, frac('c-createurs', .45), frac('c-createurs', .8)));
+    police(64, 800); g.textAlign = 'center';
+    g.save(); g.globalAlpha *= 1 - sw; g.fillStyle = COUL.doux; g.fillText('Simples utilisateurs', W / 2, 380); g.restore();
+    g.save(); g.globalAlpha *= sw; g.fillStyle = COUL.vert; g.fillText('Créateurs de solutions', W / 2, 380 - (1 - sw) * 30); g.restore();
+    g.restore();
+  }
+  g.restore();
+}
+
+// ---------- Youth Engineers Network ----------
+function scYen(t) {
+  const a = scene(t, 'yen');
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 'yen', '05', 'Insertion professionnelle', COUL.cyan);
+  const a1 = fenetre(t, D('c-yen') - .3, D('c-plateforme') - .1, .4, .5);
+  if (a1) {
+    g.save(); g.globalAlpha *= a1;
+    if (MEDIAS['logo-yen']) logoTexte(MEDIAS['logo-yen'], '', '', W / 2, 330, COUL.cyan, sortie3(prog(t, D('c-yen'), D('c-yen') + .8)));
+    else motCle(t, D('c-yen'), 'YEN', W / 2, 360, COUL.cyan, { taille: 170 });
+    texteMots('Youth Engineers Network', W / 2, 440, prog(t, frac('c-yen', .1), frac('c-yen', .4)), { taille: 48, graisse: 700 });
+    pastille('Responsable d’insertion professionnelle', W / 2, 520, prog(t, frac('c-yen', .15), frac('c-yen', .15) + .6), { couleur: COUL.or, taille: 26, align: 'center' });
+    const pf = prog(t, frac('c-yen', .5), F('c-yen'));
+    if (pf > 0) {
+      const y = 690, xa = W / 2 - 420, xb = W / 2 + 420;
+      g.save(); g.globalAlpha *= sortie3(pf * 3);
+      police(44, 800); g.textAlign = 'center'; g.fillStyle = COUL.encre; g.fillText('Formation', xa, y + 15);
+      g.fillStyle = COUL.or; g.fillText('Emploi', xb, y + 15);
+      g.strokeStyle = 'rgba(255,255,255,0.2)'; g.lineWidth = 4; g.beginPath(); g.moveTo(xa + 150, y); g.lineTo(xb - 120, y); g.stroke();
+      const q = entreeSortie(borne(pf * 1.3));
+      g.strokeStyle = COUL.cyan; g.beginPath(); g.moveTo(xa + 150, y); g.lineTo(lin(xa + 150, xb - 120, q), y); g.stroke();
+      lueur(lin(xa + 150, xb - 120, q), y, 40, COUL.cyan, .9);
+      g.restore();
+    }
+    g.restore();
+  }
+  const a2 = fenetre(t, D('c-plateforme') - .1, Infinity, .5);
+  if (a2) {
+    g.save(); g.globalAlpha *= a2;
+    texteMots('Une plateforme qui', 140, 330, prog(t, D('c-plateforme'), frac('c-plateforme', .3)), { taille: 60, graisse: 800, align: 'left' });
+    texteMots('rapproche talents', 140, 405, prog(t, frac('c-plateforme', .3), frac('c-plateforme', .6)), { taille: 60, graisse: 800, align: 'left', couleur: COUL.cyan });
+    texteMots('et opportunités.', 140, 480, prog(t, frac('c-plateforme', .55), F('c-plateforme')), { taille: 60, graisse: 800, align: 'left', couleur: COUL.or });
+    const pe = sortie5(prog(t, D('c-plateforme'), D('c-plateforme') + .9));
+    g.save(); g.globalAlpha *= pe; g.translate((1 - pe) * 100, 0);
+    navigateur(1000, 220, 800, 540, 'yen · insertion professionnelle', (X, Y, Wd) => {
+      police(16, 700); g.fillStyle = COUL.cyan; g.textAlign = 'center'; g.fillText('TALENTS', X + 150, Y + 40);
+      g.fillStyle = COUL.or; g.fillText('OPPORTUNITÉS', X + Wd - 150, Y + 40);
+      const pm = prog(t, frac('c-plateforme', .3), BORNES.yen.b - .3);
+      for (let i = 0; i < 5; i++) {
+        const yl = Y + 80 + i * 82;
+        rr(X + 40, yl, 220, 60, 30); g.fillStyle = 'rgba(58,214,230,0.1)'; g.fill();
+        cercle(X + 72, yl + 30, 18, 'rgba(58,214,230,0.6)'); ligneTexte(X + 100, yl + 26, 120, .4);
+        rr(X + Wd - 260, yl, 220, 60, 12); g.fillStyle = 'rgba(245,176,65,0.1)'; g.fill();
+        police(15, 600); g.fillStyle = COUL.encre; g.textAlign = 'left'; g.fillText(['Stage · Dev web', 'Emploi · Support IT', 'Formation · IA', 'Stage · Data', 'Emploi · Mobile'][i], X + Wd - 240, yl + 36);
+        const cible = [2, 0, 4, 1, 3][i];
+        const pl = borne(pm * 2.2 - i * .25);
+        if (pl > 0) {
+          const ya = yl + 30, yb = Y + 110 + cible * 82;
+          g.strokeStyle = COUL.vert; g.lineWidth = 2.5; g.beginPath(); g.moveTo(X + 262, ya);
+          g.bezierCurveTo(X + Wd / 2, ya, X + Wd / 2, lin(ya, yb, pl), lin(X + 262, X + Wd - 262, pl), lin(ya, yb, pl)); g.stroke();
+          if (pl >= 1) cercle(X + Wd - 262, yb, 6, COUL.vert);
+        }
+      }
+    });
+    g.restore();
+    g.restore();
+  }
+  g.restore();
+}
+
+// ---------- la Guinée et l'Afrique ----------
+function scAfrique(t) {
+  const a = scene(t, 'afrique');
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 'afrique', '06', 'La Guinée et l’Afrique', COUL.or);
+  const pf = sortie5(prog(t, D('c-potentiel') - .2, D('c-potentiel') + .7));
+  const G = carteAfrique(t, D('c-afrique') - .5, 1440, 520, 10, { arcs: frac('c-afrique', .4), alpha: 1 - .7 * pf });
+  const pe = sortie3(prog(t, D('c-afrique') + .3, D('c-afrique') + 1.1));
+  g.save(); g.globalAlpha *= pe * (1 - pf);
+  drapeau(G[0] - 190, G[1] - 14, 28);
+  police(28, 800); g.fillStyle = COUL.encre; g.textAlign = 'left'; g.fillText('Guinée', G[0] - 150, G[1] + 10);
+  g.restore();
+  if (pf > 0) {
+    g.save(); g.globalAlpha *= pf; g.translate((1 - pf) * 80, 0);
+    cadrePhoto('ev-foire', 1000, 230, 820, 546, { foyer: [.5, .5], zoom: 1 + (t - D('c-potentiel')) * .012, legende: 'Foire technologique de Guinée et d’Afrique', bord: 'rgba(245,176,65,0.6)' });
+    g.restore();
+  }
+  texteMots('Contribuer au développement', 120, 330, prog(t, D('c-afrique'), frac('c-afrique', .45)), { taille: 54, graisse: 800, align: 'left' });
+  texteMots('technologique de la Guinée', 120, 395, prog(t, frac('c-afrique', .3), frac('c-afrique', .75)), { taille: 54, graisse: 800, align: 'left', couleur: COUL.or });
+  texteMots('et de l’Afrique.', 120, 460, prog(t, frac('c-afrique', .6), F('c-afrique')), { taille: 54, graisse: 800, align: 'left' });
+  let x = 120;
+  [['Potentiel', .2], ['Idées', .45], ['Talents', .7]].forEach(([m, f]) => {
+    x += pastille(m, x, 600, prog(t, frac('c-potentiel', f), frac('c-potentiel', f) + .5), { couleur: COUL.or, taille: 34, plein: true }) + 20;
+  });
+  g.restore();
+}
+
+// ---------- conclusion ----------
+function scConclusion(t) {
+  const a = scene(t, 'conclusion', .6, 1.5);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  const a1 = fenetre(t, D('c-japprends') - .2, D('c-convaincu') - .1, .3, .4);
+  if (a1) {
+    g.save(); g.globalAlpha *= a1;
+    [['J’apprends', COUL.cyan, 0], ['Je construis', COUL.or, .27], ['J’expérimente', COUL.violet, .52], ['J’évolue', COUL.corail, .8]].forEach(([v, k, f], i) => {
+      const p = sortie5(prog(t, frac('c-japprends', f), frac('c-japprends', f) + .4));
+      if (p <= 0) return;
+      g.save(); g.globalAlpha *= p; police(84, 900); g.fillStyle = k; g.textAlign = 'center';
+      g.translate(W / 2 + (i % 2 ? 1 : -1) * 420, 420 + Math.floor(i / 2) * 150); g.scale(lin(1.4, 1, p), lin(1.4, 1, p)); g.fillText(v, 0, 0); g.restore();
+    });
+    g.restore();
+  }
+  const a2 = fenetre(t, D('c-convaincu') - .1, D('c-merci') - .2, .4, .4);
+  if (a2) {
+    g.save(); g.globalAlpha *= a2;
+    texteMots('Les idées prennent de la valeur', W / 2, 440, prog(t, frac('c-convaincu', .15), frac('c-convaincu', .55)), { taille: 80, graisse: 800 });
+    texteMots('lorsqu’on décide de les concrétiser.', W / 2, 540, prog(t, frac('c-convaincu', .5), F('c-convaincu') + .2), { taille: 80, graisse: 800, couleur: COUL.or });
+    g.restore();
+  }
+  const a3 = fenetre(t, D('c-merci') - .2, Infinity, .6);
+  if (a3) {
+    g.save(); g.globalAlpha *= a3;
+    portrait(t, W / 2, 330, 175, sortie5(prog(t, D('c-merci') - .2, D('c-merci') + .8)));
+    texteLettres('JOËL KOÏKOÏ KOÏVOGUI', W / 2, 640, prog(t, D('c-merci'), frac('c-merci', .7)), { taille: 84, graisse: 900, espace: 4 });
+    texteMots('Développeur web et mobile · Entrepreneur technologique', W / 2, 710, prog(t, frac('c-merci', .5), F('c-merci') + .6), { taille: 34, graisse: 500, couleur: COUL.doux });
+    const pl = entreeSortie(prog(t, F('c-merci'), F('c-merci') + .8));
+    g.fillStyle = COUL.or; g.fillRect(W / 2 - 220 * pl, 750, 440 * pl, 2);
+    texteMots('Merci.', W / 2, 860, prog(t, frac('c-merci', .75), F('c-merci') + .3), { taille: 96, graisse: 500, famille: SERIF, italique: true, couleur: COUL.or });
+    g.restore();
+  }
+  g.restore();
+}
+
+demarrer([scIntro, scParcours, scRealisations, scIA, scFata, scYen, scAfrique, scConclusion], 'sortie/voix-2min.wav');
+</script>
+</body>
+</html>

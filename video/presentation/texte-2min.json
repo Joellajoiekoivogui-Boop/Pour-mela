@@ -1,0 +1,154 @@
+{
+  "_lisezmoi": "Version courte (≈ 2 min) de la présentation. « texte » s'affiche en sous-titre ; « voix_el » est ce que lit ElevenLabs, « voix » ce que lit Piper ([[ … ]] = phonèmes).",
+  "reglages": {
+    "debut": 1.0,
+    "pause": 0.25,
+    "pause_scene": 0.8,
+    "fin": 3.5,
+    "vitesse_piper": 0.97,
+    "duree_cible": 120
+  },
+  "segments": [
+    {
+      "id": "c-bonjour",
+      "scene": "intro",
+      "texte": "Bonjour à toutes et à tous ! Je m'appelle Joël Koïkoï Koïvogui.",
+      "voix_el": "Bonjour à toutes et à tous ! Je m'appelle Joël Koy-koy Koyvogui.",
+      "voix": "Bonjour à toutes et à tous ! Je m'appelle Joël [[ kɔjkˈɔj kɔjvoɡˈi ]]."
+    },
+    {
+      "id": "c-roles",
+      "scene": "intro",
+      "texte": "Développeur web et mobile, entrepreneur technologique et autodidacte, je suis basé à Conakry, en Guinée."
+    },
+    {
+      "id": "c-ambition",
+      "scene": "intro",
+      "texte": "Mon ambition : transformer des idées en solutions technologiques qui répondent à des problèmes réels."
+    },
+    {
+      "id": "c-2022",
+      "scene": "parcours",
+      "texte": "Depuis 2022, j'apprends par la pratique, en plus de mes études à l'UNC.",
+      "voix_el": "Depuis 2022, j'apprends par la pratique, en plus de mes études à l'U.N.C.",
+      "voix": "Depuis 2022, j'apprends par la pratique, en plus de mes études à l'U.N.C."
+    },
+    {
+      "id": "c-stack",
+      "scene": "parcours",
+      "texte": "Je développe avec React, Next.js, Node.js, MongoDB et Supabase, et sur mobile avec React Native et Expo.",
+      "voix": "Je développe avec Riacte, Next J S, Node J S, Mongo D B et Supabase, et sur mobile avec Riacte Native et Expo."
+    },
+    {
+      "id": "c-iot",
+      "scene": "parcours",
+      "texte": "J'explore aussi Python, Arduino et l'ESP32 pour l'Internet des objets.",
+      "voix_el": "J'explore aussi Python, Arduino et l'E.S.P. 32 pour l'Internet des objets.",
+      "voix": "J'explore aussi Python, Arduino et l'[[ ˌøˌɛspˈe ]] 32 pour l'Internet des objets."
+    },
+    {
+      "id": "c-real",
+      "scene": "realisations",
+      "texte": "Parmi mes réalisations :"
+    },
+    {
+      "id": "c-nabele",
+      "scene": "realisations",
+      "texte": "NABELE, la gestion de stock et de caisse multi-boutiques ;",
+      "voix_el": "Nabélé, la gestion de stock et de caisse multi-boutiques ;",
+      "voix": "Nabélé, la gestion de stock et de caisse multi-boutiques ;"
+    },
+    {
+      "id": "c-smartstock",
+      "scene": "realisations",
+      "texte": "SmartStock Guinée, pour les commerçants ;",
+      "voix": "Smart Stock Guinée, pour les commerçants ;"
+    },
+    {
+      "id": "c-sgs",
+      "scene": "realisations",
+      "texte": "SGS, un système de gestion scolaire ;",
+      "voix_el": "S.G.S., un système de gestion scolaire ;",
+      "voix": "S G S, un système de gestion scolaire ;"
+    },
+    {
+      "id": "c-solarbox",
+      "scene": "realisations",
+      "texte": "SolarBox, un onduleur solaire connecté avec apprentissage automatique ;",
+      "voix": "Solar Box, un onduleur solaire connecté avec apprentissage automatique ;"
+    },
+    {
+      "id": "c-ast",
+      "scene": "realisations",
+      "texte": "AST Media, une plateforme d'actualités ;",
+      "voix_el": "A.S.T. Média, une plateforme d'actualités ;",
+      "voix": "A. S. T. Média, une plateforme d'actualités ;"
+    },
+    {
+      "id": "c-om",
+      "scene": "realisations",
+      "texte": "et des notifications de paiement Orange Money envoyées sur WhatsApp."
+    },
+    {
+      "id": "c-ia",
+      "scene": "ia",
+      "texte": "Je m'intéresse aussi à l'intelligence artificielle, au machine learning, à la robotique et à l'automatisation."
+    },
+    {
+      "id": "c-fata",
+      "scene": "fata",
+      "texte": "Je suis engagé dans l'éducation numérique avec FATA.SCHOOL et ELITECH ACADEMY.",
+      "voix_el": "Je suis engagé dans l'éducation numérique avec Fata School et Élitek Académie.",
+      "voix": "Je suis engagé dans l'éducation numérique avec Fata School et Élitek Académie."
+    },
+    {
+      "id": "c-ambassadeur",
+      "scene": "fata",
+      "texte": "Ambassadeur puis Country Lead de FATA.SCHOOL en Guinée, j'ai pris la parole, organisé des événements et représenté l'initiative.",
+      "voix_el": "Ambassadeur puis Country Lead de Fata School en Guinée, j'ai pris la parole, organisé des événements et représenté l'initiative.",
+      "voix": "Ambassadeur puis Country Lead de Fata School en Guinée, j'ai pris la parole, organisé des événements et représenté l'initiative."
+    },
+    {
+      "id": "c-createurs",
+      "scene": "fata",
+      "texte": "Mon objectif : que les jeunes deviennent des créateurs de solutions."
+    },
+    {
+      "id": "c-yen",
+      "scene": "yen",
+      "texte": "À Youth Engineers Network, j'aide les jeunes à passer de la formation à l'emploi,"
+    },
+    {
+      "id": "c-plateforme",
+      "scene": "yen",
+      "texte": "et j'ai développé une plateforme qui rapproche les talents et les opportunités."
+    },
+    {
+      "id": "c-afrique",
+      "scene": "afrique",
+      "texte": "Je veux contribuer au développement technologique de la Guinée et de l'Afrique."
+    },
+    {
+      "id": "c-potentiel",
+      "scene": "afrique",
+      "texte": "Nous avons le potentiel, les idées et les talents."
+    },
+    {
+      "id": "c-japprends",
+      "scene": "conclusion",
+      "texte": "J'apprends, je construis, j'expérimente et j'évolue."
+    },
+    {
+      "id": "c-convaincu",
+      "scene": "conclusion",
+      "texte": "Car les idées prennent de la valeur lorsqu'on décide de les concrétiser."
+    },
+    {
+      "id": "c-merci",
+      "scene": "conclusion",
+      "texte": "Je suis Joël Koïkoï Koïvogui. Merci.",
+      "voix_el": "Je suis Joël Koy-koy Koyvogui. Merci.",
+      "voix": "Je suis Joël [[ kɔjkˈɔj kɔjvoɡˈi ]]. Merci."
+    }
+  ]
+}
