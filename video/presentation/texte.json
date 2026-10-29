@@ -1,0 +1,93 @@
+{
+  "_lisezmoi": "Texte de la voix off, découpé en segments. « texte » s'affiche en sous-titre ; « voix » (facultatif) est ce que la synthèse vocale prononce, quand il faut l'aider : [[ ... ]] donne directement la prononciation. « scene » groupe les segments ; une pause plus longue sépare deux scènes.",
+  "segments": [
+    { "id": "bonjour", "scene": "intro", "texte": "Bonjour à toutes et à tous !" },
+    { "id": "nom", "scene": "intro", "texte": "Je m'appelle Joël Koïkoï Koïvogui.", "voix": "Je m'appelle Joël [[ kɔjkˈɔj kɔjvoɡˈi ]]." },
+    { "id": "roles", "scene": "intro", "texte": "Je suis développeur web et mobile, entrepreneur technologique, autodidacte et passionné par l'innovation, l'intelligence artificielle et la robotique." },
+    { "id": "conakry", "scene": "intro", "texte": "Je suis basé en Guinée, à Conakry, où je construis progressivement mon parcours dans le numérique." },
+    { "id": "ambition", "scene": "intro", "texte": "Mon ambition est claire : développer mes compétences, concrétiser mes idées et concevoir des solutions technologiques capables de répondre à des problèmes réels." },
+    { "id": "premiers", "scene": "intro", "texte": "Dès mes premiers pas en informatique, j'ai compris que la technologie était bien plus qu'un domaine d'étude." },
+    { "id": "moyen", "scene": "intro", "texte": "Pour moi, c'est un moyen de créer, d'innover, d'entreprendre et de contribuer au développement de mon environnement." },
+
+    { "id": "vision", "scene": "parcours", "texte": "C'est cette vision qui m'a poussé à apprendre le développement web et mobile." },
+    { "id": "2022", "scene": "parcours", "texte": "Depuis 2022, je pratique, j'expérimente et je multiplie les projets qui me permettent de progresser." },
+    { "id": "unc", "scene": "parcours", "texte": "Je poursuis également mes études à l'UNC, en complément de cet apprentissage par la pratique.", "voix": "Je poursuis également mes études à l'U.N.C, en complément de cet apprentissage par la pratique." },
+
+    { "id": "web", "scene": "stack", "texte": "Aujourd'hui, je travaille avec React, Next.js, Node.js, Express, MongoDB et Supabase", "voix": "Aujourd'hui, je travaille avec Riacte, Next J S, Node J S, Express, Mongo D B et Supabase" },
+    { "id": "web2", "scene": "stack", "texte": "pour concevoir des applications web, des plateformes numériques et des solutions adaptées aux besoins des utilisateurs." },
+    { "id": "mobile", "scene": "stack", "texte": "Côté mobile, je développe avec React Native et Expo.", "voix": "Côté mobile, je développe avec Riacte Native et Expo." },
+    { "id": "autres", "scene": "stack", "texte": "J'ai aussi exploré Electron.js pour les applications de bureau, Python, ainsi qu'Arduino et ESP32 pour l'électronique et l'Internet des objets.", "voix": "J'ai aussi exploré Électron J S pour les applications de bureau, Python, ainsi qu'Arduino et [[ ˌøˌɛspˈe ]] 32 pour l'électronique et l'Internet des objets." },
+
+    { "id": "passion", "scene": "idee", "texte": "Ce qui me passionne dans le développement, c'est de partir d'une simple idée," },
+    { "id": "passion2", "scene": "idee", "texte": "de réfléchir à la manière de la concrétiser et de la transformer en produit fonctionnel." },
+    { "id": "explorer", "scene": "idee", "texte": "J'aime explorer de nouvelles approches, résoudre des problèmes et découvrir des outils qui me permettent de travailler plus efficacement." },
+    { "id": "ia-dev", "scene": "idee", "texte": "Je m'intéresse particulièrement au développement assisté par l'intelligence artificielle :" },
+    { "id": "ia-dev2", "scene": "idee", "texte": "ces outils accélèrent la création d'applications, améliorent la productivité et changent notre façon de concevoir des logiciels." },
+
+    { "id": "real", "scene": "realisations", "texte": "Je transforme des idées en produits concrets, pensés pour les réalités guinéennes." },
+    { "id": "nabele", "scene": "realisations", "texte": "Parmi mes réalisations : NABELE, une solution multi-boutiques de gestion de stock et de caisse pour les restaurants et les commerces ;", "voix": "Parmi mes réalisations : Nabélé, une solution multi-boutiques de gestion de stock et de caisse pour les restaurants et les commerces ;" },
+    { "id": "smartstock", "scene": "realisations", "texte": "SmartStock Guinée, une plateforme destinée aux commerçants ;", "voix": "Smart Stock Guinée, une plateforme destinée aux commerçants ;" },
+    { "id": "sgs", "scene": "realisations", "texte": "SGS, un système de gestion scolaire que j'ai fait évoluer d'Electron vers Next.js et MongoDB ;", "voix": "S G S, un système de gestion scolaire que j'ai fait évoluer d'Électron vers Next J S et Mongo D B ;" },
+    { "id": "solarbox", "scene": "realisations", "texte": "SolarBox, un système d'onduleur solaire connecté avec tableaux de bord et apprentissage automatique ;", "voix": "Solar Box, un système d'onduleur solaire connecté avec tableaux de bord et apprentissage automatique ;" },
+    { "id": "ast", "scene": "realisations", "texte": "et AST Media, une plateforme d'actualités en français.", "voix": "et A. S. T. Média, une plateforme d'actualités en français." },
+    { "id": "om", "scene": "realisations", "texte": "J'ai aussi conçu une solution qui envoie des notifications de paiement Orange Money vers WhatsApp pour les commerçants." },
+    { "id": "chaque", "scene": "realisations", "texte": "Chaque projet m'apprend à mieux comprendre un besoin et à y répondre efficacement." },
+
+    { "id": "mais", "scene": "ia", "texte": "Mais mes ambitions ne s'arrêtent pas au développement web et mobile." },
+    { "id": "domaines", "scene": "ia", "texte": "Je m'intéresse à l'intelligence artificielle, au machine learning, à la robotique, à l'Internet des objets et à l'automatisation." },
+    { "id": "physique", "scene": "ia", "texte": "Avec Arduino, l'ESP32 et mon projet SolarBox, j'ai déjà commencé à relier le logiciel au monde physique,", "voix": "Avec Arduino, l'[[ ˌøˌɛspˈe ]] 32 et mon projet Solar Box, j'ai déjà commencé à relier le logiciel au monde physique," },
+    { "id": "donnees", "scene": "ia", "texte": "en y associant le machine learning pour exploiter les données collectées." },
+    { "id": "systemes", "scene": "ia", "texte": "Je souhaite approfondir ces domaines afin de participer, à terme, à la conception de systèmes intelligents capables d'interagir avec leur environnement et de répondre à des besoins concrets." },
+    { "id": "disciplines", "scene": "ia", "texte": "Je suis convaincu que l'avenir de la technologie se joue dans la capacité à faire travailler ensemble plusieurs disciplines pour créer des solutions toujours plus utiles et innovantes." },
+
+    { "id": "entre", "scene": "entreprise", "texte": "Parallèlement à mon parcours technique, je développe un véritable intérêt pour l'entrepreneuriat et la gestion de projets numériques." },
+    { "id": "initiatives", "scene": "entreprise", "texte": "À travers mes différentes initiatives, j'explore les possibilités offertes par le numérique, j'identifie des opportunités et je transforme des idées en projets concrets." },
+    { "id": "entreprendre", "scene": "entreprise", "texte": "Pour moi, entreprendre dans la technologie, ce n'est pas seulement créer une application ou lancer une plateforme." },
+    { "id": "besoin", "scene": "entreprise", "texte": "C'est avant tout comprendre un besoin, imaginer une réponse adaptée et travailler à sa réalisation." },
+    { "id": "dimensions", "scene": "entreprise", "texte": "Je m'intéresse donc autant à la dimension technique qu'à la stratégie, à l'expérience utilisateur, à la gestion de projets et à la création de valeur." },
+
+    { "id": "edu", "scene": "fata", "texte": "Je suis également engagé dans l'éducation numérique et la formation des jeunes, à travers FATA.SCHOOL et ELITECH ACADEMY.", "voix": "Je suis également engagé dans l'éducation numérique et la formation des jeunes, à travers Fata School et Élitek Académie." },
+    { "id": "ambassadeur", "scene": "fata", "texte": "J'ai d'abord été ambassadeur de FATA.SCHOOL.", "voix": "J'ai d'abord été ambassadeur de Fata School." },
+    { "id": "fatadev", "scene": "fata", "texte": "Dès ma 12e année, grâce à l'application FataDev, j'ai appris énormément de compétences en programmation, notamment en HTML et en CSS.", "voix": "Dès ma douzième année, grâce à l'application Fata Dèv, j'ai appris énormément de compétences en programmation, notamment en H T M L et en C S S." },
+    { "id": "parole", "scene": "fata", "texte": "Lors des initiatives organisées par FATA, je prenais la parole, j'allais à la rencontre des participants", "voix": "Lors des initiatives organisées par Fata, je prenais la parole, j'allais à la rencontre des participants" },
+    { "id": "parole2", "scene": "fata", "texte": "et je leur présentais l'association ainsi que l'application FATA.", "voix": "et je leur présentais l'association ainsi que l'application Fata." },
+    { "id": "lead", "scene": "fata", "texte": "J'ai ensuite été Country Lead de FATA.SCHOOL Guinée :", "voix": "J'ai ensuite été Country Lead de Fata School Guinée :" },
+    { "id": "lead2", "scene": "fata", "texte": "j'accompagnais l'initiative, je mettais en œuvre les objectifs de FATA.SCHOOL dans toute la Guinée et j'organisais des événements.", "voix": "j'accompagnais l'initiative, je mettais en œuvre les objectifs de Fata School dans toute la Guinée et j'organisais des événements." },
+    { "id": "represente", "scene": "fata", "texte": "En partenariat avec d'autres institutions, j'ai aussi représenté FATA.SCHOOL lors de plusieurs rencontres.", "voix": "En partenariat avec d'autres institutions, j'ai aussi représenté Fata School lors de plusieurs rencontres." },
+
+    { "id": "jeunes", "scene": "jeunes", "texte": "Je crois profondément que le numérique peut ouvrir de nouvelles perspectives aux jeunes," },
+    { "id": "jeunes2", "scene": "jeunes", "texte": "leur permettre d'acquérir des compétences recherchées et leur donner les moyens de devenir des créateurs de solutions plutôt que de simples utilisateurs de technologies." },
+    { "id": "piliers", "scene": "jeunes", "texte": "C'est pourquoi je considère le partage des connaissances, la formation et l'accompagnement des talents comme des piliers de mon engagement." },
+    { "id": "ecosysteme", "scene": "jeunes", "texte": "Je souhaite contribuer, à mon échelle, à un écosystème où davantage de jeunes Africains peuvent apprendre à programmer," },
+    { "id": "ecosysteme2", "scene": "jeunes", "texte": "découvrir l'intelligence artificielle, expérimenter la robotique et développer leurs propres projets." },
+
+    { "id": "yen", "scene": "yen", "texte": "Je suis également responsable d'insertion professionnelle au sein de Youth Engineers Network," },
+    { "id": "yen2", "scene": "yen", "texte": "un réseau qui accompagne les jeunes dans le développement de leurs compétences numériques et professionnelles." },
+    { "id": "role", "scene": "yen", "texte": "Mon rôle est de les aider à passer de la formation à l'emploi." },
+    { "id": "actions", "scene": "yen", "texte": "Je repère des opportunités d'emploi, de stage et de formation, j'accompagne les jeunes dans la préparation de leur candidature," },
+    { "id": "actions2", "scene": "yen", "texte": "et je les mets en relation avec des entreprises et des partenaires." },
+    { "id": "plateforme", "scene": "yen", "texte": "Pour amplifier cet impact, j'ai conçu et développé une plateforme numérique dédiée à l'insertion professionnelle des jeunes." },
+    { "id": "rapprocher", "scene": "yen", "texte": "Son objectif est de rapprocher les talents et les opportunités, et de rendre cet accompagnement accessible à un plus grand nombre." },
+    { "id": "conviction", "scene": "yen", "texte": "C'est une illustration concrète de ma conviction : une idée prend de la valeur lorsqu'on la transforme en solution." },
+
+    { "id": "conscient", "scene": "vision", "texte": "Je suis conscient que ce parcours demande du travail, de la discipline, de la patience et une volonté constante d'apprendre." },
+    { "id": "autodidacte", "scene": "vision", "texte": "En tant qu'autodidacte, j'accorde une grande importance à la pratique, à l'expérimentation et à la progression continue." },
+    { "id": "pretends", "scene": "vision", "texte": "Je ne prétends pas tout maîtriser." },
+    { "id": "occasion", "scene": "vision", "texte": "Je considère plutôt chaque nouvelle compétence, chaque difficulté et chaque projet comme une occasion d'évoluer et de renforcer mon expertise." },
+    { "id": "long", "scene": "vision", "texte": "Ma vision à long terme est de devenir un professionnel capable de réunir le développement logiciel, l'intelligence artificielle, la robotique et l'entrepreneuriat" },
+    { "id": "long2", "scene": "vision", "texte": "pour concevoir des solutions à fort impact." },
+
+    { "id": "afrique", "scene": "afrique", "texte": "Je souhaite également contribuer au développement technologique de la Guinée et, plus largement, de l'Afrique," },
+    { "id": "afrique2", "scene": "afrique", "texte": "en participant à la création de projets qui répondent aux réalités locales et ouvrent de nouvelles possibilités." },
+    { "id": "potentiel", "scene": "afrique", "texte": "Nous avons le potentiel, les idées et les talents nécessaires pour construire des solutions innovantes." },
+    { "id": "action", "scene": "afrique", "texte": "Nous devons continuer à apprendre, à collaborer et à passer de la réflexion à l'action." },
+
+    { "id": "jesuis", "scene": "conclusion", "texte": "Je suis Joël Koïkoï Koïvogui : développeur web et mobile, entrepreneur technologique, autodidacte et passionné par l'innovation.", "voix": "Je suis Joël [[ kɔjkˈɔj kɔjvoɡˈi ]] : développeur web et mobile, entrepreneur technologique, autodidacte et passionné par l'innovation." },
+    { "id": "japprends", "scene": "conclusion", "texte": "J'apprends, je construis, j'expérimente et j'évolue." },
+    { "id": "ambition2", "scene": "conclusion", "texte": "Mon ambition n'est pas simplement de suivre l'évolution de la technologie," },
+    { "id": "ambition3", "scene": "conclusion", "texte": "mais de participer activement à sa construction et à son utilisation pour résoudre des problèmes réels." },
+    { "id": "convaincu", "scene": "conclusion", "texte": "Parce que je suis convaincu d'une chose : les idées prennent de la valeur lorsqu'on décide de les concrétiser." },
+    { "id": "transformer", "scene": "conclusion", "texte": "Et moi, je veux continuer à transformer mes idées en solutions, mes connaissances en compétences et mes ambitions en réalisations concrètes." },
+    { "id": "merci", "scene": "conclusion", "texte": "Merci." }
+  ]
+}

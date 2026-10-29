@@ -3,3 +3,6 @@
 node_modules/
 .DS_Store
 /video/apercu/
+/video/presentation/medias/
+/video/presentation/sortie/
+/video/presentation/voix-perso/
