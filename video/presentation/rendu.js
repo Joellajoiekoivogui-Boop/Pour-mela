@@ -18,7 +18,8 @@ const args = process.argv.slice(2);
 const apercu = args.includes('--apercu') ? args[args.indexOf('--apercu') + 1].split(',') : null;
 
 (async () => {
-  const navigateur = await chromium.launch();
+  // Sans cette option, les photos locales « contaminent » le canvas et toDataURL échoue.
+  const navigateur = await chromium.launch({ args: ['--allow-file-access-from-files'] });
   const page = await navigateur.newPage({ viewport: { width: 1920, height: 1080 } });
   page.on('pageerror', e => { console.error('Erreur dans la page :', e.message); process.exitCode = 1; });
   await page.goto('file://' + path.join(ici, 'presentation.html') + '?rendu');
