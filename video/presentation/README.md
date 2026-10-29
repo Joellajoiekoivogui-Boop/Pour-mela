@@ -25,9 +25,14 @@ Le dépôt est public : les photos et la vidéo finale ne sont **pas** versionn�
 
 | Fichier | Utilisation | Si absent |
 |---|---|---|
-| `photo-joel.jpg` | Portrait de fin et scène FATA | Monogramme « JK » |
-| `joel-scene.jpg` | Prise de parole (FATA) | Cadre vide |
-| `affiche-fata.jpg` | Événements FATA | Cadre vide |
+| `portrait-joel.jpg` | Portrait de fin (carré, visage centré) | Monogramme « JK » |
+| `photo-joel.jpg` | Country Lead FATA.SCHOOL Guinée | Cadre absent |
+| `joel-scene.jpg`, `ev-micro.jpg` | Prises de parole | Cadre absent |
+| `ev-presentation.jpg` | Présentation de FATA.SCHOOL | Cadre absent |
+| `ev-remise.jpg`, `affiche-fata.jpg` | Événements FATA | Cadre absent |
+| `ev-stand.jpg`, `ev-stand2.jpg` | Stand FATA.SCHOOL, Afrinov Tech Expo | Cadre absent |
+| `ev-cloud-unc.jpg`, `ev-odc.jpg` | UNC et Orange Digital Center (parcours) | Cadre absent |
+| `ev-foire.jpg` | Foire technologique de Guinée et d'Afrique | Carte seule |
 | `logo-fata.png` | Logo {fata} | Logo redessiné |
 | `logo-elitech.png` | Logo ELITECH ACADEMY | Logo typographique |
 | `logo-yen.png` | Logo Youth Engineers Network | « YEN » en grand |

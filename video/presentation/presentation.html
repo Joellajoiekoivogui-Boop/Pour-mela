@@ -53,7 +53,8 @@ const BORNES = Object.fromEntries(SCENES.map(s => [s.nom, s]));
 // maquette à la place (voir README.md pour ajouter logos et captures).
 const MEDIAS = {};
 const CHARGEMENTS = [];
-['photo-joel.jpg', 'joel-scene.jpg', 'affiche-fata.jpg', 'logo-fata.png', 'logo-elitech.png', 'logo-yen.png',
+['photo-joel.jpg', 'portrait-joel.jpg', 'joel-scene.jpg', 'affiche-fata.jpg', 'logo-fata.png', 'logo-elitech.png', 'logo-yen.png',
+ 'ev-micro.jpg', 'ev-presentation.jpg', 'ev-remise.jpg', 'ev-stand.jpg', 'ev-stand2.jpg', 'ev-foire.jpg', 'ev-cloud-unc.jpg', 'ev-odc.jpg',
  'capture-nabele.png', 'capture-smartstock.png', 'capture-sgs.png', 'capture-solarbox.png', 'capture-ast.png', 'capture-om.png',
 ].forEach(nom => {
   const img = new Image();
@@ -205,6 +206,24 @@ function photo(img, x, y, w, h, { foyer = [.5, .5], zoom = 1, r = 24, rond = fal
   g.clip();
   g.drawImage(img, sx, sy, sw, sh, x, y, w, h);
   g.restore();
+  return true;
+}
+
+// Photo encadrée, avec ombre, lent zoom et légende en bas.
+function cadrePhoto(nom, x, y, w, h, { foyer = [.5, .5], legende = '', zoom = 1, bord = 'rgba(255,255,255,0.35)', lumiere = 1 } = {}) {
+  const img = MEDIAS[nom];
+  if (!img) return false;
+  g.save(); g.shadowColor = 'rgba(0,0,0,0.6)'; g.shadowBlur = 50; rr(x, y, w, h, 24); g.fillStyle = '#000'; g.fill(); g.restore();
+  if (lumiere !== 1) { g.save(); g.filter = `brightness(${lumiere})`; }
+  photo(img, x, y, w, h, { foyer, zoom });
+  if (lumiere !== 1) g.restore();
+  g.strokeStyle = bord; g.lineWidth = 2; rr(x, y, w, h, 24); g.stroke();
+  if (legende) {
+    police(20, 600);
+    const lw = Math.min(w - 48, g.measureText(legende).width + 40);
+    rr(x + 24, y + h - 70, lw, 46, 23); g.fillStyle = 'rgba(5,7,15,0.82)'; g.fill();
+    g.fillStyle = COUL.encre; g.textAlign = 'left'; g.textBaseline = 'alphabetic'; g.fillText(legende, x + 44, y + h - 40);
+  }
   return true;
 }
 
@@ -473,7 +492,8 @@ function scParcours(t) {
   g.save(); g.globalAlpha = a;
   chapitre(t, 'parcours', '01', 'Parcours', COUL.cyan);
 
-  motCle(t, D('vision') + .2, 'AUTODIDACTE', W / 2, 330, COUL.corail, { taille: 150, fin: D('unc') + .2 });
+  g.save(); g.globalAlpha *= 1 - prog(t, D('unc') - .3, D('unc') + .2);
+  motCle(t, D('vision') + .2, 'AUTODIDACTE', W / 2, 330, COUL.corail, { taille: 150 });
   texteMots('Apprendre le développement web et mobile', W / 2, 410, prog(t, frac('vision', .4), F('vision') + .3), { taille: 40, graisse: 500, couleur: COUL.doux });
 
   // frise 2022 → aujourd'hui
@@ -500,19 +520,25 @@ function scParcours(t) {
     g.restore();
   });
 
-  // UNC : pratique + études
-  const au = fenetre(t, D('unc') - .1, Infinity);
+  g.restore();
+
+  // UNC : études + pratique, avec deux photos
+  const au = fenetre(t, D('unc') - .2, Infinity, .5);
   if (au) {
     g.save(); g.globalAlpha *= au;
-    const p1 = sortie5(prog(t, frac('unc', .1), frac('unc', .4)));
-    const p2 = sortie5(prog(t, frac('unc', .5), frac('unc', .8)));
-    police(30, 600);
-    const w1 = g.measureText('Études à l’UNC').width + 48, w2 = g.measureText('Apprentissage par la pratique').width + 48;
-    const x0 = W / 2 - (w1 + w2 + 80) / 2;
-    pastille('Études à l’UNC', x0, 760, p1, { couleur: COUL.violet, taille: 30 });
-    g.globalAlpha *= p2;
-    police(40, 800); g.fillStyle = COUL.or; g.textAlign = 'center'; g.fillText('+', x0 + w1 + 40, 774);
-    pastille('Apprentissage par la pratique', x0 + w1 + 80, 760, p2, { couleur: COUL.cyan, taille: 30 });
+    const p1 = sortie5(prog(t, D('unc') - .1, D('unc') + .9));
+    const p2 = sortie5(prog(t, frac('unc', .45), frac('unc', .45) + 1));
+    g.save(); g.globalAlpha *= p1; g.translate(0, (1 - p1) * 60);
+    cadrePhoto('ev-cloud-unc', 140, 170, 440, 640, { foyer: [.5, .42], zoom: 1 + (t - D('unc')) * .01, legende: 'Journée du Cloud 2024 · UNC', bord: 'rgba(139,123,255,0.6)' });
+    g.restore();
+    g.save(); g.globalAlpha *= p2; g.translate(0, (1 - p2) * 60);
+    cadrePhoto('ev-odc', 620, 250, 420, 560, { foyer: [.5, .45], zoom: 1 + (t - D('unc')) * .01, legende: 'Orange Digital Center', bord: 'rgba(58,214,230,0.6)' });
+    g.restore();
+    texteMots('Études à l’UNC', 1120, 400, prog(t, D('unc'), frac('unc', .4)), { taille: 64, graisse: 800, align: 'left', couleur: COUL.violet });
+    texteMots('Université Nongo Conakry', 1120, 460, prog(t, frac('unc', .15), frac('unc', .5)), { taille: 32, graisse: 500, align: 'left', couleur: COUL.doux });
+    police(64, 800); g.fillStyle = COUL.or; g.textAlign = 'left'; g.globalAlpha *= p2; g.fillText('+', 1120, 570);
+    texteMots('Apprentissage', 1120, 650, prog(t, frac('unc', .5), frac('unc', .8)), { taille: 64, graisse: 800, align: 'left', couleur: COUL.cyan });
+    texteMots('par la pratique', 1120, 725, prog(t, frac('unc', .6), F('unc')), { taille: 64, graisse: 800, align: 'left' });
     g.restore();
   }
   g.restore();
@@ -1254,7 +1280,6 @@ function scFata(t) {
       ['Représentation', 'Rencontres avec des institutions partenaires', D('represente'), COUL.vert],
     ];
     const x = 170, y0 = 330, pas = 140;
-    const pl = prog(t, D('fatadev'), F('represente'));
     g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 3; g.beginPath(); g.moveTo(x, y0); g.lineTo(x, y0 + pas * 3); g.stroke();
     etapes.forEach(([titre, sous, d, k], i) => {
       const p = sortie5(prog(t, d, d + .7));
@@ -1267,19 +1292,22 @@ function scFata(t) {
       police(24, 400); g.fillStyle = COUL.doux; g.fillText(sous, x + 50, y + 50);
       g.restore();
     });
-    void pl;
     // visuels à droite
     const vx = 1060, vy = 200, vw = 740, vh = 600;
     const visuels = [
       [D('fatadev') - .1, D('parole') - .1, 'code'],
-      [D('parole') - .1, D('lead') - .1, 'joel-scene'],
-      [D('lead') - .1, D('represente') - .1, 'affiche-fata'],
-      [D('represente') - .1, Infinity, 'photo-joel'],
+      [D('parole') - .1, frac('parole', .5), 'ev-micro', [.48, .45], 'Prise de parole en public'],
+      [frac('parole', .5), D('parole2') - .1, 'joel-scene', [.6, .2], 'Prise de parole lors d’une initiative FATA'],
+      [D('parole2') - .1, D('lead') - .1, 'ev-presentation', [.5, .3], 'Présenter FATA.SCHOOL et son application'],
+      [D('lead') - .1, D('lead2') - .1, 'photo-joel', [.58, .22], 'Country Lead FATA.SCHOOL Guinée'],
+      [D('lead2') - .1, frac('lead2', .55), 'ev-remise', [.45, .4], 'Remise d’ordinateurs · Université Nongo Conakry'],
+      [frac('lead2', .55), D('represente') - .1, 'affiche-fata', [.5, .5], 'Challenge de codage FATA-Guinée 2026'],
+      [D('represente') - .1, frac('represente', .5), 'ev-stand', [.62, .5], 'Stand FATA.SCHOOL · Afrinov Tech Expo'],
+      [frac('represente', .5), Infinity, 'ev-stand2', [.55, .5], 'FATA.SCHOOL · Afrinov Tech Expo'],
     ];
-    visuels.forEach(([va, vb, quoi]) => {
+    visuels.forEach(([va, vb, quoi, foyer, legende]) => {
       const av = fenetre(t, va, vb, .6, .6);
       if (!av) return;
-      const z = 1 + (t - va) * .012;
       g.save(); g.globalAlpha *= av;
       if (quoi === 'code') {
         carte(vx, vy, vw, vh, { fond: '#0c1222', ombre: 'rgba(255,216,77,0.25)' });
@@ -1291,16 +1319,8 @@ function scFata(t) {
         pastille('HTML', vx + vw - 230, vy + vh - 50, prog(t, frac('fatadev', .75), frac('fatadev', .85)), { couleur: COUL.corail, taille: 20 });
         pastille('CSS', vx + vw - 120, vy + vh - 50, prog(t, frac('fatadev', .85), frac('fatadev', .95)), { couleur: COUL.cyan, taille: 20 });
       } else {
-        const img = MEDIAS[quoi];
-        const foyer = quoi === 'joel-scene' ? [.6, .2] : quoi === 'photo-joel' ? [.58, .22] : [.5, .5];
-        g.save(); g.shadowColor = 'rgba(0,0,0,0.6)'; g.shadowBlur = 50; rr(vx, vy, vw, vh, 24); g.fillStyle = '#000'; g.fill(); g.restore();
-        if (!photo(img, vx, vy, vw, vh, { foyer, zoom: quoi === 'affiche-fata' ? 1 : z })) {
-          carte(vx, vy, vw, vh); police(26, 600); g.fillStyle = COUL.doux; g.textAlign = 'center'; g.fillText(quoi, vx + vw / 2, vy + vh / 2);
-        }
-        g.strokeStyle = 'rgba(255,216,77,0.5)'; g.lineWidth = 2; rr(vx, vy, vw, vh, 24); g.stroke();
-        const legende = { 'joel-scene': 'Prise de parole lors d’une initiative FATA', 'affiche-fata': 'Challenge de codage FATA-Guinée 2026', 'photo-joel': 'Présenter FATA.SCHOOL et son application' }[quoi];
-        rr(vx + 24, vy + vh - 70, Math.min(vw - 48, legende.length * 13 + 40), 46, 23); g.fillStyle = 'rgba(5,7,15,0.8)'; g.fill();
-        police(20, 600); g.fillStyle = COUL.encre; g.textAlign = 'left'; g.fillText(legende, vx + 44, vy + vh - 40);
+        cadrePhoto(quoi, vx, vy, vw, vh, { foyer, legende, zoom: quoi === 'affiche-fata' ? 1 : 1 + (t - va) * .012,
+          bord: 'rgba(255,216,77,0.5)', lumiere: quoi === 'ev-micro' ? 1.35 : 1 });
       }
       g.restore();
     });
@@ -1577,9 +1597,15 @@ function scAfrique(t) {
   if (!a) return;
   g.save(); g.globalAlpha = a;
   chapitre(t, 'afrique', '10', 'La Guinée et l’Afrique', COUL.or);
-  const G = carteAfrique(t, D('afrique') - .4, 1440, 520, 10, { arcs: frac('afrique', .6) });
+  const pf = sortie5(prog(t, D('potentiel') - .2, D('potentiel') + .8));
+  const G = carteAfrique(t, D('afrique') - .4, 1440, 520, 10, { arcs: frac('afrique', .6), alpha: 1 - .7 * pf });
+  if (pf > 0) {
+    g.save(); g.globalAlpha *= pf; g.translate((1 - pf) * 80, 0);
+    cadrePhoto('ev-foire', 1000, 230, 820, 546, { foyer: [.5, .5], zoom: 1 + (t - D('potentiel')) * .01, legende: 'Foire technologique de Guinée et d’Afrique', bord: 'rgba(245,176,65,0.6)' });
+    g.restore();
+  }
   const pe = sortie3(prog(t, D('afrique') + .4, D('afrique') + 1.2));
-  g.save(); g.globalAlpha *= pe;
+  g.save(); g.globalAlpha *= pe * (1 - pf);
   drapeau(G[0] - 190, G[1] - 14, 28);
   police(28, 800); g.fillStyle = COUL.encre; g.textAlign = 'left'; g.fillText('Guinée', G[0] - 150, G[1] + 10);
   g.restore();
@@ -1619,7 +1645,7 @@ function portrait(t, cx, cy, r, p) {
   lueur(cx, cy, r * 1.8, COUL.or, .35);
   anneau(cx, cy, r + 12, COUL.or, 3, sortie3(p));
   const z = 1 + (t % 60) * .002;
-  if (!photo(MEDIAS['photo-joel'], cx - r, cy - r, r * 2, r * 2, { rond: true, foyer: [.57, .2], zoom: 2.15 * z })) {
+  if (!photo(MEDIAS['portrait-joel'], cx - r, cy - r, r * 2, r * 2, { rond: true, foyer: [.5, .5], zoom: z })) {
     cercle(cx, cy, r, COUL.sombre); police(r * .6, 900); g.fillStyle = COUL.or; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('JK', cx, cy); g.textBaseline = 'alphabetic';
   }
   g.restore();
