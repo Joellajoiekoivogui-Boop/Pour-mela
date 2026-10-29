@@ -1,0 +1,876 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Joël Koïkoï Koivogui · Motion design</title>
+<style>
+  @font-face { font-family: 'Cormorant'; font-style: italic; src: url('../fonts/cormorant-italique-latin.woff2') format('woff2'); }
+  @font-face { font-family: 'Cormorant'; font-style: italic; src: url('../fonts/cormorant-italique-latin-ext.woff2') format('woff2'); unicode-range: U+0100-024F; }
+  html, body { margin: 0; background: #05070f; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; object-fit: contain; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1920" height="1080"></canvas>
+<script>
+'use strict';
+// Toute l'animation est une fonction pure du temps : rendre(t) dessine
+// l'image à l'instant t (en secondes). Le script rendu.js l'appelle image par
+// image pour fabriquer la vidéo ; ouverte dans un navigateur, la page joue
+// l'animation en temps réel.
+
+const W = 1920, H = 1080, DUREE = 92;
+const c = document.getElementById('c');
+const g = c.getContext('2d');
+
+const COUL = {
+  fond: '#05070f', encre: '#f4f1ea', doux: '#9aa3b8',
+  or: '#f5b041', corail: '#ff6b4a', cyan: '#3ad6e6', violet: '#8b7bff', vert: '#3ddc97',
+};
+const SANS = 'Inter, "Inter Display", system-ui, sans-serif';
+const SERIF = 'Cormorant, Georgia, serif';
+
+// ---------- outils ----------
+const borne = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+const prog = (t, a, b) => borne((t - a) / (b - a));
+const lin = (a, b, p) => a + (b - a) * p;
+const sortie3 = p => 1 - Math.pow(1 - p, 3);
+const sortie5 = p => 1 - Math.pow(1 - p, 5);
+const entreeSortie = p => p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+const rebond = p => { const c1 = 1.70158, c3 = c1 + 1; return 1 + c3 * Math.pow(p - 1, 3) + c1 * Math.pow(p - 1, 2); };
+function alea(n) { const x = Math.sin(n * 127.1 + 311.7) * 43758.5453; return x - Math.floor(x); }
+
+function police(taille, graisse = 700, famille = SANS, italique = false) {
+  g.font = `${italique ? 'italic ' : ''}${graisse} ${taille}px ${famille}`;
+}
+
+// Texte révélé lettre par lettre (montée + fondu), centré ou aligné à gauche.
+function texteLettres(txt, x, y, p, { taille = 60, graisse = 700, famille = SANS, italique = false,
+  couleur = COUL.encre, align = 'center', espace = 0, decalage = .035, montee = 40, flou = true } = {}) {
+  police(taille, graisse, famille, italique);
+  const lettres = [...txt];
+  const larg = lettres.map(l => g.measureText(l).width + espace);
+  const total = larg.reduce((a, b) => a + b, 0) - espace;
+  let cx = align === 'center' ? x - total / 2 : align === 'right' ? x - total : x;
+  const n = lettres.length;
+  const fen = Math.max(.0001, 1 - decalage * (n - 1) / Math.max(1, n) * 0 - 0);
+  g.textBaseline = 'alphabetic';
+  g.textAlign = 'left';
+  lettres.forEach((l, i) => {
+    const depart = (i / Math.max(1, n)) * .6;
+    const q = sortie3(borne((p - depart) / .4));
+    if (q > 0) {
+      g.save();
+      g.globalAlpha *= q;
+      g.fillStyle = couleur;
+      if (flou && q < 1) g.filter = `blur(${(1 - q) * 8}px)`;
+      g.fillText(l, cx, y + (1 - q) * montee);
+      g.restore();
+    }
+    cx += larg[i];
+  });
+  return total;
+}
+
+// Texte révélé mot par mot.
+function texteMots(txt, x, y, p, { taille = 48, graisse = 500, famille = SANS, italique = false,
+  couleur = COUL.encre, align = 'center', accents = {} } = {}) {
+  police(taille, graisse, famille, italique);
+  const mots = txt.split(' ');
+  const espace = g.measureText(' ').width;
+  const larg = mots.map(m => g.measureText(m).width);
+  const total = larg.reduce((a, b) => a + b, 0) + espace * (mots.length - 1);
+  let cx = align === 'center' ? x - total / 2 : x;
+  g.textAlign = 'left';
+  g.textBaseline = 'alphabetic';
+  mots.forEach((m, i) => {
+    const depart = (i / mots.length) * .65;
+    const q = sortie3(borne((p - depart) / .35));
+    if (q > 0) {
+      g.save();
+      g.globalAlpha *= q;
+      g.fillStyle = accents[m.replace(/[.,…»«]/g, '')] || couleur;
+      g.fillText(m, cx, y + (1 - q) * 24);
+      g.restore();
+    }
+    cx += larg[i] + espace;
+  });
+  return total;
+}
+
+// Opacité d'une scène : fondu d'entrée et de sortie.
+function scene(t, a, b, fe = .6, fs = .6) {
+  if (t < a || t > b) return 0;
+  return Math.min(prog(t, a, a + fe), 1 - prog(t, b - fs, b));
+}
+
+function cercle(x, y, r, couleur, alpha = 1) {
+  g.save(); g.globalAlpha *= alpha; g.fillStyle = couleur;
+  g.beginPath(); g.arc(x, y, Math.max(0, r), 0, Math.PI * 2); g.fill(); g.restore();
+}
+
+function lueur(x, y, r, couleur, alpha = 1) {
+  g.save(); g.globalAlpha *= alpha;
+  const d = g.createRadialGradient(x, y, 0, x, y, r);
+  d.addColorStop(0, couleur); d.addColorStop(1, 'rgba(0,0,0,0)');
+  g.fillStyle = d; g.fillRect(x - r, y - r, r * 2, r * 2); g.restore();
+}
+
+function rectArrondi(x, y, w, h, r) {
+  g.beginPath(); g.roundRect(x, y, w, h, r);
+}
+
+// Étiquette de chapitre « 01 — Titre » en haut à gauche.
+function chapitre(t, a, num, titre, couleur) {
+  const p = prog(t, a + .1, a + 1.2);
+  g.save();
+  g.globalAlpha *= sortie3(p);
+  police(22, 600);
+  g.fillStyle = couleur;
+  g.textAlign = 'left';
+  g.fillText(num, 140, 130);
+  g.fillStyle = couleur;
+  g.fillRect(190, 122, 60 * sortie3(p), 2);
+  g.fillStyle = COUL.doux;
+  g.fillText(titre.toUpperCase(), 270, 130);
+  g.restore();
+}
+
+// ---------- fond permanent ----------
+const PARTICULES = Array.from({ length: 140 }, (_, i) => ({
+  x: alea(i) * W, y: alea(i + 500) * H, v: .2 + alea(i + 900) * .8, r: .6 + alea(i + 1300) * 1.8, ph: alea(i + 1700) * 6.28,
+}));
+
+// Teinte dominante de chaque moment de la vidéo.
+const TEINTES = [
+  [0, COUL.or], [9, COUL.violet], [17, COUL.cyan], [32, COUL.or], [42, COUL.violet],
+  [52, COUL.vert], [61, COUL.or], [72, COUL.corail], [80, COUL.or],
+];
+function teinte(t) {
+  let k = TEINTES[0][1];
+  for (const [d, coul] of TEINTES) if (t >= d) k = coul;
+  return k;
+}
+
+function fond(t) {
+  g.fillStyle = COUL.fond;
+  g.fillRect(0, 0, W, H);
+  // grandes lueurs qui dérivent
+  const k = teinte(t);
+  lueur(W * .5 + Math.sin(t * .2) * 300, H * .45 + Math.cos(t * .17) * 120, 900, k, .16);
+  lueur(W * .15 + Math.cos(t * .13) * 200, H * .9, 700, COUL.violet, .1);
+  lueur(W * .9, H * .1 + Math.sin(t * .11) * 100, 600, COUL.cyan, .07);
+  // grille de points
+  g.save();
+  g.fillStyle = 'rgba(255,255,255,0.045)';
+  const dec = (t * 8) % 60;
+  for (let x = -60 + dec; x < W + 60; x += 60)
+    for (let y = 30; y < H; y += 60) g.fillRect(x, y, 2, 2);
+  g.restore();
+  // poussières
+  for (const q of PARTICULES) {
+    const y = (q.y - t * 18 * q.v + H * 10) % H;
+    const x = q.x + Math.sin(t * .5 + q.ph) * 20;
+    cercle(x, y, q.r, '#ffffff', .15 + .25 * (.5 + .5 * Math.sin(t * 2 + q.ph)));
+  }
+}
+
+function vignette() {
+  const d = g.createRadialGradient(W / 2, H / 2, H * .35, W / 2, H / 2, H * 1.05);
+  d.addColorStop(0, 'rgba(0,0,0,0)');
+  d.addColorStop(1, 'rgba(0,0,0,0.7)');
+  g.fillStyle = d;
+  g.fillRect(0, 0, W, H);
+}
+
+// Barre de progression fine en bas de l'image.
+function barre(t) {
+  g.fillStyle = 'rgba(255,255,255,0.08)';
+  g.fillRect(0, H - 4, W, 4);
+  g.fillStyle = teinte(t);
+  g.fillRect(0, H - 4, W * (t / DUREE), 4);
+}
+
+// ---------- scène 1 : intro (0 → 9 s) ----------
+function scIntro(t) {
+  const a = scene(t, 0, 9, .01, .8);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  const cx = W / 2, cy = H / 2;
+
+  // point de lumière qui naît, puis anneaux
+  const p0 = prog(t, 0, 1.2);
+  lueur(cx, cy - 40, 300 * sortie3(p0) + 20, COUL.or, .5 * (1 - prog(t, 2, 4)) + .15);
+  for (let i = 0; i < 3; i++) {
+    const p = prog(t, .4 + i * .35, 3 + i * .35);
+    if (p > 0 && p < 1) {
+      g.save(); g.globalAlpha *= (1 - p) * .6; g.strokeStyle = COUL.or; g.lineWidth = 2;
+      g.beginPath(); g.arc(cx, cy - 40, 30 + sortie3(p) * 700, 0, Math.PI * 2); g.stroke(); g.restore();
+    }
+  }
+
+  // particules qui convergent vers le centre
+  for (let i = 0; i < 70; i++) {
+    const p = sortie5(prog(t, 0, 1.8 + alea(i) * .6));
+    const ang = alea(i + 33) * Math.PI * 2, dist = 600 + alea(i + 77) * 600;
+    const x = cx + Math.cos(ang) * dist * (1 - p), y = cy - 40 + Math.sin(ang) * dist * (1 - p);
+    cercle(x, y, 2.5, i % 3 ? COUL.or : COUL.cyan, (1 - p) * .9);
+  }
+
+  // ligne horizontale qui s'ouvre
+  const pl = entreeSortie(prog(t, .9, 2.2));
+  g.fillStyle = COUL.or;
+  g.fillRect(cx - 520 * pl, cy + 30, 1040 * pl, 3);
+
+  // le nom
+  texteLettres('JOËL KOÏKOÏ KOIVOGUI', cx, cy - 10, prog(t, 1.4, 3.6), { taille: 118, graisse: 800, espace: 6, montee: 60 });
+
+  // les trois rôles
+  const roles = ['Développeur Web & Mobile', 'Entrepreneur technologique', "Passionné d'innovation"];
+  police(34, 500);
+  const sep = 70;
+  const largs = roles.map(r => g.measureText(r).width);
+  const total = largs.reduce((x, y) => x + y, 0) + sep * 2;
+  let x = cx - total / 2;
+  roles.forEach((r, i) => {
+    const p = prog(t, 3.2 + i * .45, 4.4 + i * .45);
+    texteMots(r, x, cy + 100, p, { taille: 34, graisse: 500, couleur: i === 1 ? COUL.or : COUL.doux, align: 'left' });
+    if (i < 2) cercle(x + largs[i] + sep / 2, cy + 89, 4, COUL.or, sortie3(p));
+    x += largs[i] + sep;
+  });
+
+  // signature
+  texteMots('Depuis la Guinée — pour le monde numérique', cx, cy + 220, prog(t, 5, 6.5), { taille: 40, graisse: 500, famille: SERIF, italique: true, couleur: COUL.encre });
+  g.restore();
+}
+
+// ---------- scène 2 : manifeste (9 → 17 s) ----------
+function scManifeste(t) {
+  const a = scene(t, 9, 17.2);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  const cx = W / 2;
+  texteMots('Le numérique est bien plus', cx, 400, prog(t, 9.3, 10.6), { taille: 76, graisse: 700 });
+  texteMots("qu'un ensemble d'outils.", cx, 495, prog(t, 9.8, 11.1), { taille: 76, graisse: 700, couleur: COUL.doux });
+
+  texteMots("C'est un puissant levier de", cx, 640, prog(t, 11.6, 12.6), { taille: 44, graisse: 400, couleur: COUL.doux });
+
+  // les trois mots qui se succèdent dans une « fente »
+  const mots = [['transformation', COUL.violet], ['création', COUL.cyan], ['développement', COUL.or]];
+  const debut = 12.6, duree = 1.4;
+  mots.forEach(([m, coul], i) => {
+    const d = debut + i * duree;
+    const pin = sortie5(prog(t, d, d + .45));
+    const pout = i < 2 ? entreeSortie(prog(t, d + duree - .3, d + duree)) : 0;
+    if (pin <= 0 || pout >= 1) return;
+    g.save();
+    g.beginPath(); g.rect(0, 670, W, 130); g.clip();
+    police(96, 800, SERIF, true);
+    g.textAlign = 'center';
+    g.fillStyle = coul;
+    g.globalAlpha *= pin * (1 - pout);
+    g.fillText(m, cx, 770 + (1 - pin) * 110 - pout * 110);
+    g.restore();
+    // soulignement
+    police(96, 800, SERIF, true);
+    const w = g.measureText(m).width;
+    g.fillStyle = coul;
+    g.globalAlpha = a * (1 - pout);
+    g.fillRect(cx - w / 2, 800, w * sortie3(prog(t, d + .2, d + .8)), 4);
+    g.globalAlpha = a;
+  });
+  g.restore();
+}
+
+// ---------- scène 3 : développement, code et stack (17 → 25.5 s) ----------
+const CODE = [
+  ['k', 'const '], ['v', 'idee'], ['p', ' = '], ['s', '"résoudre un vrai problème"'], ['p', ';'], ['n', ''],
+  ['k', 'async function '], ['f', 'construire'], ['p', '(idee) {'], ['n', ''],
+  ['p', '  '], ['k', 'const '], ['v', 'besoin'], ['p', ' = '], ['f', 'comprendre'], ['p', '(idee);'], ['n', ''],
+  ['p', '  '], ['k', 'const '], ['v', 'solution'], ['p', ' = '], ['f', 'concevoir'], ['p', '(besoin);'], ['n', ''],
+  ['p', '  '], ['k', 'return await '], ['f', 'developper'], ['p', '(solution, {'], ['n', ''],
+  ['p', '    stack: ['], ['s', "'React'"], ['p', ', '], ['s', "'Next.js'"], ['p', ', '], ['s', "'Node.js'"], ['p', ', '], ['s', "'Supabase'"], ['p', '],'], ['n', ''],
+  ['p', '    '], ['v', 'utile'], ['p', ': '], ['k', 'true'], ['p', ', '], ['v', 'evolutif'], ['p', ': '], ['k', 'true'], ['p', ', '], ['v', 'fiable'], ['p', ': '], ['k', 'true'], ['n', ''],
+  ['p', '  });'], ['n', ''], ['p', '}'],
+];
+const COUL_CODE = { k: COUL.violet, v: COUL.cyan, p: '#c9cfdc', s: COUL.or, f: COUL.vert };
+
+function scCode(t) {
+  const a = scene(t, 17, 25.5);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 17, '01', 'Le développement au service des idées', COUL.cyan);
+
+  // titre à gauche
+  texteMots('Transformer des idées', 140, 300, prog(t, 17.4, 18.4), { taille: 64, graisse: 800, align: 'left' });
+  texteMots('en produits concrets.', 140, 380, prog(t, 17.8, 18.8), { taille: 64, graisse: 800, align: 'left', couleur: COUL.cyan });
+  texteMots("Écrire du code, c'est d'abord une manière de réfléchir,", 140, 470, prog(t, 18.6, 19.8), { taille: 28, graisse: 400, align: 'left', couleur: COUL.doux });
+  texteMots("d'analyser et de concevoir.", 140, 512, prog(t, 18.9, 20.1), { taille: 28, graisse: 400, align: 'left', couleur: COUL.doux });
+
+  // pastilles de la stack
+  const stack = [['React', COUL.cyan], ['Next.js', COUL.encre], ['Node.js', COUL.vert], ['Supabase', COUL.vert]];
+  let sx = 140;
+  stack.forEach(([nom, coul], i) => {
+    const p = rebond(prog(t, 20.6 + i * .3, 21.3 + i * .3));
+    police(26, 600);
+    const w = g.measureText(nom).width + 56;
+    if (p > 0) {
+      g.save();
+      g.globalAlpha *= borne(p);
+      g.translate(sx + w / 2, 640);
+      g.scale(p, p);
+      rectArrondi(-w / 2, -30, w, 60, 30);
+      g.fillStyle = 'rgba(255,255,255,0.06)'; g.fill();
+      g.strokeStyle = coul; g.lineWidth = 1.5; g.stroke();
+      cercle(-w / 2 + 24, 0, 5, coul);
+      g.fillStyle = COUL.encre; g.textAlign = 'left'; g.textBaseline = 'middle';
+      g.fillText(nom, -w / 2 + 38, 1);
+      g.restore();
+    }
+    sx += w + 18;
+  });
+
+  // fenêtre d'éditeur
+  const pe = sortie5(prog(t, 17.6, 18.8));
+  const ex = 1010, ey = 230, ew = 780, eh = 560;
+  g.save();
+  g.translate(0, (1 - pe) * 80);
+  g.globalAlpha *= pe;
+  g.shadowColor = 'rgba(58,214,230,0.25)'; g.shadowBlur = 60;
+  rectArrondi(ex, ey, ew, eh, 18);
+  g.fillStyle = '#0c1222'; g.fill();
+  g.shadowBlur = 0;
+  g.strokeStyle = 'rgba(255,255,255,0.1)'; g.lineWidth = 1; g.stroke();
+  [COUL.corail, COUL.or, COUL.vert].forEach((k, i) => cercle(ex + 30 + i * 24, ey + 30, 7, k));
+  police(18, 500); g.fillStyle = COUL.doux; g.textAlign = 'center';
+  g.fillText('vision.js — Digiterra', ex + ew / 2, ey + 36);
+  g.fillStyle = 'rgba(255,255,255,0.06)'; g.fillRect(ex, ey + 60, ew, 1);
+
+  // frappe du code
+  const total = CODE.reduce((n, [, s]) => n + s.length, 0);
+  let reste = Math.floor(total * prog(t, 18.6, 23.4));
+  police(21, 500, '"DejaVu Sans Mono", monospace');
+  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  let lx = ex + 70, ly = ey + 105, ligne = 1;
+  g.fillStyle = 'rgba(255,255,255,0.2)'; g.fillText('1', ex + 30, ly);
+  for (const [type, s] of CODE) {
+    if (type === 'n') {
+      lx = ex + 70; ly += 36; ligne++;
+      if (reste > 0) { g.fillStyle = 'rgba(255,255,255,0.2)'; g.fillText(String(ligne), ex + 30, ly); }
+      continue;
+    }
+    if (reste <= 0) break;
+    const morceau = s.slice(0, reste);
+    reste -= s.length;
+    g.fillStyle = COUL_CODE[type];
+    g.fillText(morceau, lx, ly);
+    lx += g.measureText(morceau).width;
+  }
+  if (Math.floor(t * 2.5) % 2 === 0) { g.fillStyle = COUL.cyan; g.fillRect(lx + 2, ly - 20, 11, 26); }
+  g.restore();
+  g.restore();
+}
+
+// ---------- scène 4 : trois principes (25.5 → 32.5 s) ----------
+function scPrincipes(t) {
+  const a = scene(t, 25.5, 32.5);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 25.5, '01', 'Trois principes fondamentaux', COUL.cyan);
+  texteMots('Comprendre. Concevoir. Construire.', W / 2, 260, prog(t, 25.8, 27), { taille: 66, graisse: 800,
+    accents: { 'Construire': COUL.or } });
+
+  const cartes = [
+    ['01', 'Comprendre', 'le problème', COUL.cyan, 'loupe'],
+    ['02', 'Concevoir', 'une solution adaptée', COUL.violet, 'compas'],
+    ['03', 'Construire', 'un produit utile, évolutif et fiable', COUL.or, 'cube'],
+  ];
+  const cw = 460, ch = 420, gap = 90;
+  const x0 = W / 2 - (cw * 3 + gap * 2) / 2, y0 = 360;
+
+  // fil qui relie les cartes
+  const pf = entreeSortie(prog(t, 27, 30.5));
+  g.strokeStyle = 'rgba(255,255,255,0.15)'; g.lineWidth = 2; g.setLineDash([6, 10]);
+  g.beginPath(); g.moveTo(x0 + cw / 2, y0 + 120); g.lineTo(x0 + cw / 2 + (cw + gap) * 2, y0 + 120); g.stroke();
+  g.setLineDash([]);
+  g.strokeStyle = COUL.or; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(x0 + cw / 2, y0 + 120); g.lineTo(x0 + cw / 2 + (cw + gap) * 2 * pf, y0 + 120); g.stroke();
+
+  cartes.forEach(([num, titre, sous, coul, icone], i) => {
+    const d = 27 + i * 1.1;
+    const p = sortie5(prog(t, d, d + .9));
+    if (p <= 0) return;
+    const x = x0 + i * (cw + gap);
+    g.save();
+    g.globalAlpha *= p;
+    g.translate(0, (1 - p) * 60);
+    rectArrondi(x, y0, cw, ch, 24);
+    g.fillStyle = 'rgba(12,18,34,0.92)'; g.fill();
+    g.strokeStyle = 'rgba(255,255,255,0.08)'; g.lineWidth = 1; g.stroke();
+    g.fillStyle = coul; g.fillRect(x + 40, y0, 80 * p, 4);
+
+    // icône
+    const ix = x + cw / 2, iy = y0 + 120;
+    cercle(ix, iy, 58, '#0c1222');
+    g.strokeStyle = coul; g.lineWidth = 3;
+    g.beginPath(); g.arc(ix, iy, 58, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p); g.stroke();
+    g.lineWidth = 4; g.lineCap = 'round';
+    const rot = t * .8;
+    if (icone === 'loupe') {
+      g.beginPath(); g.arc(ix - 6, iy - 6, 20, 0, Math.PI * 2); g.stroke();
+      g.beginPath(); g.moveTo(ix + 9, iy + 9); g.lineTo(ix + 24, iy + 24); g.stroke();
+    } else if (icone === 'compas') {
+      g.save(); g.translate(ix, iy); g.rotate(Math.sin(rot) * .3);
+      g.beginPath(); g.moveTo(0, -26); g.lineTo(-18, 24); g.moveTo(0, -26); g.lineTo(18, 24); g.stroke();
+      cercle(0, -26, 6, coul); g.restore();
+    } else {
+      g.save(); g.translate(ix, iy);
+      const s = 22, cs = Math.cos(rot), sn = Math.sin(rot) * .5;
+      g.beginPath();
+      g.moveTo(-s * cs, -s * .5 - s * sn); g.lineTo(0, -s); g.lineTo(s * cs, -s * .5 + s * sn);
+      g.moveTo(-s, -s * .3); g.lineTo(0, 0); g.lineTo(s, -s * .3); g.moveTo(0, 0); g.lineTo(0, s);
+      g.moveTo(-s, -s * .3); g.lineTo(-s, s * .6); g.lineTo(0, s); g.lineTo(s, s * .6); g.lineTo(s, -s * .3);
+      g.stroke(); g.restore();
+    }
+    g.lineCap = 'butt';
+
+    police(20, 700); g.fillStyle = coul; g.textAlign = 'center';
+    g.fillText(num, ix, y0 + 245);
+    police(44, 800); g.fillStyle = COUL.encre;
+    g.fillText(titre, ix, y0 + 300);
+    // sous-titre sur deux lignes si besoin
+    police(26, 400); g.fillStyle = COUL.doux;
+    const mots = sous.split(' ');
+    let l1 = '', l2 = '';
+    for (const m of mots) { if (g.measureText(l1 + ' ' + m).width < cw - 80 && !l2) l1 = (l1 ? l1 + ' ' : '') + m; else l2 = (l2 ? l2 + ' ' : '') + m; }
+    g.fillText(l1, ix, y0 + 348);
+    if (l2) g.fillText(l2, ix, y0 + 384);
+    g.restore();
+  });
+  g.restore();
+}
+
+// ---------- scène 5 : entrepreneuriat, Digiterra (32.5 → 42.5 s) ----------
+function scEntreprise(t) {
+  const a = scene(t, 32.5, 42.5);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 32.5, '02', "L'entrepreneuriat et l'innovation", COUL.or);
+
+  // DIGITERRA en grand, avec un balayage lumineux
+  const pd = prog(t, 32.8, 34.6);
+  texteLettres('DIGITERRA', W / 2, 330, pd, { taille: 150, graisse: 900, espace: 18, montee: 80 });
+  if (pd >= 1) {
+    police(150, 900);
+    const sw = (t - 34.6) % 4;
+    if (sw < 1.2) {
+      const bx = W / 2 - 600 + sw / 1.2 * 1200;
+      g.save();
+      g.globalCompositeOperation = 'lighter';
+      const d = g.createLinearGradient(bx - 120, 0, bx + 120, 0);
+      d.addColorStop(0, 'rgba(245,176,65,0)'); d.addColorStop(.5, 'rgba(245,176,65,0.5)'); d.addColorStop(1, 'rgba(245,176,65,0)');
+      g.fillStyle = d; g.fillRect(bx - 120, 180, 240, 180);
+      g.restore();
+    }
+  }
+  texteMots('Des idées qui deviennent des produits, des services et des entreprises.', W / 2, 420, prog(t, 34, 35.4), { taille: 32, graisse: 400, couleur: COUL.doux });
+
+  // chaîne de valeur
+  const etapes = ['Idée', 'Besoin', 'Produit', 'Entreprise', 'Valeur'];
+  const y = 610, x0 = 300, pas = (W - 600) / (etapes.length - 1);
+  const pc = prog(t, 35.2, 39.2);
+  g.strokeStyle = 'rgba(255,255,255,0.12)'; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(x0, y); g.lineTo(W - 300, y); g.stroke();
+  const gr = g.createLinearGradient(x0, 0, W - 300, 0);
+  gr.addColorStop(0, COUL.cyan); gr.addColorStop(1, COUL.or);
+  g.strokeStyle = gr; g.lineWidth = 4;
+  g.beginPath(); g.moveTo(x0, y); g.lineTo(x0 + (W - 600) * pc, y); g.stroke();
+  // impulsion qui voyage
+  if (pc > 0 && pc < 1) { lueur(x0 + (W - 600) * pc, y, 60, COUL.or, .9); cercle(x0 + (W - 600) * pc, y, 6, '#fff'); }
+
+  etapes.forEach((e, i) => {
+    const seuil = i / (etapes.length - 1);
+    const on = pc >= seuil - .001;
+    const pi = rebond(prog(t, 35.2 + seuil * 4, 35.8 + seuil * 4));
+    const x = x0 + i * pas;
+    const r = 24 + (i === etapes.length - 1 ? 10 : 0);
+    if (on) lueur(x, y, 90, i === 4 ? COUL.or : COUL.cyan, .35);
+    cercle(x, y, r * Math.max(.4, pi), on ? '#0c1222' : '#0a0f1c');
+    g.strokeStyle = on ? (i === 4 ? COUL.or : COUL.cyan) : 'rgba(255,255,255,0.2)';
+    g.lineWidth = 3;
+    g.beginPath(); g.arc(x, y, r * Math.max(.4, pi), 0, Math.PI * 2); g.stroke();
+    if (on) cercle(x, y, 7 * pi, i === 4 ? COUL.or : COUL.cyan);
+    g.save();
+    g.globalAlpha *= on ? sortie3(prog(t, 35.4 + seuil * 4, 36 + seuil * 4)) : .3;
+    police(30, 700); g.textAlign = 'center'; g.fillStyle = COUL.encre;
+    g.fillText(e, x, y + (i % 2 ? -60 : 85));
+    g.restore();
+  });
+
+  texteMots('Une technologie accessible, utile et adaptée aux réalités du terrain.', W / 2, 850, prog(t, 39.4, 40.8),
+    { taille: 42, graisse: 500, famille: SERIF, italique: true, accents: { accessible: COUL.or, utile: COUL.or, adaptée: COUL.or } });
+  g.restore();
+}
+
+// ---------- scène 6 : IA et robotique (42.5 → 52 s) ----------
+const COUCHES = [4, 6, 6, 3];
+function scIA(t) {
+  const a = scene(t, 42.5, 52);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 42.5, '03', "L'intelligence artificielle et la robotique", COUL.violet);
+
+  texteMots("Logiciels, données, IA", 140, 330, prog(t, 42.9, 44), { taille: 62, graisse: 800, align: 'left' });
+  texteMots('et systèmes embarqués', 140, 405, prog(t, 43.3, 44.4), { taille: 62, graisse: 800, align: 'left', couleur: COUL.violet });
+  texteMots('qui travaillent ensemble.', 140, 480, prog(t, 43.7, 44.8), { taille: 62, graisse: 800, align: 'left' });
+
+  const dom = [['Intelligence artificielle', COUL.violet], ['Automatisation', COUL.cyan], ['Internet des objets', COUL.vert], ['Robotique', COUL.or]];
+  dom.forEach(([d, k], i) => {
+    const p = sortie3(prog(t, 45 + i * .35, 45.8 + i * .35));
+    g.save(); g.globalAlpha *= p;
+    g.translate((1 - p) * -40, 0);
+    cercle(156, 573 + i * 58, 8, k);
+    police(30, 500); g.fillStyle = COUL.encre; g.textAlign = 'left';
+    g.fillText(d, 184, 584 + i * 58);
+    g.restore();
+  });
+
+  // réseau de neurones
+  const nx0 = 1080, nx1 = 1760, ny = 540, hauteur = 560;
+  const noeuds = COUCHES.map((n, ci) => Array.from({ length: n }, (_, j) => ({
+    x: lin(nx0, nx1, ci / (COUCHES.length - 1)),
+    y: ny - hauteur / 2 + (j + .5) * hauteur / n,
+  })));
+  const pres = prog(t, 43.2, 45.5);
+  // liaisons
+  for (let ci = 0; ci < noeuds.length - 1; ci++) {
+    const pc = sortie3(borne(pres * 3 - ci));
+    noeuds[ci].forEach((A, ia) => noeuds[ci + 1].forEach((B, ib) => {
+      g.strokeStyle = `rgba(139,123,255,${.18 * pc})`;
+      g.lineWidth = 1.2;
+      g.beginPath(); g.moveTo(A.x, A.y); g.lineTo(lin(A.x, B.x, pc), lin(A.y, B.y, pc)); g.stroke();
+      // signaux qui circulent
+      if (pres >= 1) {
+        const graine = ci * 100 + ia * 10 + ib;
+        const per = 1.6 + alea(graine) * 1.4;
+        const q = ((t + alea(graine + 5) * per) % per) / per;
+        if (alea(graine + 9) > .55) {
+          const sx = lin(A.x, B.x, q), sy = lin(A.y, B.y, q);
+          lueur(sx, sy, 16, ci % 2 ? COUL.cyan : COUL.violet, .8);
+          cercle(sx, sy, 2.5, '#fff', .9);
+        }
+      }
+    }));
+  }
+  // neurones
+  noeuds.forEach((couche, ci) => couche.forEach((N, j) => {
+    const p = rebond(prog(t, 43.2 + ci * .3 + j * .05, 43.8 + ci * .3 + j * .05));
+    const batt = .5 + .5 * Math.sin(t * 3 + ci + j * 1.7);
+    const k = ci === COUCHES.length - 1 ? COUL.or : ci === 0 ? COUL.cyan : COUL.violet;
+    lueur(N.x, N.y, 50, k, .25 + .25 * batt);
+    cercle(N.x, N.y, 16 * Math.max(0, p), '#0c1222');
+    g.strokeStyle = k; g.lineWidth = 3;
+    g.beginPath(); g.arc(N.x, N.y, 16 * Math.max(0, p), 0, Math.PI * 2); g.stroke();
+    cercle(N.x, N.y, 5 * Math.max(0, p) * (.6 + .4 * batt), k);
+  }));
+
+  texteMots("L'innovation n'a de valeur que lorsqu'elle produit un résultat utile.", W / 2, 935, prog(t, 47.6, 49),
+    { taille: 40, graisse: 500, famille: SERIF, italique: true, accents: { utile: COUL.or } });
+  g.restore();
+}
+
+// ---------- scène 7 : formation et impact, fata.school (52 → 61.5 s) ----------
+function scFormation(t) {
+  const a = scene(t, 52, 61.5);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 52, '04', "La formation et l'impact social", COUL.vert);
+
+  // foule de silhouettes (tête + épaules) qui s'allument par vague
+  const cols = 18, lignes = 8, esp = 36;
+  const gx = W - 140 - cols * esp, gy = 300;
+  const ox = gx + 5 * esp, oy = gy + 4 * esp; // foyer de la vague
+  const rayon = (t - 54.4) * 260;
+  for (let i = 0; i < cols; i++) for (let j = 0; j < lignes; j++) {
+    const x = gx + i * esp + (j % 2) * esp / 2, y = gy + j * esp * 1.25;
+    const pa = sortie3(prog(t, 52.4 + alea(i * 31 + j) * 1.2, 53.2 + alea(i * 31 + j) * 1.2));
+    const dist = Math.hypot(x - ox, y - oy);
+    const on = borne((rayon - dist) / 120);
+    const k = on > 0 ? (alea(i + j * 7) > .7 ? COUL.or : COUL.vert) : 'rgba(255,255,255,0.18)';
+    g.save(); g.globalAlpha *= pa;
+    if (on > 0) lueur(x, y, 30, k, .35 * on);
+    g.fillStyle = on > 0 ? k : 'rgba(255,255,255,0.16)';
+    g.beginPath(); g.arc(x, y - 6, 6, 0, Math.PI * 2); g.fill();
+    g.beginPath(); g.ellipse(x, y + 12, 10, 8, 0, Math.PI, 0); g.fill();
+    g.restore();
+  }
+  // onde
+  if (rayon > 0 && rayon < 1400) {
+    g.save(); g.globalAlpha *= .4 * (1 - rayon / 1400);
+    g.strokeStyle = COUL.vert; g.lineWidth = 2;
+    g.beginPath(); g.arc(ox, oy, rayon, 0, Math.PI * 2); g.stroke(); g.restore();
+  }
+
+  texteMots('Le talent existe partout.', 140, 340, prog(t, 52.6, 53.8), { taille: 60, graisse: 800, align: 'left' });
+  texteMots("L'accès aux opportunités, non.", 140, 420, prog(t, 53.6, 54.8), { taille: 60, graisse: 800, align: 'left', couleur: COUL.doux });
+
+  const pf = sortie3(prog(t, 55.2, 56.2));
+  g.save(); g.globalAlpha *= pf;
+  police(30, 600); g.fillStyle = COUL.vert; g.textAlign = 'left';
+  g.fillText('fata.school', 140, 520);
+  g.fillStyle = COUL.vert; g.fillRect(140, 538, 172 * pf, 2);
+  g.restore();
+  texteMots('Former, accompagner, transmettre.', 140, 600, prog(t, 55.6, 56.8), { taille: 34, graisse: 500, align: 'left' });
+
+  texteMots("Former une personne au numérique, c'est lui donner la possibilité", W / 2, 820, prog(t, 57, 58.4), { taille: 40, graisse: 500, famille: SERIF, italique: true });
+  texteMots("de créer, d'entreprendre et de construire son propre avenir.", W / 2, 875, prog(t, 57.6, 59), { taille: 40, graisse: 500, famille: SERIF, italique: true,
+    accents: { créer: COUL.vert, "d'entreprendre": COUL.vert, avenir: COUL.or } });
+  g.restore();
+}
+
+// ---------- scène 8 : l'Afrique numérique (61.5 → 72.5 s) ----------
+// Contours simplifiés (longitude, latitude).
+const AFRIQUE = [[-5.9,35.8],[-1,35.1],[3,36.8],[10,37.2],[11,33.5],[15,32.3],[19.9,30.9],[25,31.6],[29,30.9],[32.3,31.3],[32.6,29.9],[35,24],[37.2,21],[38.5,18],[41.5,14],[43.3,12.5],[44.5,10.4],[51.2,11.8],[51,10],[49,6],[46,2],[42,-1.5],[40,-3.5],[39.3,-6.8],[40.5,-10.5],[40.5,-15],[35.5,-24],[32.9,-26],[32.5,-29],[30,-31.3],[27,-33.6],[22,-34],[20,-34.8],[18.4,-34.2],[17.9,-31],[15,-27],[14.5,-23],[11.8,-17],[13.4,-12],[12.2,-6],[9.4,-1],[9.5,3.8],[8.5,4.5],[6,4.3],[3,6.4],[1,6],[-2,4.8],[-4,5.2],[-7.5,4.4],[-9.3,5.5],[-11.5,6.9],[-13.2,8.5],[-14.5,10.8],[-16.7,12.4],[-17.5,14.7],[-16.5,19.5],[-17,21],[-14.5,26],[-13,27.6],[-9.8,29.5],[-9.6,30.4],[-8.5,33.2],[-6.8,34]];
+const MADAGASCAR = [[49.3,-12],[50.5,-15.5],[49.8,-17],[47.1,-24.9],[45.2,-25.5],[43.7,-23.5],[43.3,-21.8],[44.4,-16.2],[46.5,-15.7],[48,-13.5]];
+const CARTE = { x: 1300, y: 520, e: 10.2, lon0: 17, lat0: 1 };
+const proj = ([lo, la]) => [CARTE.x + (lo - CARTE.lon0) * CARTE.e, CARTE.y - (la - CARTE.lat0) * CARTE.e];
+function dedans(pt, poly) {
+  let ok = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, yi] = poly[i], [xj, yj] = poly[j];
+    if ((yi > pt[1]) !== (yj > pt[1]) && pt[0] < (xj - xi) * (pt[1] - yi) / (yj - yi) + xi) ok = !ok;
+  }
+  return ok;
+}
+const POINTS_AFRIQUE = (() => {
+  const pts = [];
+  const pA = AFRIQUE.map(proj), pM = MADAGASCAR.map(proj);
+  for (let x = 930; x < 1720; x += 13) for (let y = 120; y < 920; y += 13)
+    if (dedans([x, y], pA) || dedans([x, y], pM)) pts.push([x, y]);
+  return pts;
+})();
+const GUINEE = proj([-11, 10.4]);
+const VILLES = [[3.4, 6.5], [36.8, -1.3], [31.2, 30], [28, -26.2], [-17.4, 14.7], [32.6, .3], [15.3, -4.3], [38.7, 9]].map(proj);
+
+function scAfrique(t) {
+  const a = scene(t, 61.5, 72.5);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  chapitre(t, 61.5, '05', "Une vision pour l'Afrique numérique", COUL.or);
+
+  // carte en points qui apparaît depuis la Guinée
+  const rayon = (t - 61.8) * 420;
+  for (const [x, y] of POINTS_AFRIQUE) {
+    const d = Math.hypot(x - GUINEE[0], y - GUINEE[1]);
+    const p = borne((rayon - d) / 160);
+    if (p <= 0) continue;
+    const scint = .55 + .45 * Math.sin(t * 2 + x * .05 + y * .03);
+    cercle(x, y, 2.6 * p, COUL.or, (.25 + .35 * scint) * p);
+  }
+
+  // arcs qui partent de la Guinée vers d'autres pôles
+  VILLES.forEach((V, i) => {
+    const d = 64 + i * .3;
+    const p = entreeSortie(prog(t, d, d + 1.2));
+    if (p <= 0) return;
+    const mx = (GUINEE[0] + V[0]) / 2, my = Math.min(GUINEE[1], V[1]) - 120;
+    g.strokeStyle = 'rgba(58,214,230,0.6)'; g.lineWidth = 2;
+    g.beginPath();
+    const N = 40;
+    for (let k = 0; k <= N * p; k++) {
+      const u = k / N;
+      const x = (1 - u) * (1 - u) * GUINEE[0] + 2 * (1 - u) * u * mx + u * u * V[0];
+      const y = (1 - u) * (1 - u) * GUINEE[1] + 2 * (1 - u) * u * my + u * u * V[1];
+      k ? g.lineTo(x, y) : g.moveTo(x, y);
+    }
+    g.stroke();
+    if (p >= 1) { lueur(V[0], V[1], 26, COUL.cyan, .7); cercle(V[0], V[1], 4, '#fff'); }
+  });
+
+  // la Guinée qui bat
+  const pg = prog(t, 61.8, 62.6);
+  for (let i = 0; i < 3; i++) {
+    const q = ((t * .6 + i / 3) % 1);
+    g.save(); g.globalAlpha *= pg * (1 - q) * .8;
+    g.strokeStyle = COUL.corail; g.lineWidth = 2;
+    g.beginPath(); g.arc(GUINEE[0], GUINEE[1], 10 + q * 70, 0, Math.PI * 2); g.stroke(); g.restore();
+  }
+  lueur(GUINEE[0], GUINEE[1], 50, COUL.corail, pg);
+  cercle(GUINEE[0], GUINEE[1], 8 * pg, '#fff');
+  // drapeau guinéen en étiquette
+  const pe = sortie3(prog(t, 62.6, 63.4));
+  g.save(); g.globalAlpha *= pe;
+  const ex = GUINEE[0] - 230, ey = GUINEE[1] - 18;
+  g.strokeStyle = 'rgba(255,255,255,0.4)'; g.lineWidth = 1.5;
+  g.beginPath(); g.moveTo(GUINEE[0] - 12, GUINEE[1]); g.lineTo(ex + 180, GUINEE[1]); g.stroke();
+  ['#ce1126', '#fcd116', '#009460'].forEach((k, i) => { g.fillStyle = k; g.fillRect(ex + i * 12, ey + 4, 12, 28); });
+  police(28, 700); g.fillStyle = COUL.encre; g.textAlign = 'left';
+  g.fillText('Guinée', ex + 46, ey + 28);
+  g.restore();
+
+  texteMots("L'Afrique n'est pas", 140, 300, prog(t, 62.2, 63.2), { taille: 54, graisse: 700, align: 'left', couleur: COUL.doux });
+  texteMots('seulement un marché.', 140, 370, prog(t, 62.6, 63.6), { taille: 54, graisse: 700, align: 'left', couleur: COUL.doux });
+  texteMots("C'est un espace", 140, 480, prog(t, 64, 65), { taille: 70, graisse: 800, align: 'left' });
+  texteMots('de création.', 140, 565, prog(t, 64.4, 65.4), { taille: 70, graisse: 800, align: 'left', couleur: COUL.or });
+
+  // domaines d'impact
+  const domaines = ['Éducation', 'Emploi', 'Agriculture', 'Santé', 'Administration', 'Entrepreneuriat'];
+  let dx = 140, dy = 680;
+  domaines.forEach((d, i) => {
+    police(24, 600);
+    const w = g.measureText(d).width + 40;
+    if (dx + w > 800) { dx = 140; dy += 66; }
+    const p = rebond(prog(t, 66.4 + i * .25, 67 + i * .25));
+    if (p > 0) {
+      g.save(); g.globalAlpha *= borne(p);
+      g.translate(dx + w / 2, dy); g.scale(p, p);
+      rectArrondi(-w / 2, -24, w, 48, 24);
+      g.fillStyle = 'rgba(245,176,65,0.1)'; g.fill();
+      g.strokeStyle = 'rgba(245,176,65,0.6)'; g.lineWidth = 1.2; g.stroke();
+      g.fillStyle = COUL.encre; g.textAlign = 'center'; g.textBaseline = 'middle';
+      g.fillText(d, 0, 1);
+      g.restore();
+    }
+    dx += w + 14;
+  });
+  g.restore();
+}
+
+// ---------- scène 9 : apprendre, construire, évoluer (72.5 → 80.5 s) ----------
+function scVerbes(t) {
+  const a = scene(t, 72.5, 80.5, .3, .6);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  const verbes = [['APPRENDRE', COUL.cyan], ['CONSTRUIRE', COUL.or], ['ÉVOLUER', COUL.corail]];
+  const fin = 76.6; // les trois mots se rangent ensemble
+  verbes.forEach(([v, k], i) => {
+    const d = 72.7 + i * 1.3;
+    const pin = sortie5(prog(t, d, d + .5));
+    if (pin <= 0) return;
+    const pr = entreeSortie(prog(t, fin, fin + 1));
+    const seul = t < d + 1.3 || i === 2;
+    // phase « seul » : plein écran ; phase « rangé » : liste centrée
+    const tailleSeul = 220, tailleRang = 120;
+    const taille = lin(tailleSeul, tailleRang, pr);
+    const ySeul = H / 2 + 75, yRang = 330 + i * 170;
+    const y = lin(ySeul, yRang, pr);
+    let alpha = pin;
+    if (pr === 0 && !seul) alpha = 1 - sortie3(prog(t, d + 1.1, d + 1.35));
+    if (pr > 0) alpha = Math.max(alpha * (i === 2 ? 1 : pr), pr);
+    g.save();
+    g.globalAlpha *= alpha;
+    police(taille, 900);
+    g.textAlign = 'center';
+    const ech = lin(1.25, 1, pin);
+    g.translate(W / 2, y); g.scale(ech, ech);
+    g.fillStyle = k;
+    g.fillText(v, 0, 0);
+    g.restore();
+    // éclats autour du mot qui arrive
+    const pe = prog(t, d, d + .8);
+    if (pe > 0 && pe < 1 && pr === 0) {
+      for (let s = 0; s < 18; s++) {
+        const ang = s / 18 * Math.PI * 2;
+        const r1 = 300 + sortie3(pe) * 500;
+        g.save(); g.globalAlpha *= (1 - pe);
+        g.strokeStyle = k; g.lineWidth = 3;
+        g.beginPath();
+        g.moveTo(W / 2 + Math.cos(ang) * r1, H / 2 + Math.sin(ang) * r1 * .55);
+        g.lineTo(W / 2 + Math.cos(ang) * (r1 + 60), H / 2 + Math.sin(ang) * (r1 + 60) * .55);
+        g.stroke(); g.restore();
+      }
+    }
+  });
+  texteMots('Rester curieux. Expérimenter. Progresser sans cesse.', W / 2, 900, prog(t, 77.8, 79), { taille: 38, graisse: 500, famille: SERIF, italique: true, couleur: COUL.doux });
+  g.restore();
+}
+
+// ---------- scène 10 : conclusion (80.5 → 92 s) ----------
+function scFinal(t) {
+  const a = scene(t, 80.5, DUREE, .6, 1.4);
+  if (!a) return;
+  g.save(); g.globalAlpha = a;
+  const cx = W / 2;
+  // partie 1 : la phrase
+  const p1 = 1 - prog(t, 85.4, 86.2);
+  g.save(); g.globalAlpha *= p1;
+  texteMots('Je ne me contente pas', cx, 420, prog(t, 80.8, 82), { taille: 64, graisse: 700, couleur: COUL.doux });
+  texteMots("d'imaginer le futur du numérique.", cx, 510, prog(t, 81.3, 82.5), { taille: 64, graisse: 700, couleur: COUL.doux });
+  texteMots('Je travaille à le construire.', cx, 680, prog(t, 83, 84.2), { taille: 96, graisse: 800, famille: SANS, couleur: COUL.or });
+  g.restore();
+
+  // partie 2 : signature
+  const p2 = prog(t, 86, 88);
+  if (p2 > 0) {
+    lueur(cx, 470, 500, COUL.or, .25 * p2);
+    // monogramme JK
+    const pm = sortie5(prog(t, 86, 87));
+    g.save();
+    g.globalAlpha *= pm;
+    g.strokeStyle = COUL.or; g.lineWidth = 3;
+    g.beginPath(); g.arc(cx, 330, 70, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * pm); g.stroke();
+    police(64, 900); g.fillStyle = COUL.encre; g.textAlign = 'center'; g.textBaseline = 'middle';
+    g.fillText('JK', cx, 334);
+    g.textBaseline = 'alphabetic';
+    g.restore();
+    texteLettres('JOËL KOÏKOÏ KOIVOGUI', cx, 530, prog(t, 86.5, 88.2), { taille: 92, graisse: 800, espace: 4 });
+    texteMots('Développeur Web & Mobile · Entrepreneur technologique · Bâtisseur de solutions', cx, 600, prog(t, 87.5, 88.7), { taille: 28, graisse: 500, couleur: COUL.doux });
+    const pl = entreeSortie(prog(t, 88, 89));
+    g.fillStyle = COUL.or; g.fillRect(cx - 200 * pl, 650, 400 * pl, 2);
+    texteMots('Apprendre continuellement · Innover intelligemment · Contribuer', cx, 720, prog(t, 88.4, 89.6), { taille: 36, graisse: 500, famille: SERIF, italique: true });
+    texteMots('Digiterra   ·   fata.school', cx, 820, prog(t, 89, 90), { taille: 26, graisse: 600, couleur: COUL.or });
+  }
+  g.restore();
+}
+
+// Petite transition « volet » lumineuse entre les chapitres.
+const COUPURES = [9, 17, 25.5, 32.5, 42.5, 52, 61.5, 72.5, 80.5];
+function transitions(t) {
+  for (const k of COUPURES) {
+    const p = prog(t, k - .45, k + .45);
+    if (p <= 0 || p >= 1) continue;
+    const x = lin(-300, W + 300, entreeSortie(p));
+    g.save();
+    g.globalCompositeOperation = 'lighter';
+    const d = g.createLinearGradient(x - 220, 0, x + 220, 0);
+    d.addColorStop(0, 'rgba(255,255,255,0)'); d.addColorStop(.5, 'rgba(245,176,65,0.16)'); d.addColorStop(1, 'rgba(255,255,255,0)');
+    g.fillStyle = d;
+    g.fillRect(x - 220, 0, 440, H);
+    g.fillStyle = 'rgba(255,220,160,0.5)';
+    g.fillRect(x, 0, 2, H);
+    g.restore();
+  }
+}
+
+function rendre(t) {
+  g.save();
+  g.globalAlpha = 1;
+  g.filter = 'none';
+  fond(t);
+  scIntro(t); scManifeste(t); scCode(t); scPrincipes(t); scEntreprise(t);
+  scIA(t); scFormation(t); scAfrique(t); scVerbes(t); scFinal(t);
+  transitions(t);
+  vignette();
+  barre(t);
+  // fondu au noir final
+  const fn = prog(t, DUREE - .8, DUREE);
+  if (fn > 0) { g.fillStyle = `rgba(0,0,0,${fn})`; g.fillRect(0, 0, W, H); }
+  g.restore();
+}
+
+window.rendre = rendre;
+window.DUREE = DUREE;
+window.policesPretes = document.fonts.ready;
+
+// Lecture en temps réel quand la page est ouverte normalement.
+if (!location.search.includes('rendu')) {
+  const debut = performance.now();
+  (function boucle() {
+    const t = ((performance.now() - debut) / 1000) % DUREE;
+    rendre(t);
+    requestAnimationFrame(boucle);
+  })();
+}
+</script>
+</body>
+</html>
