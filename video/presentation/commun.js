@@ -5,8 +5,8 @@
 // Chaque page charge d'abord sa timeline, puis ce fichier, puis ses scènes,
 // et appelle enfin demarrer([...ses scènes], 'sortie/…wav').
 
-const W = 1920, H = 1080;
 const c = document.getElementById('c');
+const W = c.width, H = c.height;  // 1920 × 1080, ou 1080 × 1920 pour la version verticale
 const g = c.getContext('2d');
 const TL = window.TIMELINE;
 const DUREE = TL.duree;
@@ -685,16 +685,16 @@ function barre(t) {
 
 // Dessine l'image à l'instant t avec les scènes de la page, et prépare la
 // lecture en temps réel (avec la voix) quand la page est ouverte normalement.
-function demarrer(scenes, voix) {
+// « habillage » remplace le fond et les couches du dessus (version verticale).
+function demarrer(scenes, voix, habillage = {}) {
+  const dessous = habillage.dessous || [fond];
+  const dessus = habillage.dessus || [transitions, vignette, sousTitres, barre];
   function rendre(t) {
     g.save();
     g.globalAlpha = 1;
-    fond(t);
+    dessous.forEach(f => f(t));
     scenes.forEach(sc => sc(t));
-    transitions(t);
-    vignette();
-    sousTitres(t);
-    barre(t);
+    dessus.forEach(f => f(t));
     const fo = prog(t, DUREE - 1.2, DUREE);
     if (fo > 0) { g.fillStyle = `rgba(0,0,0,${fo})`; g.fillRect(0, 0, W, H); }
     g.restore();

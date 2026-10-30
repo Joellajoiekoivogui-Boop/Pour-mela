@@ -4,6 +4,7 @@
 //
 //   node video/presentation/rendu.js                       → sortie/presentation-joel-koivogui.mp4
 //   node video/presentation/rendu.js --courte              → sortie/presentation-2min.mp4 (courte.html)
+//   node video/presentation/rendu.js --reels               → sortie/presentation-reels.mp4 (reels.html, 9:16)
 //   node video/presentation/rendu.js --apercu nom+1,sgs+3  → images PNG (instant = segment + secondes)
 'use strict';
 
@@ -17,23 +18,26 @@ const sortie = path.join(ici, 'sortie');
 const IPS = 30;
 const args = process.argv.slice(2);
 const apercu = args.includes('--apercu') ? args[args.indexOf('--apercu') + 1].split(',') : null;
-const courte = args.includes('--courte');
-const VERSION = courte
-  ? { page: 'courte.html', voix: 'voix-2min.wav', video: 'presentation-2min.mp4' }
-  : { page: 'presentation.html', voix: 'voix.wav', video: 'presentation-joel-koivogui.mp4' };
+const VERSION = args.includes('--reels')
+  ? { page: 'reels.html', voix: 'voix-reels.wav', video: 'presentation-reels.mp4', largeur: 1080, hauteur: 1920, musique: 'musique-reels.py', volume: 0.6 }
+  : args.includes('--courte')
+    ? { page: 'courte.html', voix: 'voix-2min.wav', video: 'presentation-2min.mp4' }
+    : { page: 'presentation.html', voix: 'voix.wav', video: 'presentation-joel-koivogui.mp4' };
 
 (async () => {
   // Sans cette option, les photos locales « contaminent » le canvas et toDataURL échoue.
   const navigateur = await chromium.launch({ args: ['--allow-file-access-from-files'] });
-  const page = await navigateur.newPage({ viewport: { width: 1920, height: 1080 } });
+  const page = await navigateur.newPage({ viewport: { width: VERSION.largeur || 1920, height: VERSION.hauteur || 1080 } });
   page.on('pageerror', e => { console.error('Erreur dans la page :', e.message); process.exitCode = 1; });
   await page.goto('file://' + path.join(ici, VERSION.page) + '?rendu');
   await page.evaluate(async () => {
     await document.fonts.load('italic 40px Cormorant');
     await document.fonts.load('800 40px Inter');
+    await document.fonts.load('40px "Great Vibes"');
     await window.pret;
   });
   const duree = await page.evaluate(() => window.DUREE);
+  const moteur = await page.evaluate(() => window.TIMELINE.moteur);
   fs.mkdirSync(sortie, { recursive: true });
 
   if (apercu) {
@@ -67,12 +71,14 @@ const VERSION = courte
 
   // musique baissée automatiquement quand la voix parle
   const musique = path.join(sortie, 'musique.wav');
-  execFileSync('python3', [path.join(ici, 'musique.py'), musique, String(duree)], { stdio: 'inherit' });
+  execFileSync('python3', [path.join(ici, VERSION.musique || 'musique.py'), musique, String(duree)], { stdio: 'inherit' });
+  // sans voix (aperçu « estimation »), la musique passe au premier plan
+  const volume = moteur === 'estimation' ? 0.9 : (VERSION.volume || 0.5);
   const finale = path.join(sortie, VERSION.video);
   execFileSync('ffmpeg', ['-y', '-loglevel', 'error', '-i', muet, '-i', path.join(sortie, VERSION.voix), '-i', musique,
     '-filter_complex',
     '[1:a]aformat=channel_layouts=stereo,volume=1.0,asplit=2[voix][cle];' +
-    '[2:a]volume=0.5[mus];' +
+    `[2:a]volume=${volume}[mus];` +
     '[mus][cle]sidechaincompress=threshold=0.02:ratio=6:attack=80:release=900[musb];' +
     '[voix][musb]amix=inputs=2:duration=first:normalize=0,alimiter=limit=0.95[a]',
     '-map', '0:v', '-map', '[a]', '-c:v', 'copy', '-c:a', 'aac', '-b:a', '192k', '-movflags', '+faststart', '-shortest', finale], { stdio: 'inherit' });

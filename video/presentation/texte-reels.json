@@ -1,0 +1,41 @@
+{
+  "_lisezmoi": "Version verticale 9:16 (≈ 2 min), style réseaux sociaux. « texte » s'affiche en sous-titres karaoké ; « voix_el » est ce que lit ElevenLabs quand il faut l'aider à prononcer.",
+  "reglages": { "debut": 0.6, "pause": 0.2, "pause_scene": 0.6, "fin": 4.0, "duree_cible": 120 },
+  "segments": [
+    { "id": "r-accroche", "scene": "accroche", "texte": "Et si l'avenir du numérique africain se construisait ici, en Guinée ?" },
+
+    { "id": "r-nom", "scene": "nom", "texte": "Je m'appelle Joël Koïkoï Koïvogui.", "voix_el": "Je m'appelle Joël Koy-koy Koyvogui." },
+    { "id": "r-titres", "scene": "nom", "texte": "Développeur web et mobile, entrepreneur technologique, autodidacte." },
+
+    { "id": "r-etudiant", "scene": "roles", "texte": "Étudiant en génie informatique à l'Université Nongo Conakry." },
+    { "id": "r-cto", "scene": "roles", "texte": "CTO de Digiterra." },
+    { "id": "r-delegue", "scene": "roles", "texte": "Délégué national de FATA.SCHOOL.", "voix_el": "Délégué national de Fata School." },
+    { "id": "r-iot", "scene": "roles", "texte": "Responsable IoT et robotique chez Secury Énergie.", "voix_el": "Responsable I.O.T. et robotique chez Sécuri Énergie." },
+    { "id": "r-luuma", "scene": "roles", "texte": "Et coordinateur de LUUMA.", "voix_el": "Et coordinateur de Louma." },
+
+    { "id": "r-stack", "scene": "stack", "texte": "Je construis avec React, Next.js, Node.js, MongoDB, Supabase et React Native." },
+
+    { "id": "r-projets", "scene": "projets", "texte": "Des idées devenues produits, pensés pour les réalités guinéennes :" },
+    { "id": "r-nabele", "scene": "projets", "texte": "NABELE, la gestion de stock et de caisse.", "voix_el": "Nabélé, la gestion de stock et de caisse." },
+    { "id": "r-smartstock", "scene": "projets", "texte": "SmartStock Guinée, pour les commerçants." },
+    { "id": "r-sgs", "scene": "projets", "texte": "SGS, pour la gestion scolaire.", "voix_el": "S.G.S., pour la gestion scolaire." },
+    { "id": "r-solarbox", "scene": "projets", "texte": "SolarBox, l'énergie solaire connectée." },
+    { "id": "r-ast", "scene": "projets", "texte": "AST Media, pour l'information.", "voix_el": "A.S.T. Média, pour l'information." },
+    { "id": "r-om", "scene": "projets", "texte": "Et les paiements Orange Money notifiés sur WhatsApp." },
+
+    { "id": "r-ia", "scene": "ia", "texte": "Mon terrain de jeu : l'intelligence artificielle, le machine learning, l'Internet des objets et la robotique." },
+
+    { "id": "r-fata", "scene": "fata", "texte": "Avec FATA.SCHOOL, je porte l'éducation numérique dans toute la Guinée :", "voix_el": "Avec Fata School, je porte l'éducation numérique dans toute la Guinée :" },
+    { "id": "r-fata2", "scene": "fata", "texte": "prises de parole, événements, challenges de code." },
+
+    { "id": "r-emploi", "scene": "emploi", "texte": "Avec ELITECH ACADEMY et Youth Engineers Network, j'aide les jeunes à passer de la formation à l'emploi.", "voix_el": "Avec Élitek Académie et Youth Engineers Network, j'aide les jeunes à passer de la formation à l'emploi." },
+
+    { "id": "r-talent", "scene": "talent", "texte": "Parce que le talent existe partout." },
+    { "id": "r-afrique", "scene": "talent", "texte": "Et que l'Afrique doit créer ses propres solutions." },
+
+    { "id": "r-verbes", "scene": "verbes", "texte": "J'apprends. Je construis. J'expérimente. J'évolue." },
+
+    { "id": "r-slogan", "scene": "fin", "texte": "Innover aujourd'hui, construire demain." },
+    { "id": "r-signature", "scene": "fin", "texte": "Je suis Joël Koïkoï Koïvogui.", "voix_el": "Je suis Joël Koy-koy Koyvogui." }
+  ]
+}

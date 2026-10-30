@@ -5,7 +5,8 @@ d'ambiance. Les animations sont calées phrase par phrase sur la voix.
 
 | Version | Texte | Page | Vidéo |
 |---|---|---|---|
-| **2 minutes** | `texte-2min.json` | `courte.html` | `sortie/presentation-2min.mp4` |
+| **Réseaux sociaux, 9:16, 2 min** | `texte-reels.json` | `reels.html` | `sortie/presentation-reels.mp4` |
+| 2 minutes, 16:9 | `texte-2min.json` | `courte.html` | `sortie/presentation-2min.mp4` |
 | Complète (8 min 53) | `texte.json` | `presentation.html` | `sortie/presentation-joel-koivogui.mp4` |
 
 Les deux pages partagent `commun.js` (outils, fond, sous-titres, carte,
@@ -50,6 +51,21 @@ Il suffit d'ajouter un fichier puis de relancer le rendu : il remplace
 automatiquement la maquette.
 
 ## Refaire la vidéo
+
+### Version réseaux sociaux (9:16)
+
+Aux couleurs de la carte de visite (violet, orange), volets diagonaux entre
+les scènes, mots-clés géants et sous-titres karaoké calés sur l'instant où
+chaque mot est prononcé (ElevenLabs fournit ces instants ; les autres moteurs
+les estiment). Musique rythmée : `musique-reels.py`.
+
+```bash
+python3 video/presentation/voix.py --texte texte-reels.json --moteur elevenlabs
+node video/presentation/rendu.js --reels                        # ≈ 8 min
+```
+
+Sans clé ElevenLabs, `--moteur estimation` produit un aperçu muet (musique
+seule) avec des durées estimées, pour valider l'animation.
 
 ### Voix ElevenLabs (recommandé)
 

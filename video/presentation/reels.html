@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Joël Koïkoï Koïvogui · Reels</title>
+<style>
+  @font-face { font-family: 'Cormorant'; font-style: italic; src: url('../../fonts/cormorant-italique-latin.woff2') format('woff2'); }
+  @font-face { font-family: 'Great Vibes'; src: url('../../fonts/great-vibes-latin.woff2') format('woff2'); }
+  @font-face { font-family: 'Great Vibes'; src: url('../../fonts/great-vibes-latin-ext.woff2') format('woff2'); unicode-range: U+0100-024F; }
+  html, body { margin: 0; background: #140d2e; overflow: hidden; }
+  canvas { display: block; width: 100vw; height: 100vh; object-fit: contain; }
+</style>
+</head>
+<body>
+<canvas id="c" width="1080" height="1920"></canvas>
+<script src="timeline-reels.js"></script>
+<script src="commun.js"></script>
+<script>
+'use strict';
+// Version verticale 9:16 pour les réseaux sociaux, aux couleurs de la carte
+// de visite de Joël (violet et orange). Les mots-clés et les sous-titres
+// karaoké sont calés sur l'instant où chaque mot est prononcé (timeline-reels.js).
+
+const R = {
+  nuit: '#140d2e', violet: '#4b2fb5', violetVif: '#6a4cf0', lavande: '#ece8fb',
+  orange: '#f7a21b', blanc: '#ffffff', encre: '#1b1240',
+};
+const SCRIPT = '"Great Vibes", cursive';
+
+// ---------- temps des mots ----------
+const sansPonct = m => m.toLowerCase().replace(/[.,:;!?«»"'’()]/g, '');
+// instant où le mot (ou le n-ième mot) du segment est prononcé
+function tMot(id, quoi) {
+  const mots = SEG[id].mots;
+  if (typeof quoi === 'number') return mots[Math.min(quoi, mots.length - 1)][1];
+  const cible = sansPonct(quoi);
+  const m = mots.find(w => sansPonct(w[0]).includes(cible));
+  return m ? m[1] : D(id);
+}
+
+// ---------- scènes et transitions ----------
+const ORDRE = SCENES.map(s => s.nom);
+ORDRE.forEach((nom, i) => {
+  BORNES[nom].a = i ? SCENES[i].debut - .35 : 0;
+});
+const FOND_SCENE = { accroche: R.nuit, nom: R.nuit, roles: R.violet, stack: R.lavande, projets: R.nuit, ia: R.nuit,
+  fata: R.nuit, emploi: R.orange, talent: R.violet, verbes: R.nuit, fin: R.lavande };
+const CLAIR = c => c === R.lavande || c === R.orange || c === R.blanc;
+
+// motif de croix de la carte de visite, qui dérive lentement
+function motif(t, couleur) {
+  g.save();
+  g.strokeStyle = CLAIR(couleur) ? 'rgba(75,47,181,0.08)' : 'rgba(255,255,255,0.05)';
+  g.lineWidth = 3;
+  const pas = 150, dec = (t * 12) % pas;
+  for (let x = -pas; x < W + pas; x += pas) for (let y = -pas; y < H + pas; y += pas) {
+    const cx = x + dec + ((y / pas) % 2) * pas / 2, cy = y + dec * .5, s = 22;
+    g.beginPath();
+    g.moveTo(cx - s / 3, cy - s); g.lineTo(cx + s / 3, cy - s); g.lineTo(cx + s / 3, cy - s / 3); g.lineTo(cx + s, cy - s / 3);
+    g.lineTo(cx + s, cy + s / 3); g.lineTo(cx + s / 3, cy + s / 3); g.lineTo(cx + s / 3, cy + s); g.lineTo(cx - s / 3, cy + s);
+    g.lineTo(cx - s / 3, cy + s / 3); g.lineTo(cx - s, cy + s / 3); g.lineTo(cx - s, cy - s / 3); g.lineTo(cx - s / 3, cy - s / 3);
+    g.closePath(); g.stroke();
+  }
+  g.restore();
+}
+
+function dessinerScene(i, t) {
+  const nom = ORDRE[i];
+  g.fillStyle = FOND_SCENE[nom]; g.fillRect(0, 0, W, H);
+  motif(t, FOND_SCENE[nom]);
+  SCENES_FN[nom](t);
+}
+
+// volet diagonal : la nouvelle scène balaie l'ancienne, précédée d'une bande orange
+function rendreReels(t) {
+  let k = 0;
+  ORDRE.forEach((nom, i) => { if (t >= BORNES[nom].a) k = i; });
+  const p = k ? entreeSortie(prog(t, BORNES[ORDRE[k]].a, BORNES[ORDRE[k]].a + .5)) : 1;
+  if (p >= 1) { dessinerScene(k, t); return; }
+  dessinerScene(k - 1, t);
+  const bord = lin(-500, W + 500, p);
+  const polygone = dx => { g.beginPath(); g.moveTo(-600, 0); g.lineTo(bord + dx + 300, 0); g.lineTo(bord + dx - 300, H); g.lineTo(-600, H); g.closePath(); };
+  g.save(); polygone(140); g.fillStyle = R.orange; g.fill(); g.restore();
+  g.save(); polygone(0); g.clip(); dessinerScene(k, t); g.restore();
+}
+
+// ---------- outils de style ----------
+function gros(txt, x, y, taille, couleur, { p = 1, align = 'center', graisse = 900, rot = 0, famille = SANS } = {}) {
+  if (p <= 0) return;
+  const q = rebond(borne(p));
+  g.save(); g.globalAlpha *= borne(p * 3);
+  g.translate(x, y); g.rotate(rot * (1 - borne(p))); g.scale(q, q);
+  g.font = `${graisse} ${taille}px ${famille}`; g.textAlign = align; g.textBaseline = 'alphabetic';
+  g.fillStyle = couleur; g.fillText(txt, 0, 0);
+  g.restore();
+}
+
+// surligneur qui se déroule derrière un mot
+function surligne(txt, x, y, taille, p, { fond = R.orange, couleur = R.encre, align = 'center', graisse = 900 } = {}) {
+  if (p <= 0) return;
+  g.font = `${graisse} ${taille}px ${SANS}`;
+  const w = g.measureText(txt).width + taille * .5, h = taille * 1.15;
+  const x0 = align === 'center' ? x - w / 2 : x - taille * .25;
+  g.save();
+  g.fillStyle = fond; g.beginPath(); g.roundRect(x0, y - taille * .9, w * sortie5(borne(p * 1.4)), h, 14); g.fill();
+  g.globalAlpha *= borne(p * 2 - .3);
+  g.fillStyle = couleur; g.textAlign = align; g.fillText(txt, x, y);
+  g.restore();
+}
+
+function degradeBas(couleur, haut = 900) {
+  const d = g.createLinearGradient(0, H - haut, 0, H);
+  d.addColorStop(0, 'rgba(20,13,46,0)'); d.addColorStop(.55, couleur); d.addColorStop(1, couleur);
+  g.fillStyle = d; g.fillRect(0, H - haut, W, haut);
+}
+
+function photoPleine(nom, t, debut, { foyer = [.5, .4], zoom = .03, sombre = .35, lumiere = 1 } = {}) {
+  const img = MEDIAS[nom];
+  if (!img) return;
+  const z = 1.08 + (t - debut) * zoom + .12 * (1 - sortie5(prog(t, debut, debut + .5)));  // petit « coup de zoom » à l'entrée
+  if (lumiere !== 1) { g.save(); g.filter = `brightness(${lumiere})`; }
+  photo(img, 0, 0, W, H, { foyer, zoom: z, r: 0 });
+  if (lumiere !== 1) g.restore();
+  g.fillStyle = `rgba(20,13,46,${sombre})`; g.fillRect(0, 0, W, H);
+}
+
+function etiquette(txt, x, y, p, { couleur = R.orange, texte = R.encre, taille = 34 } = {}) {
+  if (p <= 0) return;
+  police(taille, 800);
+  const w = g.measureText(txt).width + taille * 1.4, h = taille * 1.9;
+  const q = rebond(borne(p));
+  g.save(); g.globalAlpha *= borne(p * 3); g.translate(x, y); g.scale(q, q);
+  g.beginPath(); g.roundRect(-w / 2, -h / 2, w, h, h / 2); g.fillStyle = couleur; g.fill();
+  g.fillStyle = texte; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(txt, 0, 2);
+  g.restore();
+}
+
+// ---------- pictogrammes des projets ----------
+function picto(type, s, k, t) {
+  g.save(); g.strokeStyle = k; g.fillStyle = k; g.lineWidth = s * .06; g.lineCap = 'round'; g.lineJoin = 'round';
+  if (type === 'nabele') {         // boutique avec store rayé
+    g.strokeRect(-s * .42, -s * .05, s * .84, s * .45);
+    for (let i = 0; i < 6; i++) { g.fillStyle = i % 2 ? k : R.orange; g.beginPath(); g.moveTo(-s * .5 + i * s / 6, -s * .32); g.lineTo(-s * .5 + (i + 1) * s / 6, -s * .32); g.lineTo(-s * .5 + (i + 1) * s / 6, -s * .12); g.arc(-s * .5 + (i + .5) * s / 6, -s * .12, s / 12, 0, Math.PI); g.fill(); }
+    g.strokeRect(-s * .12, s * .12, s * .24, s * .28);
+  } else if (type === 'smartstock') {  // cartons empilés
+    [[-.3, .1], [.05, .1], [-.12, -.25]].forEach(([x, y], i) => { g.strokeRect(s * x, s * y, s * .32, s * .3); g.beginPath(); g.moveTo(s * (x + .16), s * y); g.lineTo(s * (x + .16), s * (y + .1)); g.stroke(); });
+  } else if (type === 'sgs') {         // toque de diplômé
+    g.beginPath(); g.moveTo(0, -s * .35); g.lineTo(s * .5, -s * .12); g.lineTo(0, s * .1); g.lineTo(-s * .5, -s * .12); g.closePath(); g.fill();
+    g.beginPath(); g.moveTo(-s * .28, -s * .02); g.lineTo(-s * .28, s * .25); g.quadraticCurveTo(0, s * .42, s * .28, s * .25); g.lineTo(s * .28, -s * .02); g.stroke();
+    g.beginPath(); g.moveTo(s * .42, -s * .1); g.lineTo(s * .42, s * .25); g.stroke();
+  } else if (type === 'solarbox') {    // soleil + panneau
+    g.save(); g.translate(s * .18, -s * .2); g.rotate(t * .5);
+    for (let i = 0; i < 8; i++) { g.rotate(Math.PI / 4); g.beginPath(); g.moveTo(s * .17, 0); g.lineTo(s * .26, 0); g.stroke(); }
+    g.restore(); cercle(s * .18, -s * .2, s * .11, k);
+    g.save(); g.translate(-s * .1, s * .2); g.transform(1, 0, -.35, 1, 0, 0);
+    g.strokeRect(-s * .3, -s * .12, s * .55, s * .26); g.beginPath(); g.moveTo(-s * .03, -s * .12); g.lineTo(-s * .03, s * .14); g.moveTo(-s * .3, 0); g.lineTo(s * .25, 0); g.stroke();
+    g.restore();
+  } else if (type === 'ast') {         // journal
+    g.strokeRect(-s * .38, -s * .32, s * .76, s * .64);
+    g.fillRect(-s * .28, -s * .22, s * .56, s * .1);
+    for (let i = 0; i < 3; i++) { g.beginPath(); g.moveTo(-s * .28, s * (-.02 + i * .1)); g.lineTo(s * .28, s * (-.02 + i * .1)); g.stroke(); }
+  } else if (type === 'om') {          // téléphone + bulle validée
+    g.beginPath(); g.roundRect(-s * .32, -s * .4, s * .38, s * .8, s * .06); g.stroke();
+    g.beginPath(); g.roundRect(-s * .05, -s * .2, s * .48, s * .3, s * .1); g.fillStyle = R.orange; g.fill();
+    g.strokeStyle = R.encre; g.beginPath(); g.moveTo(s * .08, -s * .05); g.lineTo(s * .16, s * .03); g.lineTo(s * .32, -s * .12); g.stroke();
+  }
+  g.restore();
+}
+
+// =====================================================================
+// SCÈNES
+// =====================================================================
+const SCENES_FN = {
+  // « Et si l'avenir du numérique africain se construisait ici, en Guinée ? »
+  accroche(t) {
+    carteAfrique(t, D('r-accroche') + .3, 560, 1080, 12.5, { arcs: tMot('r-accroche', 'ici') });
+    const lignesTxt = [['ET SI', 'si', R.blanc, 120], ['L’AVENIR', 'avenir', R.blanc, 150], ['DU NUMÉRIQUE', 'numérique', R.lavande, 104], ['AFRICAIN', 'africain', R.orange, 150], ['SE CONSTRUISAIT…', 'construisait', R.blanc, 84]];
+    lignesTxt.forEach(([txt, mot, k, taille], i) => gros(txt, W / 2, 260 + i * 150, taille, k, { p: prog(t, tMot('r-accroche', mot) - .15, tMot('r-accroche', mot) + .35), rot: (i % 2 ? .08 : -.08) }));
+    const pi = prog(t, tMot('r-accroche', 'ici') - .1, tMot('r-accroche', 'ici') + .4);
+    if (pi > 0) {
+      surligne('ICI.', W / 2, 1050, 210, pi);
+      const pg = prog(t, tMot('r-accroche', 'guinée') - .1, tMot('r-accroche', 'guinée') + .4);
+      g.save(); g.globalAlpha *= borne(pg * 2); drapeau(W / 2 - 170, 1170, 56); g.restore();
+      gros('GUINÉE', W / 2 + 50, 1222, 72, R.blanc, { p: pg });
+    }
+  },
+
+  // nom et titres sur la grande photo
+  nom(t) {
+    photoPleine('photo-joel', t, BORNES.nom.a, { foyer: [.55, .3], sombre: .15 });
+    degradeBas(R.nuit, 1200);
+    gros('JOËL', 80, 980, 230, R.blanc, { p: prog(t, tMot('r-nom', 'joël') - .1, tMot('r-nom', 'joël') + .4), align: 'left' });
+    gros('KOÏKOÏ', 84, 1110, 140, R.orange, { p: prog(t, tMot('r-nom', 3) - .1, tMot('r-nom', 3) + .4), align: 'left' });
+    gros('KOÏVOGUI', 84, 1240, 140, R.orange, { p: prog(t, tMot('r-nom', 4) - .1, tMot('r-nom', 4) + .4), align: 'left' });
+    // trois étiquettes : une ligne, puis deux côte à côte
+    const tags = [['Développeur web & mobile', 'développeur', R.blanc, R.encre], ['Entrepreneur tech', 'entrepreneur', R.orange, R.encre], ['Autodidacte', 'autodidacte', R.violetVif, R.blanc]];
+    police(36, 800);
+    const larg = tags.map(([txt]) => g.measureText(txt).width + 36 * 1.4);
+    const places = [[84 + larg[0] / 2, 1320], [84 + larg[1] / 2, 1410], [84 + larg[1] + 20 + larg[2] / 2, 1410]];
+    tags.forEach(([txt, mot, k, encre], i) => {
+      etiquette(txt, places[i][0], places[i][1], prog(t, tMot('r-titres', mot) - .1, tMot('r-titres', mot) + .4), { couleur: k, texte: encre, taille: 36 });
+    });
+  },
+
+  // cinq rôles, un par phrase
+  roles(t) {
+    const roles = [
+      ['r-etudiant', 'ÉTUDIANT', 'Génie informatique', 'Université Nongo Conakry', 'ev-cloud-unc', [.5, .35]],
+      ['r-cto', 'CTO', 'Directeur technique', 'DIGITERRA', null],
+      ['r-delegue', 'DÉLÉGUÉ NATIONAL', 'Éducation numérique', 'FATA.SCHOOL', 'ev-stand', [.62, .45]],
+      ['r-iot', 'RESPONSABLE IoT & ROBOTIQUE', 'Objets connectés', 'SECURY ÉNERGIE', null],
+      ['r-luuma', 'COORDINATEUR', '', 'LUUMA', null],
+    ];
+    roles.forEach(([id, titre, sous, org, img, foyer], i) => {
+      const debut = i ? D(id) - .15 : BORNES.roles.a;
+      const fin = i < roles.length - 1 ? D(roles[i + 1][0]) - .15 : Infinity;
+      if (t < debut || t > fin) return;
+      const p = prog(t, debut, debut + .5);
+      if (img) photoPleine(img, t, debut, { foyer, sombre: .72 });
+      else {
+        g.fillStyle = i % 2 ? R.violet : R.nuit; g.fillRect(0, 0, W, H); motif(t, R.nuit);
+        if (id === 'r-iot') { // circuit animé
+          g.strokeStyle = 'rgba(247,162,27,0.35)'; g.lineWidth = 4;
+          for (let j = 0; j < 7; j++) { const y = 300 + j * 140; g.beginPath(); g.moveTo(0, y); g.lineTo(300 + j * 40, y); g.lineTo(380 + j * 40, y + 80); g.lineTo(W, y + 80); g.stroke();
+            const q = (t * .6 + j / 7) % 1; lueur(q * W, q * W < 300 + j * 40 ? y : y + 80, 30, R.orange, .9); }
+        }
+        if (id === 'r-cto') { gros('{ }', W / 2, 1150, 520, 'rgba(255,255,255,0.06)', { p: 1 }); }
+      }
+      // compteur
+      g.save(); g.globalAlpha *= sortie3(p);
+      g.font = `900 260px ${SANS}`; g.textAlign = 'left'; g.lineWidth = 4; g.strokeStyle = 'rgba(255,255,255,0.5)';
+      g.strokeText(String(i + 1).padStart(2, '0'), 70, 420);
+      police(30, 700); g.fillStyle = R.orange; g.fillText('/ 05', 400, 410);
+      g.restore();
+      // titre du rôle, coupé sur plusieurs lignes
+      let taille = titre.length > 14 ? 96 : 140;
+      police(taille, 900);
+      const ls = lignes(titre, W - 160);
+      ls.forEach(l => { while (g.measureText(l).width > W - 160) police(--taille, 900); });
+      ls.forEach((l, j) => gros(l, 80, 640 + j * taille * 1.12, taille, R.blanc, { p: prog(t, debut + .1 + j * .12, debut + .55 + j * .12), align: 'left' }));
+      const yo = 640 + ls.length * taille * 1.12 + 40;
+      if (sous) gros(sous, 82, yo, 44, R.lavande, { p: prog(t, debut + .35, debut + .8), align: 'left', graisse: 600 });
+      surligne(org, 80, yo + 150, org.length > 16 ? 70 : 96, prog(t, tMot(id, org.split(' ')[0].replace('.SCHOOL', '')) - .2, tMot(id, org.split(' ')[0].replace('.SCHOOL', '')) + .5), { align: 'left' });
+    });
+  },
+
+  // la boîte à outils
+  stack(t) {
+    gros('JE CONSTRUIS', W / 2, 330, 120, R.encre, { p: prog(t, D('r-stack') - .1, D('r-stack') + .4) });
+    surligne('AVEC', W / 2, 470, 110, prog(t, tMot('r-stack', 'avec') - .1, tMot('r-stack', 'avec') + .4), { fond: R.violet, couleur: R.blanc });
+    const T = {}; [...TECHS.web, ...TECHS.mobile].forEach(tc => { T[tc[0]] = tc; });
+    const liste = [['React', 'react'], ['Next.js', 'next'], ['Node.js', 'node'], ['MongoDB', 'mongodb'], ['Supabase', 'supabase'], ['React Native', 'native']];
+    liste.forEach(([nom, mot], i) => {
+      const d = mot === 'react' ? tMot('r-stack', 4) : tMot('r-stack', mot);
+      const x = W / 2 + (i % 2 ? 1 : -1) * 220, y = 720 + Math.floor(i / 2) * 330;
+      g.save(); g.translate(x, y); g.scale(1.5, 1.5); tuile(t, T[nom], 0, 0, prog(t, d - .2, d + .35)); g.restore();
+    });
+  },
+
+  // six projets
+  projets(t) {
+    const ap = fenetre(t, BORNES.projets.a, D('r-nabele') - .1, .01, .25);
+    if (ap) {
+      g.save(); g.globalAlpha *= ap;
+      gros('DES IDÉES', W / 2, 560, 150, R.blanc, { p: prog(t, tMot('r-projets', 'idées') - .15, tMot('r-projets', 'idées') + .35) });
+      gros('DEVENUES', W / 2, 730, 150, R.lavande, { p: prog(t, tMot('r-projets', 'devenues') - .15, tMot('r-projets', 'devenues') + .35) });
+      surligne('PRODUITS', W / 2, 920, 170, prog(t, tMot('r-projets', 'produits') - .1, tMot('r-projets', 'produits') + .4));
+      gros('pensés pour les réalités guinéennes', W / 2, 1080, 46, R.lavande, { p: prog(t, tMot('r-projets', 'pensés'), tMot('r-projets', 'pensés') + .5), graisse: 600 });
+      g.restore();
+    }
+    const P = [['r-nabele', 'nabele', 'NABELE', 'Stock & caisse', 'multi-boutiques'], ['r-smartstock', 'smartstock', 'SMARTSTOCK', 'Guinée', 'pour les commerçants'],
+      ['r-sgs', 'sgs', 'SGS', 'Gestion', 'scolaire'], ['r-solarbox', 'solarbox', 'SOLARBOX', 'Énergie solaire', 'connectée'],
+      ['r-ast', 'ast', 'AST MEDIA', 'L’actualité', 'en français'], ['r-om', 'om', 'ORANGE MONEY', '→ WhatsApp', 'paiements notifiés']];
+    P.forEach(([id, ic, nom, l1, l2], i) => {
+      const debut = D(id) - .1, fin = i < P.length - 1 ? D(P[i + 1][0]) - .1 : Infinity;
+      if (t < debut || t > fin) return;
+      const fondc = [R.violet, R.orange, R.nuit, R.violet, R.nuit, R.orange][i];
+      g.fillStyle = fondc; g.fillRect(0, 0, W, H); motif(t, fondc);
+      const clair = CLAIR(fondc), encre = clair ? R.encre : R.blanc;
+      const p = prog(t, debut, debut + .55);
+      // pastille du pictogramme
+      const q = rebond(borne(p));
+      g.save(); g.translate(W / 2, 640); g.rotate((1 - borne(p)) * -.6); g.scale(q, q);
+      cercle(0, 0, 240, clair ? R.nuit : R.blanc);
+      picto(ic, 300, clair ? R.blanc : R.violet, t);
+      g.restore();
+      g.save(); g.globalAlpha *= sortie3(p); police(32, 800); g.fillStyle = encre; g.textAlign = 'center';
+      g.fillText(`PROJET ${String(i + 1).padStart(2, '0')} / 06`, W / 2, 300); g.restore();
+      const xg = lin(W + 400, W / 2, sortie5(prog(t, debut + .1, debut + .6)));
+      g.font = `900 ${nom.length > 9 ? 120 : 160}px ${SANS}`; g.textAlign = 'center'; g.fillStyle = encre; g.fillText(nom, xg, 1060);
+      gros(l1, W / 2, 1170, 64, encre, { p: prog(t, debut + .35, debut + .8), graisse: 800 });
+      surligne(l2, W / 2, 1270, 52, prog(t, debut + .5, debut + 1), { fond: clair ? R.nuit : R.orange, couleur: clair ? R.blanc : R.encre, graisse: 800 });
+    });
+  },
+
+  // IA, ML, IoT, robotique : un mot géant à la fois
+  ia(t) {
+    reseau(t, D('r-ia') - .3, 160, 920, 1050, 640);
+    gros('MON TERRAIN DE JEU', W / 2, 300, 66, R.lavande, { p: prog(t, D('r-ia') - .1, D('r-ia') + .4) });
+    const mots = [['IA', 'intelligence', 220, R.orange], ['MACHINE', 'machine', 150, R.blanc], ['IoT', 'internet', 220, R.violetVif], ['ROBOTIQUE', 'robotique', 140, R.orange]];
+    mots.forEach(([m, cle, taille, k], i) => {
+      const d = tMot('r-ia', cle), f = i < mots.length - 1 ? tMot('r-ia', mots[i + 1][1]) : Infinity;
+      if (t < d - .15 || t > f - .05) return;
+      gros(m, W / 2, 560, taille, k, { p: prog(t, d - .15, d + .3), rot: .1 });
+      if (m === 'MACHINE') gros('LEARNING', W / 2, 680, 120, R.blanc, { p: prog(t, tMot('r-ia', 'learning') - .1, tMot('r-ia', 'learning') + .3) });
+    });
+  },
+
+  // FATA.SCHOOL : montage de photos rapide
+  fata(t) {
+    const a = BORNES.fata.a, b = SCENES[ORDRE.indexOf('fata') + 1].debut - .35;
+    const photos = [['ev-presentation', [.55, .3]], ['ev-micro', [.48, .45], 1.35], ['ev-remise', [.42, .4]], ['ev-stand2', [.55, .45]], ['joel-scene', [.6, .25]], ['affiche-fata', [.5, .5]]];
+    const duree = (b - a) / photos.length;
+    const i = Math.min(photos.length - 1, Math.floor((t - a) / duree));
+    const [nom, foyer, lum] = photos[Math.max(0, i)];
+    photoPleine(nom, t, a + i * duree, { foyer, sombre: .25, lumiere: lum || 1 });
+    // éclair blanc à chaque coupe
+    const flash = 1 - prog(t, a + i * duree, a + i * duree + .15);
+    if (i > 0 && flash > 0) { g.fillStyle = `rgba(255,255,255,${flash * .5})`; g.fillRect(0, 0, W, H); }
+    degradeBas(R.nuit, 1000);
+    g.save(); g.fillStyle = 'rgba(20,13,46,0.55)'; g.fillRect(0, 0, W, 330); g.restore();
+    logoFata(W / 2, 190, 120, sortie3(prog(t, a, a + .5)));
+    gros('DANS TOUTE', W / 2, 920, 110, R.blanc, { p: prog(t, tMot('r-fata', 'toute') - .15, tMot('r-fata', 'toute') + .35) });
+    surligne('LA GUINÉE', W / 2, 1060, 130, prog(t, tMot('r-fata', 'guinée') - .15, tMot('r-fata', 'guinée') + .4));
+    // une étiquette à la fois, au rythme des mots
+    const tags = [['PRISES DE PAROLE', 'prises'], ['ÉVÉNEMENTS', 'événements'], ['CHALLENGES DE CODE', 'challenges']];
+    let actif = -1;
+    tags.forEach(([, cle], j) => { if (t >= tMot('r-fata2', cle) - .1) actif = j; });
+    if (actif >= 0) {
+      const [m, cle] = tags[actif];
+      etiquette(m, W / 2, 1220, prog(t, tMot('r-fata2', cle) - .1, tMot('r-fata2', cle) + .35), { taille: 48 });
+    }
+  },
+
+  // de la formation à l'emploi
+  emploi(t) {
+    etiquette('ELITECH ACADEMY', W / 2, 250, prog(t, tMot('r-emploi', 'elitech') - .1, tMot('r-emploi', 'elitech') + .4), { couleur: R.nuit, texte: R.blanc, taille: 44 });
+    etiquette('YOUTH ENGINEERS NETWORK', W / 2, 370, prog(t, tMot('r-emploi', 'youth') - .1, tMot('r-emploi', 'youth') + .4), { couleur: R.violet, texte: R.blanc, taille: 40 });
+    // « j'aide les jeunes » s'efface quand « formation » arrive
+    const pj = fenetre(t, tMot('r-emploi', 'aide') - .15, tMot('r-emploi', 'formation') - .1, .3, .3);
+    if (pj) { g.save(); g.globalAlpha *= pj;
+      gros('J’AIDE', W / 2, 760, 170, R.encre, { p: prog(t, tMot('r-emploi', 'aide') - .15, tMot('r-emploi', 'aide') + .3) });
+      surligne('LES JEUNES', W / 2, 960, 150, prog(t, tMot('r-emploi', 'jeunes') - .15, tMot('r-emploi', 'jeunes') + .35), { fond: R.nuit, couleur: R.blanc });
+      g.restore(); }
+    gros('FORMATION', W / 2, 640, 150, R.encre, { p: prog(t, tMot('r-emploi', 'formation') - .15, tMot('r-emploi', 'formation') + .35) });
+    const pf = entreeSortie(prog(t, tMot('r-emploi', 'formation') + .1, tMot('r-emploi', 'emploi')));
+    if (pf > 0) {
+      g.save(); g.strokeStyle = R.encre; g.lineWidth = 18; g.lineCap = 'round';
+      g.beginPath(); g.moveTo(W / 2, 700); g.lineTo(W / 2, lin(700, 960, pf)); g.stroke();
+      if (pf > .9) { g.beginPath(); g.moveTo(W / 2 - 60, 900); g.lineTo(W / 2, 970); g.lineTo(W / 2 + 60, 900); g.stroke(); }
+      g.restore();
+    }
+    surligne('EMPLOI', W / 2, 1160, 190, prog(t, tMot('r-emploi', 'emploi') - .1, tMot('r-emploi', 'emploi') + .4), { fond: R.nuit, couleur: R.orange });
+  },
+
+  // le talent existe partout, l'Afrique doit créer
+  talent(t) {
+    const pt = fenetre(t, BORNES.talent.a, D('r-afrique') - .1, .01, .3);
+    if (pt) {
+      g.save(); g.globalAlpha *= pt;
+      const cols = 11, rangs = 9, esp = 86, gx = W / 2 - (cols - 1) * esp / 2, gy = 880;
+      const rayon = (t - tMot('r-talent', 'partout')) * 900;
+      for (let i = 0; i < cols; i++) for (let j = 0; j < rangs; j++) {
+        const x = gx + i * esp + (j % 2 ? esp / 2 : 0) - esp / 4, y = gy + j * 62;
+        const on = borne((rayon - Math.hypot(x - W / 2, y - (gy + 250))) / 160);
+        const k = alea(i + j * 7) > .7 ? R.orange : R.blanc;
+        g.fillStyle = on > 0 ? k : 'rgba(255,255,255,0.18)';
+        if (on > 0) lueur(x, y, 50, k, .3 * on);
+        g.beginPath(); g.arc(x, y - 12, 12, 0, Math.PI * 2); g.fill();
+        g.beginPath(); g.ellipse(x, y + 22, 19, 15, 0, Math.PI, 0); g.fill();
+      }
+      gros('LE TALENT', W / 2, 420, 150, R.blanc, { p: prog(t, D('r-talent') - .1, D('r-talent') + .35) });
+      gros('EXISTE', W / 2, 580, 150, R.blanc, { p: prog(t, tMot('r-talent', 'existe') - .1, tMot('r-talent', 'existe') + .35) });
+      surligne('PARTOUT.', W / 2, 760, 160, prog(t, tMot('r-talent', 'partout') - .1, tMot('r-talent', 'partout') + .4));
+      g.restore();
+    }
+    const pa = fenetre(t, D('r-afrique') - .1, Infinity, .3);
+    if (pa) {
+      g.save(); g.globalAlpha *= pa;
+      g.fillStyle = R.nuit; g.fillRect(0, 0, W, H);
+      carteAfrique(t, D('r-afrique') - .2, 560, 1020, 12.5, { arcs: tMot('r-afrique', 'créer') });
+      gros('L’AFRIQUE', W / 2, 330, 140, R.blanc, { p: prog(t, tMot('r-afrique', 'afrique') - .15, tMot('r-afrique', 'afrique') + .35) });
+      gros('DOIT CRÉER', W / 2, 470, 110, R.orange, { p: prog(t, tMot('r-afrique', 'créer') - .15, tMot('r-afrique', 'créer') + .35) });
+      surligne('SES SOLUTIONS', W / 2, 1300, 100, prog(t, tMot('r-afrique', 'solutions') - .2, tMot('r-afrique', 'solutions') + .4));
+      g.restore();
+    }
+  },
+
+  // j'apprends, je construis, j'expérimente, j'évolue
+  verbes(t) {
+    const v = [['J’APPRENDS', 'apprends', R.violet], ['JE CONSTRUIS', 'construis', R.orange], ['J’EXPÉRIMENTE', 'expérimente', R.violetVif], ['J’ÉVOLUE', 'évolue', R.nuit]];
+    let actif = -1;
+    v.forEach(([, cle], i) => { if (t >= tMot('r-verbes', cle) - .1) actif = i; });
+    if (actif >= 0) { g.fillStyle = v[actif][2]; g.fillRect(0, 0, W, H); motif(t, v[actif][2]); }
+    v.forEach(([m, cle, k], i) => {
+      const d = tMot('r-verbes', cle);
+      const p = prog(t, d - .1, d + .3);
+      const encre = i === actif ? (k === R.orange ? R.encre : R.blanc) : 'rgba(255,255,255,0.35)';
+      gros(m, W / 2, 520 + i * 210, i === actif ? 120 : 92, encre, { p });
+    });
+  },
+
+  // fin : portrait, slogan et signature, comme la carte de visite
+  fin(t) {
+    const a = BORNES.fin.a;
+    const pp = sortie5(prog(t, a + .1, a + .9));
+    if (pp > 0) {
+      g.save(); g.globalAlpha *= pp;
+      cercle(W / 2, 600, 330 * pp, R.violet);
+      anneau(W / 2, 600, 350, R.orange, 10, pp);
+      photo(MEDIAS['portrait-joel'], W / 2 - 310, 290, 620, 620, { rond: true, zoom: 1 + (t - a) * .01 });
+      g.restore();
+    }
+    const ps = prog(t, D('r-slogan') - .1, F('r-slogan'));
+    if (ps > 0) {
+      g.save(); g.globalAlpha *= borne(ps * 3);
+      g.font = `110px ${SCRIPT}`; g.textAlign = 'center';
+      // le slogan s'écrit de gauche à droite
+      const w1 = g.measureText('Innover aujourd’hui,').width;
+      g.save(); g.beginPath(); g.rect(W / 2 - w1 / 2 - 20, 980, (w1 + 40) * borne(ps * 2), 160); g.clip();
+      g.fillStyle = R.encre; g.fillText('Innover aujourd’hui,', W / 2, 1090); g.restore();
+      const w2 = g.measureText('construire demain.').width;
+      g.save(); g.beginPath(); g.rect(W / 2 - w2 / 2 - 20, 1110, (w2 + 40) * borne(ps * 2 - 1), 170); g.clip();
+      g.fillStyle = R.orange; g.fillText('construire', W / 2 - w2 / 2 + g.measureText('construire').width / 2, 1225);
+      g.fillStyle = R.encre; g.fillText('demain.', W / 2 + w2 / 2 - g.measureText('demain.').width / 2, 1225);
+      g.restore();
+      g.restore();
+    }
+    const pn = prog(t, D('r-signature') - .1, F('r-signature') + .3);
+    if (pn > 0) {
+      gros('KOÏKOÏ', W / 2, 1420, 120, R.violet, { p: prog(t, tMot('r-signature', 3) - .1, tMot('r-signature', 3) + .4) });
+      gros('KOÏVOGUI', W / 2, 1540, 120, R.orange, { p: prog(t, tMot('r-signature', 4) - .1, tMot('r-signature', 4) + .4) });
+      g.save(); g.globalAlpha *= prog(t, F('r-signature'), F('r-signature') + .8);
+      police(34, 700); g.fillStyle = R.encre; g.textAlign = 'center';
+      g.fillText('CTO Digiterra · Délégué national fata.school', W / 2, 1650);
+      police(30, 500); g.fillStyle = R.violet; g.fillText('Développeur web & mobile · Entrepreneur technologique', W / 2, 1705);
+      g.restore();
+    }
+  },
+};
+
+// ---------- sous-titres karaoké ----------
+function karaoke(t) {
+  const s = TL.segments.find(s => t >= s.debut - .1 && t <= s.fin + .25);
+  if (!s || ['r-slogan', 'r-signature'].includes(s.id)) return;
+  const a = Math.min(prog(t, s.debut - .1, s.debut + .05), 1 - prog(t, s.fin + .05, s.fin + .25));
+  police(54, 800);
+  // groupes de mots d'au plus ~26 caractères, comme sur les réseaux
+  const groupes = []; let cour = [];
+  s.mots.forEach(m => { const essai = [...cour, m].map(x => x[0]).join(' '); if (cour.length && essai.length > 26) { groupes.push(cour); cour = [m]; } else cour.push(m); });
+  if (cour.length) groupes.push(cour);
+  const gi = Math.max(0, groupes.findIndex((gr, i) => t < (groupes[i + 1] ? groupes[i + 1][0][1] : Infinity)));
+  const gr = groupes[gi];
+  const txt = gr.map(m => m[0]);
+  const espace = g.measureText(' ').width;
+  const ws = txt.map(m => g.measureText(m).width);
+  const total = ws.reduce((x, y) => x + y, 0) + espace * (txt.length - 1);
+  const y = 1560;
+  g.save(); g.globalAlpha = a;
+  g.beginPath(); g.roundRect(W / 2 - total / 2 - 36, y - 62, total + 72, 88, 26); g.fillStyle = 'rgba(20,13,46,0.82)'; g.fill();
+  let x = W / 2 - total / 2;
+  g.textAlign = 'left'; g.textBaseline = 'alphabetic';
+  gr.forEach((m, i) => {
+    const dit = t >= m[1] - .03;
+    const suivant = gr[i + 1] || s.mots[s.mots.indexOf(m) + 1];
+    const courant = dit && (!suivant || t < suivant[1] - .03);  // un seul mot allumé : le dernier commencé
+    const pop = dit ? 1 + .06 * (1 - prog(t, m[1], m[1] + .18)) : 1;
+    g.save(); g.translate(x + ws[i] / 2, y); g.scale(pop, pop);
+    g.fillStyle = courant ? R.orange : (dit ? R.blanc : 'rgba(255,255,255,0.55)');
+    g.fillText(m[0], -ws[i] / 2, 0); g.restore();
+    x += ws[i] + espace;
+  });
+  g.restore();
+}
+
+// barre de progression en segments, façon « Stories »
+function barreStories(t) {
+  const n = ORDRE.length, marge = 30, ecart = 10, w = (W - 2 * marge - ecart * (n - 1)) / n;
+  ORDRE.forEach((nom, i) => {
+    const a = BORNES[nom].a, b = i < n - 1 ? BORNES[ORDRE[i + 1]].a : DUREE;
+    const x = marge + i * (w + ecart);
+    g.fillStyle = 'rgba(255,255,255,0.3)'; g.beginPath(); g.roundRect(x, 34, w, 7, 4); g.fill();
+    g.fillStyle = R.orange; g.beginPath(); g.roundRect(x, 34, w * prog(t, a, b), 7, 4); g.fill();
+  });
+}
+
+demarrer([], 'sortie/voix-reels.wav', { dessous: [rendreReels], dessus: [karaoke, barreStories] });
+</script>
+</body>
+</html>
