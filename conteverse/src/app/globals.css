@@ -1,0 +1,127 @@
+@import "tailwindcss";
+
+/* ─── Identité CONTEVERSE ─────────────────────────────────────────────
+   Orange (énergie), vert (nature), jaune (connaissance), violet
+   (imagination), bleu (confiance). Fond crème chaleureux, encre profonde. */
+@theme {
+  --font-sans: "Nunito Variable", "Nunito", ui-sans-serif, system-ui, sans-serif;
+
+  --color-creme: #fff8ef;
+  --color-sable: #f6ead8;
+  --color-encre: #1f1a2e;
+  --color-encre-doux: #4a4560;
+
+  --color-orange-50: #fff4ea;
+  --color-orange-100: #ffe3c8;
+  --color-orange-200: #ffc48f;
+  --color-orange-400: #ff8a2b;
+  --color-orange-500: #f26a0f;
+  --color-orange-600: #d1540a;
+  --color-orange-700: #a8410b;
+
+  --color-vert-50: #eaf8f0;
+  --color-vert-100: #cdeedb;
+  --color-vert-400: #2fb36d;
+  --color-vert-500: #189557;
+  --color-vert-600: #0f7745;
+  --color-vert-700: #0b5c36;
+
+  --color-jaune-50: #fff9e0;
+  --color-jaune-100: #fff0ad;
+  --color-jaune-300: #ffd84a;
+  --color-jaune-400: #f7c21b;
+  --color-jaune-600: #b88400;
+
+  --color-violet-50: #f3efff;
+  --color-violet-100: #e3dbff;
+  --color-violet-400: #8f6cf0;
+  --color-violet-500: #6f48de;
+  --color-violet-600: #5634b8;
+  --color-violet-700: #432892;
+
+  --color-bleu-50: #eaf4ff;
+  --color-bleu-100: #cfe6ff;
+  --color-bleu-400: #3f93ec;
+  --color-bleu-500: #1f74d1;
+  --color-bleu-600: #165ba9;
+  --color-bleu-700: #11467f;
+
+  --radius-xl2: 1.25rem;
+  --shadow-carte: 0 1px 2px rgb(31 26 46 / 0.06), 0 8px 24px -12px rgb(31 26 46 / 0.18);
+  --shadow-relief: 0 4px 0 0 rgb(31 26 46 / 0.12);
+}
+
+:root {
+  color-scheme: light;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--color-creme);
+  color: var(--color-encre);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Motif discret inspiré des tissages (bandes du kente, losanges bogolan). */
+.motif {
+  background-image:
+    linear-gradient(135deg, rgb(242 106 15 / 0.07) 25%, transparent 25%),
+    linear-gradient(225deg, rgb(242 106 15 / 0.07) 25%, transparent 25%),
+    linear-gradient(45deg, rgb(242 106 15 / 0.07) 25%, transparent 25%),
+    linear-gradient(315deg, rgb(242 106 15 / 0.07) 25%, transparent 25%);
+  background-size: 28px 28px;
+  background-position: 14px 0, 14px 0, 0 0, 0 0;
+}
+
+.bande-kente {
+  background: repeating-linear-gradient(
+    90deg,
+    var(--color-orange-500) 0 24px,
+    var(--color-jaune-400) 24px 36px,
+    var(--color-vert-500) 36px 60px,
+    var(--color-encre) 60px 66px,
+    var(--color-violet-500) 66px 84px,
+    var(--color-jaune-400) 84px 96px
+  );
+}
+
+/* Lecture confortable */
+.lecture p {
+  font-size: 1.125rem;
+  line-height: 1.8;
+}
+
+:focus-visible {
+  outline: 3px solid var(--color-violet-500);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Carte Leaflet sans tuiles : fond océan */
+.leaflet-container.carte-afrique {
+  background: #cfe8f7;
+  font-family: var(--font-sans);
+}
+.leaflet-tooltip.pays-tooltip {
+  border-radius: 10px;
+  border: 0;
+  box-shadow: var(--shadow-carte);
+  font-weight: 700;
+  padding: 6px 10px;
+  color: var(--color-encre);
+}
