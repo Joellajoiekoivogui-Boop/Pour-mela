@@ -1,0 +1,45 @@
+{
+  "name": "conteverse",
+  "version": "0.1.0",
+  "private": true,
+  "description": "CONTEVERSE — plateforme éducative africaine pour les enfants de 7 à 12 ans.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types --no-warnings src/lib/__tests__/*.test.ts",
+    "geo": "node scripts/build-africa-geojson.mjs",
+    "seed": "node --experimental-strip-types --no-warnings scripts/generate-seed.ts",
+    "test:e2e": "node scripts/e2e-jury.cjs",
+    "icons": "node scripts/build-icons.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.3.0",
+    "@fontsource-variable/nunito": "^5.3.0",
+    "@supabase/ssr": "^0.12.7",
+    "@supabase/supabase-js": "^2.118.0",
+    "framer-motion": "^14.9.0",
+    "leaflet": "^1.9.4",
+    "lucide-react": "^1.66.0",
+    "next": "^16.4.3",
+    "react": "^19.3.0",
+    "react-dom": "^19.3.0",
+    "server-only": "^0.0.1"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.3",
+    "@types/leaflet": "^1.9.22",
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "@types/topojson-client": "^3.1.5",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.3",
+    "tailwindcss": "^4.3.3",
+    "topojson-client": "^3.1.0",
+    "typescript": "^5.9.3",
+    "world-atlas": "^2.0.2"
+  }
+}

@@ -6,6 +6,10 @@
 > voir [`reine/README.md`](reine/README.md) pour la personnaliser et la mettre
 > en ligne.
 >
+> **Et aussi : [🌍 CONTEVERSE](conteverse/)**, la plateforme éducative africaine
+> pour enfants du Hackathon Lire Demain 2026 (Next.js, Supabase, Leaflet). Elle
+> vit dans le dossier `conteverse/` ; voir [`conteverse/README.md`](conteverse/README.md).
+>
 > **Et aussi : [🌌 Joël · 10.10](joel/)**, un site anniversaire cinématique
 > pour Joël Koivogui (10 octobre), en Next.js, Three.js et Motion. Il vit dans
 > le dossier `joel/` ; voir [`joel/README.md`](joel/README.md).
