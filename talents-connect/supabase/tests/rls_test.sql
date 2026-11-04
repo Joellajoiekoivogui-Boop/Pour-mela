@@ -268,3 +268,24 @@ do $$ begin
   raise notice '✔ Visiteur anonyme : annuaire public seulement';
 end $$;
 reset role;
+
+-- Compteurs de l'annuaire : accessibles aux anonymes, sans données privées.
+set role anon;
+do $$ begin
+  assert (select active_mentees from public.mentor_directory_stats(array['00000000-0000-0000-0000-00000000000c'::uuid])) = 1, 'compteur de mentorés actifs';
+  assert (select rating from public.mentor_directory_stats(array['00000000-0000-0000-0000-00000000000c'::uuid])) = 5.0, 'note moyenne';
+  assert not exists (select 1 from public.mentor_directory_stats(array['00000000-0000-0000-0000-00000000000d'::uuid])), 'mentor non vérifié exclu';
+  raise notice '✔ Compteurs publics de l''annuaire';
+end $$;
+reset role;
+
+-- Suppression de compte : le mentoré Pirate supprime son compte, ses données disparaissent.
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000e', false);
+select public.delete_my_account();
+reset role;
+do $$ begin
+  assert not exists (select 1 from auth.users where id = '00000000-0000-0000-0000-00000000000e'), 'compte supprimé';
+  assert not exists (select 1 from public.profiles where id = '00000000-0000-0000-0000-00000000000e'), 'profil supprimé en cascade';
+  raise notice '✔ Suppression de compte en cascade';
+end $$;

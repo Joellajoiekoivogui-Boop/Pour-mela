@@ -705,6 +705,38 @@ language sql stable security definer set search_path = '' as $$
 $$;
 grant execute on function public.mentor_rating(uuid) to anon, authenticated;
 
+-- Compteurs publics de l'annuaire des mentors (aucune donnée personnelle) :
+-- mentorés actifs (capacité), créneaux libres à venir, note moyenne.
+create function public.mentor_directory_stats(p_ids uuid[])
+returns table (mentor_id uuid, active_mentees bigint, free_slots bigint, rating numeric, reviews bigint)
+language sql stable security definer set search_path = '' as $$
+  select mp.user_id,
+    (select count(*) from public.mentorships m where m.mentor_id = mp.user_id and m.status = 'active'),
+    (select count(*) from public.availability_slots s where s.mentor_id = mp.user_id and not s.is_booked and s.starts_at > now()),
+    (select round(avg(r.rating)::numeric, 1) from public.reviews r where r.mentor_id = mp.user_id and not r.is_hidden),
+    (select count(*) from public.reviews r where r.mentor_id = mp.user_id and not r.is_hidden)
+  from public.mentor_profiles mp
+  where mp.user_id = any (p_ids) and mp.verification_status = 'verified'
+$$;
+grant execute on function public.mentor_directory_stats(uuid[]) to anon, authenticated;
+
+-- Suppression de son propre compte : supprime l'utilisateur d'auth.users,
+-- ce qui efface en cascade son profil et ses données. Interdit aux admins
+-- (un super administrateur doit d'abord changer leur rôle).
+create function public.delete_my_account() returns void
+language plpgsql security definer set search_path = '' as $$
+begin
+  if auth.uid() is null then
+    raise exception 'Non connecté.' using errcode = '42501';
+  end if;
+  if public.current_user_role() in ('admin', 'super_admin') then
+    raise exception 'Un compte administrateur ne peut pas être supprimé ainsi.' using errcode = 'P0001';
+  end if;
+  delete from auth.users where id = auth.uid();
+end $$;
+revoke execute on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;
+
 -- Fonctions réservées aux utilisateurs connectés
 revoke execute on function public.respond_to_request(uuid, boolean, text) from public, anon;
 revoke execute on function public.cancel_request(uuid) from public, anon;

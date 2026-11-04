@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+/* ─── Identité TALENTS CONNECT ────────────────────────────────────────
+   Bleu profond (confiance), bleu principal (action), violet (innovation),
+   vert (progression). Fond gris très clair, texte ardoise. */
+@theme {
+  --font-sans: "Inter Variable", "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+
+  --color-navy: #142b4a;
+  --color-navy-900: #0d1d33;
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+  --color-primary-soft: #eff4ff;
+  --color-violet: #7c3aed;
+  --color-violet-soft: #f4effe;
+  --color-success: #16a34a;
+  --color-success-soft: #ecfdf3;
+  --color-warning: #d97706;
+  --color-warning-soft: #fff8eb;
+  --color-danger: #dc2626;
+  --color-danger-soft: #fef2f2;
+
+  --color-background: #f8fafc;
+  --color-surface: #ffffff;
+  --color-foreground: #0f172a;
+  --color-muted: #64748b;
+  --color-subtle: #f1f5f9;
+  --color-border: #e2e8f0;
+  --color-ring: #93b4f7;
+
+  --radius-card: 0.875rem;
+  --shadow-card: 0 1px 2px rgb(15 23 42 / 0.04), 0 1px 3px rgb(15 23 42 / 0.04);
+  --shadow-raised: 0 4px 12px -2px rgb(15 23 42 / 0.08), 0 2px 4px -2px rgb(15 23 42 / 0.04);
+
+  --animate-fade-in: fade-in 0.35s ease-out both;
+  @keyframes fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: none; }
+  }
+}
+
+@layer base {
+  html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+  body {
+    background: var(--color-background);
+    color: var(--color-foreground);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  *, ::before, ::after { border-color: var(--color-border); }
+  :focus-visible { outline: 2px solid var(--color-primary); outline-offset: 2px; }
+  ::selection { background: #dbe6fe; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
+}
+
+.bg-grid {
+  background-image: linear-gradient(to right, rgb(37 99 235 / 0.06) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(37 99 235 / 0.06) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
