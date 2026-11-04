@@ -10,6 +10,10 @@
 > pour enfants du Hackathon Lire Demain 2026 (Next.js, Supabase, Leaflet). Elle
 > vit dans le dossier `conteverse/` ; voir [`conteverse/README.md`](conteverse/README.md).
 >
+> **Et aussi : [🤝 TALENTS CONNECT](talents-connect/)**, la plateforme de mentorat
+> numérique du hackathon « Talents Connect » (Next.js, Supabase). Elle vit dans le
+> dossier `talents-connect/` ; voir [`talents-connect/README.md`](talents-connect/README.md).
+>
 > **Et aussi : [🌌 Joël · 10.10](joel/)**, un site anniversaire cinématique
 > pour Joël Koivogui (10 octobre), en Next.js, Three.js et Motion. Il vit dans
 > le dossier `joel/` ; voir [`joel/README.md`](joel/README.md).

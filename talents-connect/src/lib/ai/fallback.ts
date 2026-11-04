@@ -1,4 +1,4 @@
-import { keywords } from "@/lib/matching/engine";
+import { keywords } from "../matching/engine.ts";
 import type { AssistantMode } from "./prompts";
 
 /**

@@ -29,7 +29,7 @@ export default async function HomePage() {
         <div className="absolute -top-40 left-1/2 h-[480px] w-[880px] -translate-x-1/2 rounded-full bg-gradient-to-r from-blue-200/50 via-violet-200/40 to-blue-100/40 blur-3xl" aria-hidden />
         <div className="relative mx-auto max-w-6xl px-4 pb-20 pt-16 sm:px-6 sm:pb-28 sm:pt-24">
           <div className="mx-auto max-w-3xl text-center">
-            <Badge tone="primary" className="mb-6 px-3 py-1 text-[13px]">
+            <Badge tone="primary" className="mb-6 whitespace-normal px-3 py-1 text-center text-[12px] sm:text-[13px]">
               <Sparkles /> Salon international du livre de jeunesse de Conakry · 10ᵉ édition
             </Badge>
             <h1 className="text-balance text-4xl font-semibold tracking-tight text-navy sm:text-6xl">
