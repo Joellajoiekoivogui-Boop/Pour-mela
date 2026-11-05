@@ -289,3 +289,28 @@ do $$ begin
   assert not exists (select 1 from public.profiles where id = '00000000-0000-0000-0000-00000000000e'), 'profil supprimé en cascade';
   raise notice '✔ Suppression de compte en cascade';
 end $$;
+
+-- Apprentissage : intention sur une étape, notes de séance et révision.
+insert into public.availability_slots (mentor_id, starts_at, ends_at) values ('00000000-0000-0000-0000-00000000000c', now() + interval '5 days', now() + interval '5 days 1 hour');
+insert into public.appointments (mentorship_id, mentor_id, mentee_id, starts_at, ends_at, session_type, status)
+  select id, mentor_id, mentee_id, now() - interval '3 days', now() - interval '3 days' + interval '1 hour', 'video', 'completed' from public.mentorships limit 1;
+set role authenticated;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000a', false);
+do $$ declare v_a uuid; refused boolean := false; begin
+  update public.goal_milestones set intention = 'Quand je rentre des cours, je code 30 minutes.' where position = 2;
+  assert exists (select 1 from public.goal_milestones where intention is not null), 'intention enregistrée';
+  select id into v_a from public.appointments where status = 'completed' limit 1;
+  perform public.save_session_takeaways(v_a, 'Toujours découper un projet en petites étapes.');
+  perform public.mark_takeaways_reviewed(v_a);
+  assert (select review_count from public.appointments where id = v_a) = 1, 'révision comptée';
+  begin perform public.save_session_takeaways((select id from public.appointments where status = 'cancelled' limit 1), 'Une séance annulée ne se résume pas.');
+  exception when others then refused := true; end;
+  assert refused, 'notes réservées aux séances réalisées';
+end $$;
+select set_config('request.jwt.claim.sub', '00000000-0000-0000-0000-00000000000b', false);
+do $$ declare refused boolean := false; begin
+  begin perform public.mark_takeaways_reviewed('00000000-0000-0000-0000-000000000000'); exception when others then refused := true; end;
+  assert refused, 'un tiers ne peut pas réviser';
+  raise notice '✔ Apprentissage : intentions, notes de séance et révision';
+end $$;
+reset role;

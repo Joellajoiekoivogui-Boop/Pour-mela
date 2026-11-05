@@ -108,3 +108,25 @@ export async function completeAppointmentAction(appointmentId: string, notes: st
   revalidateCalendar();
   return { ok: true, message: "Séance marquée comme réalisée." };
 }
+
+/** Le mentoré note ce qu'il retient d'une séance réalisée. */
+export async function saveTakeawaysAction(appointmentId: string, text: string): Promise<ActionResult> {
+  const { session, error } = await actionSession(["mentee"]);
+  if (error) return error;
+  if (!uuid.safeParse(appointmentId).success || text.length > 1500) return { ok: false, error: "Données invalides." };
+  const { error: dbError } = await session.supabase.rpc("save_session_takeaways", { p_appointment_id: appointmentId, p_text: text });
+  if (dbError) return fromDb(dbError);
+  revalidateCalendar();
+  return { ok: true, message: "C'est noté. Nous vous proposerons de le revoir dans quelques jours." };
+}
+
+/** Révision terminée (le mentoré a essayé de se rappeler, puis a relu ses notes). */
+export async function markTakeawaysReviewedAction(appointmentId: string): Promise<ActionResult> {
+  const { session, error } = await actionSession(["mentee"]);
+  if (error) return error;
+  if (!uuid.safeParse(appointmentId).success) return { ok: false, error: "Séance invalide." };
+  const { error: dbError } = await session.supabase.rpc("mark_takeaways_reviewed", { p_appointment_id: appointmentId });
+  if (dbError) return fromDb(dbError);
+  revalidateCalendar();
+  return { ok: true };
+}

@@ -42,6 +42,8 @@ TALENTS CONNECT est une plateforme de mentorat numérique pour les jeunes de Gui
 8. Le mentoré définit un objectif et ses étapes (ou le génère avec l'assistant), puis coche ses étapes : la progression se calcule sur les étapes réellement accomplies.
 9. L'admin suit le tout dans `/admin`.
 
+Les mécanismes d'apprentissage (intentions, « Ce que je retiens », révision espacée) et leurs fondements sont décrits dans [`docs/conception-comportementale.md`](docs/conception-comportementale.md).
+
 ## Stack et choix techniques
 
 - **Next.js 16 (App Router)**, React 19, TypeScript strict (`noUncheckedIndexedAccess` activé), Tailwind CSS 4.
@@ -87,7 +89,8 @@ Sans Supabase, le site public s'affiche, mais l'authentification et les données
    1. `supabase/migrations/20261104000000_schema.sql` (tables, types, index)
    2. `supabase/migrations/20261104000100_functions.sql` (fonctions métier, déclencheurs, notifications)
    3. `supabase/migrations/20261104000200_rls.sql` (RLS, buckets Storage, Realtime)
-   4. `supabase/seed.sql` (12 domaines d'expertise, environ 50 compétences : données de référence, pas de démo)
+   4. `supabase/migrations/20261105000000_learning.sql` (intentions, notes de séance, révision espacée)
+   5. `supabase/seed.sql` (12 domaines d'expertise, environ 50 compétences : données de référence, pas de démo)
 
    Avec la CLI Supabase : `supabase link --project-ref <ref>`, puis `supabase db push`, puis `psql "<db-url>" -f supabase/seed.sql`.
 2. **Authentication → URL Configuration** :
@@ -182,8 +185,8 @@ Les types TypeScript (`src/types/db.ts`) sont écrits à la main. Vous pouvez le
 ```bash
 npm run typecheck   # TypeScript strict
 npm run lint        # ESLint (règles Next.js et React 19)
-npm test            # 14 tests unitaires : matching, progression, fuseau horaire, redirections, mode sans IA
-npm run test:db     # migrations + 14 scénarios de sécurité sur un PostgreSQL local
+npm test            # 18 tests unitaires : matching, progression, apprentissage, fuseau horaire, redirections, mode sans IA
+npm run test:db     # migrations + 15 scénarios de sécurité sur un PostgreSQL local
 npm run build
 BASE_URL=http://localhost:3000 npm run test:smoke   # Chromium : pages, routes protégées, liens, mobile 390 px
 ```

@@ -10,8 +10,9 @@ import { Avatar } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Select } from "@/components/ui/input";
 import {
-  cancelAppointmentAction, completeAppointmentAction, confirmAppointmentAction, rescheduleAppointmentAction,
+  cancelAppointmentAction, completeAppointmentAction, confirmAppointmentAction, rescheduleAppointmentAction, saveTakeawaysAction,
 } from "@/lib/actions/appointments";
+import { Textarea } from "@/components/ui/input";
 import { formatDateTime, formatTime } from "@/lib/dates";
 import { SESSION_TYPE_LABELS } from "@/lib/labels";
 import { fullName } from "@/lib/utils";
@@ -53,6 +54,8 @@ export function AppointmentItem({ appointment: a, other, viewer, freeSlots = [] 
         )}
         {a.cancel_reason && <p className="mt-1 text-xs text-muted">Motif : {a.cancel_reason}</p>}
         {a.mentor_notes && <p className="mt-2 rounded-md bg-subtle p-2.5 text-sm text-slate-700"><span className="font-medium">Notes de séance : </span>{a.mentor_notes}</p>}
+        {a.mentee_takeaways && <p className="mt-2 whitespace-pre-line rounded-md bg-violet-soft p-2.5 text-sm text-slate-700"><span className="font-medium">{viewer === "mentee" ? "Ce que je retiens" : "Ce que le mentoré retient"} : </span>{a.mentee_takeaways}</p>}
+        {viewer === "mentee" && a.status === "completed" && !a.mentee_takeaways && <TakeawaysForm appointmentId={a.id} />}
 
         {rescheduling && (
           <div className="mt-3 flex flex-col gap-2 sm:flex-row">
@@ -90,5 +93,26 @@ export function AppointmentItem({ appointment: a, other, viewer, freeSlots = [] 
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * « Ce que je retiens » : reformuler soi-même la séance (effet de génération)
+ * mémorise mieux que relire des notes, et donne au mentor un retour précis.
+ */
+function TakeawaysForm({ appointmentId }: { appointmentId: string }) {
+  const router = useRouter();
+  const [text, setText] = useState("");
+  const [pending, start] = useTransition();
+  return (
+    <form className="mt-3 space-y-2 rounded-lg border border-dashed border-violet/40 p-3" onSubmit={(e) => {
+      e.preventDefault();
+      start(async () => { const r = await saveTakeawaysAction(appointmentId, text); if (r.ok) { toast.success(r.message); router.refresh(); } else toast.error(r.error); });
+    }}>
+      <label htmlFor={`tk-${appointmentId}`} className="text-sm font-medium">Ce que je retiens de cette séance</label>
+      <p className="text-xs text-muted">Avec vos mots, 1 à 3 idées. Votre mentor les verra, et nous vous proposerons de les revoir dans 2 jours.</p>
+      <Textarea id={`tk-${appointmentId}`} value={text} onChange={(e) => setText(e.target.value)} maxLength={1500} className="min-h-20" placeholder={"1. …\n2. …\n3. …"} />
+      <Button type="submit" size="sm" loading={pending} disabled={text.trim().length < 10}>Enregistrer</Button>
+    </form>
   );
 }

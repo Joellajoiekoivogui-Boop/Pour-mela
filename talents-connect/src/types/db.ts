@@ -118,6 +118,8 @@ export interface Milestone {
   position: number;
   is_done: boolean;
   done_at: string | null;
+  /** Intention de mise en œuvre : « Quand…, je… » */
+  intention: string | null;
 }
 
 export interface GoalComment {
@@ -152,6 +154,11 @@ export interface Appointment {
   mentor_notes: string | null;
   cancel_reason: string | null;
   rescheduled_from: string | null;
+  /** Ce que le mentoré retient de la séance, et suivi de sa révision. */
+  mentee_takeaways: string | null;
+  takeaways_at: string | null;
+  reviewed_at: string | null;
+  review_count: number;
   created_at: string;
 }
 

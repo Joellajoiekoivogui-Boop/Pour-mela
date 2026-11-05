@@ -120,3 +120,16 @@ export async function addGoalCommentAction(goalId: string, body: string): Promis
   revalidateGoals();
   return { ok: true, message: "Commentaire publié." };
 }
+
+/** Intention de mise en œuvre sur une étape (« Quand…, je… »). Vide = supprimée. */
+export async function setMilestoneIntentionAction(milestoneId: string, intention: string): Promise<ActionResult> {
+  const { session, error } = await actionSession(["mentee", "mentor"]);
+  if (error) return error;
+  const text = intention.trim();
+  if (!uuid.safeParse(milestoneId).success || text.length > 300) return { ok: false, error: "Intention invalide (300 caractères maximum)." };
+  const { error: dbError, count } = await session.supabase.from("goal_milestones").update({ intention: text || null }, { count: "exact" }).eq("id", milestoneId);
+  if (dbError) return fromDb(dbError);
+  if (!count) return { ok: false, error: "Vous ne pouvez pas modifier cette étape." };
+  revalidateGoals();
+  return { ok: true, message: text ? "Intention enregistrée." : "Intention retirée." };
+}
