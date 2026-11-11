@@ -1,0 +1,44 @@
+{
+  "name": "monmentor",
+  "version": "2.0.0",
+  "private": true,
+  "type": "module",
+  "description": "MonMentor — plateforme de mentorat qui connecte les jeunes talents guinéens à des professionnels.",
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "db:migrate": "tsx --env-file-if-exists=.env scripts/migrate.ts",
+    "db:seed": "tsx --env-file-if-exists=.env scripts/seed.ts",
+    "demo:reset": "tsx --env-file-if-exists=.env scripts/seed.ts --reset-demo",
+    "jobs": "tsx --conditions=react-server --env-file-if-exists=.env scripts/jobs.ts",
+    "test:e2e": "node scripts/e2e.mjs",
+    "admin:create": "tsx --env-file-if-exists=.env scripts/create-admin.ts"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^1.8.0",
+    "@libsql/client": "^0.18.0",
+    "@react-pdf/renderer": "^4.9.0",
+    "bcryptjs": "^3.0.3",
+    "drizzle-orm": "^0.45.4",
+    "next": "^16.4.6",
+    "qrcode": "^1.5.4",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@tailwindcss/postcss": "^4.3.5",
+    "@types/node": "^26.6.6",
+    "@types/qrcode": "^1.5.6",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "tailwindcss": "^4.3.5",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  }
+}

@@ -1,0 +1,108 @@
+@import "tailwindcss";
+
+/* Identité MonMentor : bleu nuit et orange du logo, neutres légèrement bleutés.
+   Polices système : rien à télécharger, lisible sur les petites connexions. */
+:root {
+  --bg: #f5f7fa;
+  --surface: #ffffff;
+  --surface-2: #eef2f6;
+  --ink: #15202e;
+  --ink-2: #4b5a6b;
+  --ink-3: #6b7888;
+  --line: #d9e0e8;
+  --brand: #1b2533;
+  --brand-ink: #ffffff;
+  --accent: #c25a07;
+  --accent-strong: #a64c05;
+  --accent-soft: #fdf0e4;
+  --ok: #1e7a4c;
+  --ok-soft: #e5f4ec;
+  --warn: #9a5b06;
+  --warn-soft: #fdf3e1;
+  --bad: #b42318;
+  --bad-soft: #fdecea;
+  --info-soft: #e8eef6;
+  --focus: #2f6fd1;
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f151c;
+    --surface: #161e28;
+    --surface-2: #1e2834;
+    --ink: #e7ecf2;
+    --ink-2: #a8b4c2;
+    --ink-3: #8794a3;
+    --line: #2a3542;
+    --brand: #e7ecf2;
+    --brand-ink: #0f151c;
+    --accent: #f08c35;
+    --accent-strong: #f5a35b;
+    --accent-soft: #33220f;
+    --ok: #6ccb97;
+    --ok-soft: #15301f;
+    --warn: #e9b266;
+    --warn-soft: #352813;
+    --bad: #f08a80;
+    --bad-soft: #3a1d1b;
+    --info-soft: #1b2a3d;
+    --focus: #7db0ec;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-ink-2: var(--ink-2);
+  --color-ink-3: var(--ink-3);
+  --color-line: var(--line);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-accent: var(--accent);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-info-soft: var(--info-soft);
+  --font-sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+html { -webkit-text-size-adjust: 100%; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-sans); line-height: 1.55; }
+h1, h2, h3 { text-wrap: balance; line-height: 1.2; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+
+@layer components {
+  .btn { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50; }
+  .btn-primary { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 bg-accent text-white hover:bg-accent-strong; }
+  .btn-dark { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 bg-brand text-brand-ink hover:opacity-90; }
+  .btn-ghost { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 border border-line bg-surface text-ink hover:bg-surface-2; }
+  .btn-danger { @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-50 border border-bad/40 bg-surface text-bad hover:bg-bad-soft; }
+  .btn-sm { @apply min-h-9 px-3 py-1.5 text-xs; }
+  .card { @apply rounded-xl border border-line bg-surface; }
+  .field { @apply grid gap-1.5 text-sm; }
+  .label { @apply font-semibold text-ink; }
+  .hint { @apply text-xs text-ink-3; }
+  .input { @apply min-h-11 w-full rounded-lg border border-line bg-surface px-3 py-2 text-base text-ink placeholder:text-ink-3 focus:border-accent focus:outline-none; }
+  .chip { @apply inline-flex items-center gap-1 rounded-full bg-surface-2 px-2.5 py-0.5 text-xs font-medium text-ink-2; }
+  .eyebrow { @apply text-xs font-bold uppercase tracking-[0.12em] text-accent; }
+  .link { @apply font-semibold text-accent underline-offset-4 hover:underline; }
+  .prose-mm h2 { @apply mt-6 mb-2 text-lg font-bold; }
+  .prose-mm p { @apply my-3; }
+  .prose-mm ul { @apply my-3 list-disc pl-5; }
+  .prose-mm ol { @apply my-3 list-decimal pl-5; }
+  .prose-mm li { @apply my-1; }
+  .prose-mm strong { @apply font-semibold text-ink; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
